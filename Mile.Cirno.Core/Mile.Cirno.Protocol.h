@@ -20,6 +20,8 @@ typedef enum _MILE_CIRNO_PROTOCOL_MESSAGE_TYPE
 {
     // 9P2000.L
 
+    MileCirnoLinuxErrorRequestMessage = 6,
+    MileCirnoLinuxErrorResponseMessage,
     MileCirnoStatFsRequestMessage = 8,
     MileCirnoStatFsResponseMessage,
     MileCirnoLinuxOpenRequestMessage = 12,
