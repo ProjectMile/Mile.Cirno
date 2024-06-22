@@ -158,7 +158,7 @@ typedef enum _MILE_CIRNO_PROTOCOL_MESSAGE_TYPE
     // header<Header>[1] qid<Qid>[1]
     MileCirnoAttachResponseMessage,
     // Illegal
-    MileCirnoErrorRequestMessage = 106,\
+    MileCirnoErrorRequestMessage = 106,
     // 9P2000
     //   header<Header>[1] ename<String>[1]
     // 9P2000.u
