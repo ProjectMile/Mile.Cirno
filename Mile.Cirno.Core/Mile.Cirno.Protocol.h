@@ -14,12 +14,8 @@
 
 #include <stdint.h>
 
- /* in Tattach, no auth fid */
-#define MILE_CRINO_PROTOCOL_NOFID ((uint32_t)-1)
-/* in Tattach, no n_uname */
-#define MILE_CRINO_PROTOCOL_NONUNAME ((uint32_t)-1)
-
-#define MILE_CRINO_PROTOCOL_FSTYPE 0x01021997
+// References
+// - https://github.com/freebsd/freebsd-src/blob/main/contrib/lib9p/fcall.h
 
 /**
  * @brief The definition of Plan 9 File System Protocol Message Type.
@@ -264,8 +260,10 @@ typedef enum _MILE_CIRNO_PROTOCOL_MESSAGE_TYPE
     MileCirnoWindowsOpenResponseMessage,
 } MILE_CIRNO_PROTOCOL_MESSAGE_TYPE, *PMILE_CIRNO_PROTOCOL_MESSAGE_TYPE;
 
-// @ref: https://github.com/freebsd/freebsd-src/blob/main/contrib/lib9p/fcall.h
-// todo: add documented comments.
+#define MILE_CIRNO_NOTAG 0xFFFF
+#define MILE_CIRNO_NOFID 0xFFFFFFFF
+#define MILE_CIRNO_NONUNAME 0xFFFFFFFF
+#define MILE_CIRNO_FSTYPE 0x01021997
 
 /*
  * @brief Type code bits in (the first byte of) a qid.
@@ -283,7 +281,7 @@ typedef enum _MILE_CRINO_PROTOCOL_QID_TYPE
 } MILE_CRINO_PROTOCOL_QID_TYPE, *PMILE_CRINO_PROTOCOL_QID_TYPE;
 
 /*
- * @brief Extra permission bits in create and file modes (stat).
+ * @brief The perm field flags used in MileCirnoCreateRequestMessage.
  */
 typedef enum _MILE_CRINO_PROTOCOL_PERMISSION_MODE
 {
