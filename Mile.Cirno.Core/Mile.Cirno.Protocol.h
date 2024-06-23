@@ -402,7 +402,7 @@ typedef enum _MILE_CRINO_PROTOCOL_LINUX_LOCK_TYPE
     MileCrinoProtocolLinuxLockTypeUnlock = 2,
 } MILE_CRINO_PROTOCOL_LINUX_LOCK_TYPE, *PMILE_CRINO_PROTOCOL_LINUX_LOCK_TYPE;
 
-typedef enum _MILE_CRINO_PROTOCOL_LLINUX_OCK_FLAGS
+typedef enum _MILE_CRINO_PROTOCOL_LINUX_OCK_FLAGS
 {
     MileCrinoProtocolLinuxLockTypeBlock  = 1,
     MileCrinoProtocolLinuxLockTypeReclaim= 2
