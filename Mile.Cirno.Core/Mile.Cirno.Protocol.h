@@ -158,7 +158,7 @@ typedef enum _MILE_CIRNO_PROTOCOL_MESSAGE_TYPE
     // header<Header>[1] qid<Qid>[1]
     MileCirnoAttachResponseMessage,
     // Illegal
-    MileCirnoErrorRequestMessage = 106,\
+    MileCirnoErrorRequestMessage = 106,
     // 9P2000
     //   header<Header>[1] ename<String>[1]
     // 9P2000.u
@@ -257,4 +257,63 @@ typedef enum _MILE_CIRNO_PROTOCOL_MESSAGE_TYPE
 
 } MILE_CIRNO_PROTOCOL_MESSAGE_TYPE, *PMILE_CIRNO_PROTOCOL_MESSAGE_TYPE;
 
+// @ref: https://github.com/freebsd/freebsd-src/blob/main/contrib/lib9p/fcall.h
+// todo: add documented comments.
+
+/*
+ * Type code bits in (the first byte of) a qid.
+ */
+typedef enum _MILE_CRINO_PROTOCOL_QID_TYPE {
+    MileCrinoProtocolQTypeDirectory         = 0x80,
+    MileCrinoProtocolQTypeAppendOnlyFiles   = 0x40,
+    MileCrinoProtocolQTypeExclusiveUseFiles = 0x20,
+    MileCrinoProtocolQTypeMountedChannel    = 0x10,
+    MileCrinoProtocolQTypeAuthenticationFile= 0x08,
+    MileCrinoProtocolQTypeTemporaryFile     = 0x04,
+    MileCrinoProtocolQTypeSymbolicLink      = 0x02,
+    MileCrinoProtocolQTypePlainFile         = 0x01,
+
+};
+
+/*
+ * Extra permission bits in create and file modes (stat).
+ */
+#define MILE_CRINO_IN_DIRECTORY_MODE 0x80000000
+typedef enum _MILE_CRINO_PROTOCOL_DIRECTORY_MODE {
+    MileCrinoProtocolDirectoryModeAppend            = 0x40000000,
+    MileCrinoProtocolDirectoryModeExclude           = 0x20000000,
+    MileCrinoProtocolDirectoryModeMount             = 0x10000000,
+    MileCrinoProtocolDirectoryModeAuthenticationFile= 0x08000000,
+    MileCrinoProtocolDirectoryModeTemporaryFile     = 0x04000000,
+    MileCrinoProtocolDirectoryModeSymbolicLink      = 0x02000000,
+    // 9p2000Protocol.U extension.
+    MileCrinoProtocolDirectoryModeDevice            = 0x00800000,
+    MileCrinoProtocolDirectoryModeNamedPipe         = 0x00200000,
+    MileCrinoProtocolDirectoryModeSocket            = 0x00100000,
+    MileCrinoProtocolDirectoryModeSetUID            = 0x00080000,
+    MileCrinoProtocolDirectoryModeSetGID            = 0x00040000,
+
+};
+
+typedef enum _MILE_CRINO_PROTOCOL_OPEN_MODE {
+    MileCrinoProtocolOpenModeRead           = 0,
+    MileCrinoProtocolOpenModeWrite          = 1,
+    MileCrinoProtocolOpenModeReadAndWrite   = 2,
+    MileCrinoProtocolOpenModeExecute        = 3,
+    MileCrinoProtocolOpenModeAccessModeMask = 3,
+    MileCrinoProtocolOpenModeTruncate       = 16,
+    MileCrinoProtocolOpenModeCloseOnExecute = 32,
+    MileCrinoProtocolOpenModeRemoveOnClose  = 64,
+    MileCrinoProtocolOpenModeDirectAccess   = 128,
+
+};
+
+// todo: find a more elegant way of naming:0)
+typedef enum _MILE_CRINO_PROTOCOL_L_OPEN_TYPE {
+    MileCrinoProtocolLOpenCreate = 000000100U,
+    MileCrinoProtocolLOpenExclude = 000000100U,
+
+};
+
+typedef enum _MILE_CRINO_PROTOCOL_
 #endif // !MILE_CIRNO_PROTOCOL
