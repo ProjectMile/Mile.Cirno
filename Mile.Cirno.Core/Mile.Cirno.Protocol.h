@@ -5,13 +5,18 @@
  *
  * LICENSE:   The MIT License
  *
- * MAINTAINER: MouriNaruto (Kenji.Mouri@outlook.com)
+ * MAINTAINER: per1cycle (pericycle.cc@gmail.com)
  */
 
 #ifndef MILE_CIRNO_PROTOCOL
 #define MILE_CIRNO_PROTOCOL
 
 #include <stdint.h>
+
+ /* in Tattach, no auth fid */
+#define MILE_CRINO_PROTOCOL_NO_AUTH_FID ((uint32_t)-1)
+/* in Tattach, no n_uname */
+#define MILE_CRINO_PROTOCOL_NO_N_UNAME ((uint32_t)-1)
 
 /**
  * @brief The definition of Plan 9 File System Protocol Message Type.
@@ -263,30 +268,32 @@ typedef enum _MILE_CIRNO_PROTOCOL_MESSAGE_TYPE
 /*
  * Type code bits in (the first byte of) a qid.
  */
-typedef enum _MILE_CRINO_PROTOCOL_QID_TYPE {
-    MileCrinoProtocolQTypeDirectory         = 0x80,
-    MileCrinoProtocolQTypeAppendOnlyFiles   = 0x40,
-    MileCrinoProtocolQTypeExclusiveUseFiles = 0x20,
-    MileCrinoProtocolQTypeMountedChannel    = 0x10,
-    MileCrinoProtocolQTypeAuthenticationFile= 0x08,
-    MileCrinoProtocolQTypeTemporaryFile     = 0x04,
-    MileCrinoProtocolQTypeSymbolicLink      = 0x02,
-    MileCrinoProtocolQTypePlainFile         = 0x00,
+typedef enum _MILE_CRINO_PROTOCOL_QID_TYPE
+{
+    MileCrinoProtocolQidTypeDirectory         = 0x80,
+    MileCrinoProtocolQidTypeAppendOnlyFiles   = 0x40,
+    MileCrinoProtocolQidTypeExclusiveUseFiles = 0x20,
+    MileCrinoProtocolQidTypeMountedChannel    = 0x10,
+    MileCrinoProtocolQidTypeAuthenticationFile= 0x08,
+    MileCrinoProtocolQidTypeTemporaryFile     = 0x04,
+    MileCrinoProtocolQidTypeSymbolicLink      = 0x02,
+    MileCrinoProtocolQidTypePlainFile         = 0x00,
 
 } MILE_CRINO_PROTOCOL_QID_TYPE, *PMILE_CRINO_PROTOCOL_QID_TYPE;
 
 /*
  * Extra permission bits in create and file modes (stat).
  */
-#define MILE_CRINO_IN_DIRECTORY_MODE 0x80000000
-typedef enum _MILE_CRINO_PROTOCOL_DIRECTORY_MODE {
+typedef enum _MILE_CRINO_PROTOCOL_DIRECTORY_MODE
+{
+    MileCrinoProtocolDirectoryMode                  = 0x80000000,
     MileCrinoProtocolDirectoryModeAppend            = 0x40000000,
     MileCrinoProtocolDirectoryModeExclude           = 0x20000000,
     MileCrinoProtocolDirectoryModeMount             = 0x10000000,
     MileCrinoProtocolDirectoryModeAuthenticationFile= 0x08000000,
     MileCrinoProtocolDirectoryModeTemporaryFile     = 0x04000000,
     MileCrinoProtocolDirectoryModeSymbolicLink      = 0x02000000,
-    // 9p2000Protocol.U extension.
+    // 9P2000.u extension.
     MileCrinoProtocolDirectoryModeDevice            = 0x00800000,
     MileCrinoProtocolDirectoryModeNamedPipe         = 0x00200000,
     MileCrinoProtocolDirectoryModeSocket            = 0x00100000,
@@ -295,7 +302,8 @@ typedef enum _MILE_CRINO_PROTOCOL_DIRECTORY_MODE {
 
 } MILE_CRINO_PROTOCOL_DIRECTORY_MODE, *PMILE_CRINO_PROTOCOL_DIRECTORY_MODE;
 
-typedef enum _MILE_CRINO_PROTOCOL_OPEN_MODE {
+typedef enum _MILE_CRINO_PROTOCOL_OPEN_MODE
+{
     MileCrinoProtocolOpenModeRead           = 0,
     MileCrinoProtocolOpenModeWrite          = 1,
     MileCrinoProtocolOpenModeReadAndWrite   = 2,
@@ -309,94 +317,99 @@ typedef enum _MILE_CRINO_PROTOCOL_OPEN_MODE {
 } MILE_CRINO_PROTOCOL_OPEN_MODE, *PMILE_CRINO_PROTOCOL_OPEN_MODE;
 
 // todo: find a more elegant way of naming:0)
-typedef enum _MILE_CRINO_PROTOCOL_L_OPEN_TYPE {
-    MileCrinoProtocolLOpenCreate                    = 000000100U,
-    MileCrinoProtocolLOpenExclude                   = 000000200U,
-    MileCrinoProtocolLOpenNoControllingTerminalType = 000000400U,
-    MileCrinoProtocolLOpenTruncate                  = 000001000U,
-    MileCrinoProtocolLOpenAppend                    = 000002000U,
-    MileCrinoProtocolLOpenNoneBlock                 = 000004000U,
-    MileCrinoProtocolLOpenDataSynchronize           = 000010000U,
-    MileCrinoProtocolLOpenFileAsynchronize          = 000020000U,
-    MileCrinoProtocolLOpenDirect                    = 000040000U,
-    MileCrinoProtocolLOpenLargeFile                 = 000100000U,
-    MileCrinoProtocolLOpenDirectory                 = 000200000U,
-    MileCrinoProtocolLOpenNoFollow                  = 000400000U,
-    MileCrinoProtocolLOpenNoAccessTime              = 001000000U,
-    MileCrinoProtocolLOpenCloseOnExecute            = 002000000U,
-    MileCrinoProtocolLOpenSynchronize               = 004000000U,
-    MileCrinoProtocolLOpenPath                      = 010000000U,
-    MileCrinoProtocolLOpenTemporaryFile             = 020000000U,
+typedef enum _MILE_CRINO_PROTOCOL_LINUX_OPEN_TYPE
+{
+    MileCrinoProtocolLinuxOpenCreate                    = 000000100U,
+    MileCrinoProtocolLinuxOpenExclude                   = 000000200U,
+    MileCrinoProtocolLinuxOpenNoControllingTerminalType = 000000400U,
+    MileCrinoProtocolLinuxOpenTruncate                  = 000001000U,
+    MileCrinoProtocolLinuxOpenAppend                    = 000002000U,
+    MileCrinoProtocolLinuxOpenNoneBlock                 = 000004000U,
+    MileCrinoProtocolLinuxOpenDataSynchronize           = 000010000U,
+    MileCrinoProtocolLinuxOpenFileAsynchronize          = 000020000U,
+    MileCrinoProtocolLinuxOpenDirect                    = 000040000U,
+    MileCrinoProtocolLinuxOpenLargeFile                 = 000100000U,
+    MileCrinoProtocolLinuxOpenDirectory                 = 000200000U,
+    MileCrinoProtocolLinuxOpenNoFollow                  = 000400000U,
+    MileCrinoProtocolLinuxOpenNoAccessTime              = 001000000U,
+    MileCrinoProtocolLinuxOpenCloseOnExecute            = 002000000U,
+    MileCrinoProtocolLinuxOpenSynchronize               = 004000000U,
+    MileCrinoProtocolLinuxOpenPath                      = 010000000U,
+    MileCrinoProtocolLinuxOpenTemporaryFile             = 020000000U,
 
-} MILE_CRINO_PROTOCOL_L_OPEN_TYPE, *PMILE_CRINO_PROTOCOL_L_OPEN_TYPE;
+} MILE_CRINO_PROTOCOL_LINUX_OPEN_TYPE, *PMILE_CRINO_PROTOCOL_LINUX_OPEN_TYPE;
 
 // protocol magic number?
 #define MileCrinoProtocolFileSystemType 0x01021997
 /* Fields in req->request_mask and reply->valid for Tgetattr, Rgetattr. */
 
-typedef enum _MILE_CRINO_PROTOCOL_GET_ATTRIBUTE_FLAG {
-    MileCrinoProtocolGetAttributeMode           = 0x00000001,
-    MileCrinoProtocolGetAttributeNLink          = 0x00000002,
-    MileCrinoProtocolGetAttributeUID            = 0x00000004,
-    MileCrinoProtocolGetAttributeGID            = 0x00000008,
-    MileCrinoProtocolGetAttributeRawDevice      = 0x00000010,
-    MileCrinoProtocolGetAttributeAccessTime     = 0x00000020,
-    MileCrinoProtocolGetAttributeModifiedTime   = 0x00000040,
-    MileCrinoProtocolGetAttributeChangeTime     = 0x00000080,
-    MileCrinoProtocolGetAttributeInodeNumber    = 0x00000100,
-    MileCrinoProtocolGetAttributeSize           = 0x00000200,
-    MileCrinoProtocolGetAttributeBlocks         = 0x00000400,
+typedef enum _MILE_CRINO_PROTOCOL_LINUX_GET_ATTR_FLAG
+{
+    MileCrinoProtocolLinuxGetAttrMode           = 0x00000001,
+    MileCrinoProtocolLinuxGetAttrNLink          = 0x00000002,
+    MileCrinoProtocolLinuxGetAttrUID            = 0x00000004,
+    MileCrinoProtocolLinuxGetAttrGID            = 0x00000008,
+    MileCrinoProtocolLinuxGetAttrRawDevice      = 0x00000010,
+    MileCrinoProtocolLinuxGetAttrAccessTime     = 0x00000020,
+    MileCrinoProtocolLinuxGetAttrModifiedTime   = 0x00000040,
+    MileCrinoProtocolLinuxGetAttrChangeTime     = 0x00000080,
+    MileCrinoProtocolLinuxGetAttrInodeNumber    = 0x00000100,
+    MileCrinoProtocolLinuxGetAttrSize           = 0x00000200,
+    MileCrinoProtocolLinuxGetAttrBlocks         = 0x00000400,
     /* everything up to and including BLOCKS is BASIC */
-    MileCrinoProtocolGetAttributeBasic =
-        MileCrinoProtocolGetAttributeMode           |
-        MileCrinoProtocolGetAttributeNLink          |
-        MileCrinoProtocolGetAttributeUID            |
-        MileCrinoProtocolGetAttributeGID            |
-        MileCrinoProtocolGetAttributeRawDevice      |
-
-        MileCrinoProtocolGetAttributeAccessTime     |
-        MileCrinoProtocolGetAttributeModifiedTime   |
-        MileCrinoProtocolGetAttributeChangeTime     |
-        MileCrinoProtocolGetAttributeInodeNumber    |
-        MileCrinoProtocolGetAttributeSize           |
-        MileCrinoProtocolGetAttributeBlocks,
-    MileCrinoProtocolGetAttributeBirthTime  = 0x00000800,
-    MileCrinoProtocolGetAttributeGenration  = 0x00001000,
-    MileCrinoProtocolGetAttributeDataVersion= 0x00002000,
-    MileCrinoGetAttrributeAll =
-        MileCrinoProtocolGetAttributeBasic      |
-        MileCrinoProtocolGetAttributeBirthTime  |
-        MileCrinoProtocolGetAttributeGenration  |
-        MileCrinoProtocolGetAttributeDataVersion
-} MILE_CRINO_PROTOCOL_GET_ATTRIBUTE_FLAG, *PMILE_CRINO_PROTOCOL_GET_ATTRIBUTE_FLAG;
+    MileCrinoProtocolLinuxGetAttrBasic =
+        MileCrinoProtocolLinuxGetAttrMode           |
+        MileCrinoProtocolLinuxGetAttrNLink          |
+        MileCrinoProtocolLinuxGetAttrUID            |
+        MileCrinoProtocolLinuxGetAttrGID            |
+        MileCrinoProtocolLinuxGetAttrRawDevice      |
+        MileCrinoProtocolLinuxGetAttrAccessTime     |
+        MileCrinoProtocolLinuxGetAttrModifiedTime   |
+        MileCrinoProtocolLinuxGetAttrChangeTime     |
+        MileCrinoProtocolLinuxGetAttrInodeNumber    |
+        MileCrinoProtocolLinuxGetAttrSize           |
+        MileCrinoProtocolLinuxGetAttrBlocks,
+    MileCrinoProtocolLinuxGetAttrBirthTime  = 0x00000800,
+    MileCrinoProtocolLinuxGetAttrGenration  = 0x00001000,
+    MileCrinoProtocolLinuxGetAttrDataVersion= 0x00002000,
+    MileCrinoLinuxGetAttrributeAll =
+        MileCrinoProtocolLinuxGetAttrBasic      |
+        MileCrinoProtocolLinuxGetAttrBirthTime  |
+        MileCrinoProtocolLinuxGetAttrGenration  |
+        MileCrinoProtocolLinuxGetAttrDataVersion
+} MILE_CRINO_PROTOCOL_LINUX_GET_ATTR_FLAG, *PMILE_CRINO_PROTOCOL_LINUX_GET_ATTR_FLAG;
 
 
 /* Fields in req->valid for Tsetattr. */
-typedef enum _MILE_CRINO_PROTOCOL_SET_ATTRIBUTE_FLAG {
+typedef enum _MILE_CRINO_PROTOCOL_LINUX_SET_ATTR_FLAG
+{
     // todo
-    MileCrinoProtocolSetAttributeMode           = 0x00000001,
-    MileCrinoProtocolSetAttributeUID            = 0x00000002,
-    MileCrinoProtocolSetAttributeGID            = 0x00000004,
-    MileCrinoProtocolSetAttributeSize           = 0x00000008,
-    MileCrinoProtocolSetAttributeAccessTime     = 0x00000010,
-    MileCrinoProtocolSetAttributeModifiedTime   = 0x00000020,
-    MileCrinoProtocolSetAttributeChangeTime     = 0x00000040,
-    MileCrinoProtocolSetAttributeAccessTimeSet  = 0x00000080,
-    MileCrinoProtocolSetAttributeModifiedTimeSet= 0x00000100,
-} MILE_CRINO_PROTOCOL_SET_ATTRIBUTE_FLAG, *PMILE_CRINO_PROTOCOL_SET_ATTRIBUTE_FLAG;
+    MileCrinoProtocolLinuxSetAttrMode           = 0x00000001,
+    MileCrinoProtocolLinuxSetAttrUID            = 0x00000002,
+    MileCrinoProtocolLinuxSetAttrGID            = 0x00000004,
+    MileCrinoProtocolLinuxSetAttrSize           = 0x00000008,
+    MileCrinoProtocolLinuxSetAttrAccessTime     = 0x00000010,
+    MileCrinoProtocolLinuxSetAttrModifiedTime   = 0x00000020,
+    MileCrinoProtocolLinuxSetAttrChangeTime     = 0x00000040,
+    MileCrinoProtocolLinuxSetAttrAccessTimeSet  = 0x00000080,
+    MileCrinoProtocolLinuxSetAttrModifiedTimeSet= 0x00000100,
+} MILE_CRINO_PROTOCOL_LINUX_SET_ATTR_FLAG, *PMILE_CRINO_PROTOCOL_LINUX_SET_ATTR_FLAG;
 
-typedef enum _MILE_CRINO_PROTOCOL_LOCK_TYPE {
+typedef enum _MILE_CRINO_PROTOCOL_LOCK_TYPE
+{
     MileCrinoProtocolLockTypeReadLock   = 0,
     MileCrinoProtocolLockTypeWriteLock  = 1,
     MileCrinoProtocolLockTypeUnlock     = 2,
 } MILE_CRINO_PROTOCOL_LOCK_TYPE, *PMILE_CRINO_PROTOCOL_LOCK_TYPE;
 
-typedef enum _MILE_CRINO_PROTOCOL_LOCK_FLAGS{
+typedef enum _MILE_CRINO_PROTOCOL_LOCK_FLAGS
+{
     MileCrinoProtocolLockTypeBlock  = 1,
     MileCrinoProtocolLockTypeReclaim= 2
 } MILE_CRINO_PROTOCOL_LOCK_FLAGS, *PMILE_CRINO_PROTOCOL_LOCK_FLAGS;
 
-typedef enum _MILE_CRINO_PROTOCOL_LOCK_STATUS {
+typedef enum _MILE_CRINO_PROTOCOL_LOCK_STATUS
+{
     MileCrinoProtocolLockSuccess= 0,
     MileCrinoProtocolLockBlocked= 1,
     MileCrinoProtocolLockError  = 2,
@@ -408,8 +421,9 @@ typedef enum _MILE_CRINO_PROTOCOL_LOCK_STATUS {
  * Flags in Tunlinkat (which re-uses f_tlcreate data structure but
  * with different meaning).
  */
-typedef enum _MILE_CRINO_PROTOCOL_UNLINK_AT_FLAGS {
+typedef enum _MILE_CRINO_PROTOCOL_LINUX_UNLINK_AT_FLAGS
+{
     MileProtocolAtRemoveDirectory = 0x0200
-} MILE_CRINO_PROTOCOL_UNLINK_AT_FLAGS, *PMILE_CRINO_PROTOCOL_UNLINK_AT_FLAGS;
+} MILE_CRINO_PROTOCOL_LINUX_UNLINK_AT_FLAGS, *PMILE_CRINO_PROTOCOL_LINUX_UNLINK_AT_FLAGS;
 
 #endif // !MILE_CIRNO_PROTOCOL

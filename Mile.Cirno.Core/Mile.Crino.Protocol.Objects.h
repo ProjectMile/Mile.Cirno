@@ -5,7 +5,7 @@
  *
  * LICENSE:   The MIT License
  *
- * MAINTAINER: MouriNaruto (Kenji.Mouri@outlook.com)
+ * MAINTAINER: per1cycle (pericycle.cc@gmail.com)
  */
 #ifndef MILE_CRINO_PROTOCOL_OBJECTS_H
 #define MILE_CRINO_PROTOCOL_OBJECTS_H
