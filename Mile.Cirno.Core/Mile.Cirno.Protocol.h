@@ -353,6 +353,7 @@ typedef enum _MILE_CRINO_PROTOCOL_GET_ATTRIBUTE_FLAG {
         MileCrinoProtocolGetAttributeUID            |
         MileCrinoProtocolGetAttributeGID            |
         MileCrinoProtocolGetAttributeRawDevice      |
+
         MileCrinoProtocolGetAttributeAccessTime     |
         MileCrinoProtocolGetAttributeModifiedTime   |
         MileCrinoProtocolGetAttributeChangeTime     |
