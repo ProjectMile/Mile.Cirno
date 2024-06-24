@@ -258,7 +258,7 @@ typedef enum _MILE_CIRNO_PROTOCOL_MESSAGE_TYPE
     // Undocumented
     // header<Header>[1] (Unknown)
     MileCirnoWindowsOpenResponseMessage,
-} MILE_CIRNO_PROTOCOL_MESSAGE_TYPE, * PMILE_CIRNO_PROTOCOL_MESSAGE_TYPE;
+} MILE_CIRNO_PROTOCOL_MESSAGE_TYPE, *PMILE_CIRNO_PROTOCOL_MESSAGE_TYPE;
 
 #define MILE_CIRNO_NOTAG 0xFFFF
 #define MILE_CIRNO_NOFID 0xFFFFFFFF
@@ -278,7 +278,7 @@ typedef enum _MILE_CIRNO_PROTOCOL_QID_TYPE
     MileCirnoQidTypeTemporaryFile = 0x04,
     MileCirnoQidTypeSymbolicLink = 0x02,
     MileCirnoQidTypePlainFile = 0x00,
-} MILE_CIRNO_PROTOCOL_QID_TYPE, * PMILE_CIRNO_PROTOCOL_QID_TYPE;
+} MILE_CIRNO_PROTOCOL_QID_TYPE, *PMILE_CIRNO_PROTOCOL_QID_TYPE;
 
 /*
  * @brief The perm field flags used in MileCirnoCreateRequestMessage.
@@ -300,7 +300,7 @@ typedef enum _MILE_CIRNO_PROTOCOL_PERMISSION_MODE
     MileCirnoPermissionModeSocket = 0x00100000,
     MileCirnoPermissionModeSetUid = 0x00080000,
     MileCirnoPermissionModeSetGid = 0x00040000,
-} MILE_CIRNO_PROTOCOL_PERMISSION_MODE, * PMILE_CIRNO_PROTOCOL_PERMISSION_MODE;
+} MILE_CIRNO_PROTOCOL_PERMISSION_MODE, *PMILE_CIRNO_PROTOCOL_PERMISSION_MODE;
 
 /**
  * @brief The flags used in MileCirnoOpenRequestMessage and
@@ -317,7 +317,7 @@ typedef enum _MILE_CIRNO_PROTOCOL_OPEN_MODE
     MileCirnoOpenModeCloseOnExecute = 32,
     MileCirnoOpenModeRemoveOnClose = 64,
     MileCirnoOpenModeDirectAccess = 128,
-} MILE_CIRNO_PROTOCOL_OPEN_MODE, * PMILE_CIRNO_PROTOCOL_OPEN_MODE;
+} MILE_CIRNO_PROTOCOL_OPEN_MODE, *PMILE_CIRNO_PROTOCOL_OPEN_MODE;
 
 /**
  * @brief The flags used in MileCirnoLinuxOpenRequestMessage and
@@ -342,7 +342,7 @@ typedef enum _MILE_CIRNO_PROTOCOL_LINUX_OPEN_CREATE_FLAGS
     MileCirnoLinuxOpenCreateFlagSynchronize = 004000000U,
     MileCirnoLinuxOpenCreateFlagPath = 010000000U,
     MileCirnoLinuxOpenCreateFlagTemporaryFile = 020000000U,
-} MILE_CIRNO_PROTOCOL_LINUX_OPEN_CREATE_FLAGS, * PMILE_CIRNO_PROTOCOL_LINUX_OPEN_CREATE_FLAGS;
+} MILE_CIRNO_PROTOCOL_LINUX_OPEN_CREATE_FLAGS, *PMILE_CIRNO_PROTOCOL_LINUX_OPEN_CREATE_FLAGS;
 
 /**
  * @brief The request_mask field flags used in MileCirnoGetAttrRequestMessage
@@ -383,7 +383,7 @@ typedef enum _MILE_CIRNO_PROTOCOL_LINUX_GETATTR_FLAGS
     MileCirnoLinuxGetAttrFlagBirthTime |
     MileCirnoLinuxGetAttrFlagGenration |
     MileCirnoLinuxGetAttrFlagDataVersion
-} MILE_CIRNO_PROTOCOL_LINUX_GETATTR_FLAGS, * PMILE_CIRNO_PROTOCOL_LINUX_GETATTR_FLAGS;
+} MILE_CIRNO_PROTOCOL_LINUX_GETATTR_FLAGS, *PMILE_CIRNO_PROTOCOL_LINUX_GETATTR_FLAGS;
 
 /**
  * @brief The valid field flags used in MileCirnoSetAttrRequestMessage.
@@ -399,28 +399,28 @@ typedef enum _MILE_CIRNO_PROTOCOL_LINUX_SETATTR_FLAGS
     MileCirnoLinuxSetAttrFlagChangeTime = 0x00000040,
     MileCirnoLinuxSetAttrFlagAccessTimeSet = 0x00000080,
     MileCirnoLinuxSetAttrFlagModifiedTimeSet = 0x00000100,
-} MILE_CIRNO_PROTOCOL_LINUX_SETATTR_FLAGS, * PMILE_CIRNO_PROTOCOL_LINUX_SETATTR_FLAGS;
+} MILE_CIRNO_PROTOCOL_LINUX_SETATTR_FLAGS, *PMILE_CIRNO_PROTOCOL_LINUX_SETATTR_FLAGS;
 
 typedef enum _MILE_CIRNO_PROTOCOL_LINUX_LOCK_TYPE
 {
     MileCirnoLinuxLockTypeRead = 0,
     MileCirnoLinuxLockTypeWrite = 1,
     MileCirnoLinuxLockTypeUnlock = 2,
-} MILE_CIRNO_PROTOCOL_LINUX_LOCK_TYPE, * PMILE_CIRNO_PROTOCOL_LINUX_LOCK_TYPE;
+} MILE_CIRNO_PROTOCOL_LINUX_LOCK_TYPE, *PMILE_CIRNO_PROTOCOL_LINUX_LOCK_TYPE;
 
 typedef enum _MILE_CIRNO_PROTOCOL_LINUX_LOCK_FLAGS
 {
     MileCirnoLinuxLockFlagBlock = 1,
     MileCirnoLinuxLockFlagReclaim = 2,
-} MILE_CIRNO_PROTOCOL_LINUX_LOCK_FLAGS, * PMILE_CIRNO_PROTOCOL_LINUX_LOCK_FLAGS;
+} MILE_CIRNO_PROTOCOL_LINUX_LOCK_FLAGS, *PMILE_CIRNO_PROTOCOL_LINUX_LOCK_FLAGS;
 
 typedef enum _MILE_CIRNO_PROTOCOL_LINUX_LOCK_STATUS
 {
     MileCirnoLinuxLockStatusSuccess = 0,
     MileCirnoLinuxLockStatusBlocked = 1,
-    MileCirnoLinuxL ockStatusError = 2,
+    MileCirnoLinuxLockStatusError = 2,
     MileCirnoLinuxLockStatusGrace = 3,
-} MILE_CIRNO_PROTOCOL_LINUX_LOCK_STATUS, * PMILE_CIRNO_PROTOCOL_LINUX_LOCK_STATUS;
+} MILE_CIRNO_PROTOCOL_LINUX_LOCK_STATUS, *PMILE_CIRNO_PROTOCOL_LINUX_LOCK_STATUS;
 
 /**
  * @brief The flags used in MileCirnoUnlinkAtRequestMessage.
@@ -428,6 +428,6 @@ typedef enum _MILE_CIRNO_PROTOCOL_LINUX_LOCK_STATUS
 typedef enum _MILE_CIRNO_PROTOCOL_LINUX_UNLINKAT_FLAGS
 {
     MileCirnoLinuxUnlinkAtFlagRemoveDirectory = 0x00000200,
-} MILE_CIRNO_PROTOCOL_LINUX_UNLINKAT_FLAGS, * PMILE_CIRNO_PROTOCOL_LINUX_UNLINKAT_FLAGS;
+} MILE_CIRNO_PROTOCOL_LINUX_UNLINKAT_FLAGS, *PMILE_CIRNO_PROTOCOL_LINUX_UNLINKAT_FLAGS;
 
 #endif // !MILE_CIRNO_PROTOCOL
