@@ -14,12 +14,12 @@
 
 #include <stdint.h>
 
- // References
- // - https://github.com/freebsd/freebsd-src/blob/main/contrib/lib9p/fcall.h
+// References
+// - https://github.com/freebsd/freebsd-src/blob/main/contrib/lib9p/fcall.h
 
- /**
-  * @brief The definition of Plan 9 File System Protocol Message Type.
-  */
+/**
+ * @brief The definition of Plan 9 File System Protocol Message Type.
+ */
 typedef enum _MILE_CIRNO_PROTOCOL_MESSAGE_TYPE
 {
     // Structures Definitions (%Name%<%Type%>[%Length%])
