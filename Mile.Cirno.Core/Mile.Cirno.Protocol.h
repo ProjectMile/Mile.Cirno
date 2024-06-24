@@ -418,7 +418,7 @@ typedef enum _MILE_CIRNO_PROTOCOL_LINUX_LOCK_STATUS
 {
     MileCirnoLinuxLockStatusSuccess = 0,
     MileCirnoLinuxLockStatusBlocked = 1,
-    MileCirnoLinuxLockStatusError = 2,
+    MileCirnoLinuxL ockStatusError = 2,
     MileCirnoLinuxLockStatusGrace = 3,
 } MILE_CIRNO_PROTOCOL_LINUX_LOCK_STATUS, * PMILE_CIRNO_PROTOCOL_LINUX_LOCK_STATUS;
 
