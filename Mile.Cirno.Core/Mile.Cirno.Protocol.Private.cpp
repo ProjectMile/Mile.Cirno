@@ -8,13 +8,5 @@
  * MAINTAINER: MouriNaruto (Kenji.Mouri@outlook.com)
  *             per1cycle (pericycle.cc@gmail.com)
  */
+
 #include <Mile.Cirno.Protocol.Private.h>
-
-namespace Mile
-{
-namespace Cirno
-{
-    
-} // namespace Cirno
-
-} // namespace Mile

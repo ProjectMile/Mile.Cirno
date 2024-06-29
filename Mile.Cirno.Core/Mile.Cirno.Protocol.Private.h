@@ -12,553 +12,537 @@
 #ifndef MILE_CIRNO_PROTOCOL_PRIVATE
 #define MILE_CIRNO_PROTOCOL_PRIVATE
 
-#include <stdint.h>
-
-#include <array>
-#include <string>
-
 #include <Mile.Cirno.Protocol.h>
 
-namespace Mile
+#include <cstdint>
+
+#include <string>
+#include <vector>
+
+namespace Mile::Cirno
 {
-namespace Cirno
-{
-
-struct Header
-{
-    uint8_t Type;
-    uint16_t Tag;
-    uint32_t Fid;
-};
-
-struct Qid
-{
-    uint8_t Type;
-    uint32_t Version;
-    uint64_t Path;
-};
-
-struct DirectoryEntry
-{
-    Qid Qid;
-    uint64_t Offset;
-    uint8_t Type;
-    std::string Name;
-};
-
-struct Stat
-{
-    uint16_t Type;
-    uint32_t Device;
-    Qid Qid;
-    uint32_t Mode;
-    uint32_t AccessTime;
-    uint32_t ModifiedTime;
-    uint64_t Length;
-    std::string Name;
-    std::string Uid;
-    std::string Gid;
-    std::string ModifiedUid;
-    std::string extension;
-    uint32_t nUid;
-    uint32_t nGid;
-    uint32_t nModifiedUid;
-};
-
-struct WindowsDirectoryEntry
-{
-    DirectoryEntry Entry;
-    Stat Stat;
-};
-
-struct StatFs
-{
-    uint32_t Type;
-    uint32_t BSize;
-    uint64_t Blocks;
-    uint64_t BFree;
-    uint64_t BAvail;
-    uint64_t Files;
-    uint64_t FFree;
-    uint64_t FSid;
-    uint32_t NameLen;
-};
-struct Version
-{
-    uint32_t Size;
-    std::string Version;
-};
-
-// struct LinuxErrorRequest
-// {
-//     // empty
-// };
-
-struct LinuxErrorResponse
-{
-    uint32_t ECode;
-};
-
-struct StatFsRequest
-{
-    uint32_t Fid;
-};
-
-struct StatFsResponse
-{
-    uint32_t Type;
-    uint32_t BSize;
-    uint64_t Blocks;
-    uint64_t BFree;
-    uint64_t BAvail;
-    uint64_t Files;
-    uint64_t FFree;
-    uint64_t Fid;
-    uint32_t NameLen;
-};
-
-struct LinuxOpenRequest
-{
-    uint32_t Fid;
-    uint32_t Flags;
-};
-
-struct LinuxOpenResponse
-{
-    Qid Qid;
-    uint32_t IOUnit;
-};
-
-struct LinuxCreateRequest
-{
-    uint32_t Fid;
-    std::string Name;
-    uint32_t Flags;
-    uint32_t Mode;
-    uint32_t Gid;
-};
-
-struct LinuxCreateResponse
-{
-    Qid Qid;
-    uint32_t IOUnit;
-};
-
-struct SymLinkRequest
-{
-    uint32_t Fid;
-    std::string Name;
-    std::string SymTarget;
-    uint32_t Gid;
-};
-struct SymLinkResponse
-{
-    Qid Qid;
-};
-struct MkNodRequest
-{
-    uint32_t DirFid;
-    std::string Name;
-    uint32_t Mode;
-    uint32_t Major;
-    uint32_t Minor;
-    uint32_t Gid;
-};
-
-struct MkNodResponse
-{
-    Qid Qid;
-};
-
-struct RenameRequest
-{
-    uint32_t Fid;
-    uint32_t DirFid;
-    std::string Name;
-};
-
-// struct RenameResponse
-// {
-//     // empty
-// };
-
-struct ReadLinkRequest
-{
-    uint32_t Fid;
-};
-
-struct ReadLinkResponse
-{
-    std::string Target;
-};
-
-struct GetAttrRequest
-{
-    uint32_t Fid;
-    uint64_t RequestMask;
-};
-
-struct GetAttrResponse
-{
-    uint64_t Valid;
-    Qid Qid;
-    uint32_t Mode;
-    uint32_t Uid;
-    uint32_t Gid;
-    uint64_t nLink;
-    uint64_t RDev;
-    uint64_t Size;
-    uint64_t BSize;
-    uint64_t Blocks;
-
-    uint64_t AccessTimeSec;
-    uint64_t AccessTimeNSec;
-    uint64_t ModifiedTimeSec;
-    uint64_t ModifiedTimeNSec;
-    uint64_t ChangeTimeSec;
-    uint64_t ChangeTimeNSec;
-    uint64_t BirthTimeSec;
-    uint64_t BirthTimeNSec;
-    uint64_t Generation;
-    uint64_t DataVersion;
-};
-
-struct SetAttrRequest
-{
-    uint32_t Fid;
-    uint32_t Valid;
-    uint32_t Mode;
-    uint32_t Uid;
-    uint32_t Gid;
-    uint64_t Size;
-    // valid & LinuxSetAttrFlagAccessTimeSet
-    uint64_t AtimeSec;
-    // else
-    uint64_t AtimeNSec;
-    // valid & LinuxSetAttrFlagModifiedTimeSet
-    uint64_t MtimeSec;
-    // else
-    uint64_t MtimeNSec;
-};
-
-// struct SetAttrResponse
-// {
-//     // empty
-// };
-
-struct XAttrWalkRequest
-{
-    uint32_t Fid;
-    uint32_t NewFid;
-    std::string Name;
-};
-
-struct XAttrWalkResponse
-{
-    uint64_t Size;
-};
-
-struct XAttrCreateRequest
-{
-    uint32_t Fid;
-    std::string Name;
-    uint64_t AttrSize;
-    uint32_t Flags;
-};
-
-// struct XAttrCreateResponse
-// {
-//     // empty
-// };
-
-struct ReadDirRequest
-{
-    uint32_t Fid;
-    uint64_t Offset;
-    uint32_t Count;
-};
-
-struct ReadDirResonse
-{
-    uint32_t Count;
-    std::array<DirectoryEntry, MILE_CIRNO_MAXWELEM> Data;
-};
-
-struct FsyncRequest
-{
-    uint32_t Fid;
-};
-
-// struct FsyncResponse
-// {
-// };
-
-struct LockRequest
-{
-    uint32_t Fid;
-    uint8_t Type;
-    uint32_t Flags;
-    uint64_t Start;
-    uint64_t Length;
-    uint32_t ProcId;
-    std::string CliendId;
-};
-
-struct LockResponse
-{
-    uint8_t Status;
-};
-
-struct GetLockRequest
-{
-    uint32_t Fid;
-    uint8_t Type;
-    uint64_t Start;
-    uint64_t Length;
-    uint32_t ProcId;
-    std::string CliendId;
-};
-
-struct GetLockResponse
-{
-    uint8_t Type;
-    uint64_t Start;
-    uint64_t Length;
-    uint32_t ProcId;
-    std::string CliendId;
-};
-
-struct LinkRequest
-{
-    uint32_t Fid;
-    uint32_t DirFid;
-    std::string Name;
-};
-
-// struct LinkResponse
-// {
-// };
-
-struct MkdirRequest
-{
-    uint32_t DirFid;
-    std::string Name;
-    uint32_t Mode;
-    uint32_t Gid;
-};
-
-struct MkdirResponse
-{
-    Qid Qid;
-};
-
-struct RenameAtRequest
-{
-    uint32_t OldDirFid;
-    std::string OldName;
-    uint32_t NewDirFid;
-    std::string NewName;
-};
-
-// struct RenameAtResponse
-// {
-//     // empty
-// };
-
-struct UnlinkAtRequest
-{
-    uint32_t DirFd;
-    std::string Name;
-    uint32_t Flags;
-};
-
-// struct UnlinkAtResponse
-// {
-//     // empty
-// };
-
-struct VersionRequest
-{
-    uint32_t Size;
-    std::string Version;
-};
-
-struct VersionResponse
-{
-    uint32_t Size;
-    std::string Version;
-};
-
-struct AuthRequest
-{
-    uint32_t AFid;
-    std::string UName;
-    std::string AName;
-    uint32_t nUName;
-};
-
-struct AuthResponse
-{
-    Qid Qid;
-};
-
-struct AttachRequest
-{
-    uint32_t Fid;
-    uint32_t AFid;
-    std::string UName;
-    std::string AName;
-    uint32_t nUName;
-};
-
-struct AttachResponse
-{
-    Qid Qid;
-};
-
-// struct ErrorRequest
-// {
-//     // illegal
-// };
-
-struct ErrorResponse
-{
-    // 9P2000.L
-    std::string EName;
-    uint32_t Errno;
-};
-
-struct FlushRequest
-{
-    uint16_t OldTag;
-};
-
-// struct FlushResponse
-// {
-//     // empty
-// };
-
-struct WalkRequest
-{
-    uint32_t Fid;
-    uint32_t NewFid;
-    uint16_t nWName;
-    std::string WName;
-};
-
-struct WalkResponse
-{
-    uint16_t nWQid;
-    std::array<Qid, MILE_CIRNO_MAXWELEM> WQid;
-};
-
-// struct OpenRequest
-// {
-//     // in 9P2000.L not used.
-// };
-
-// struct OpenResponse
-// {
-//     // in 9P2000.L not used.
-// };
-
-// struct CreateRequest
-// {
-//     // in 9P2000.L not used.
-// };
-
-// struct CreateResponse
-// {
-//     // in 9P2000.L not used.
-
-// };
-
-struct ReadRequest
-{
-    uint32_t Fid;
-    uint64_t Offset;
-    uint32_t Count;
-};
-
-struct ReadResponse
-{
-    uint32_t Count;
-    // todo: data[Count]
-};
-
-struct WriteRequest
-{
-    uint32_t Fid;
-    uint64_t Offset;
-    uint32_t Count;
-    // todo: data[count]
-};
-
-struct WriteResponse
-{
-    uint32_t Count;
-};
-
-struct ClunkRequest
-{
-    uint32_t Fid;
-};
-
-// struct ClunkResponse
-// {
-//     // empty
-// };
-
-struct RemoveRequest
-{
-    uint32_t Fid;
-};
-
-// struct RemoveResponse
-// {
-//     // empty
-// };
-
-// struct StatRequest
-// {
-//     // 9P2000.L not used.
-// };
-
-// struct StatResponse
-// {
-//     // 9P2000.L not used.
-// };
-
-// struct StatResponse
-// {
-//     // 9P2000.L not used.
-// };
-
-// struct WriteStatRequest
-// {
-//     // 9P2000.L not used.
-// };
-
-// struct WriteStatResponse
-// {
-//     // 9P2000.L not used.
-// };
-
-struct AccessRequest
-{
-    uint32_t Fid;
-    uint32_t Flags;
-};
-
-// struct AccessResponse
-// {
-//     // empty
-// };
-
-// todo: 9P2000.W extension
-
-} // namespace Cirno
-
-} // namespace Mile
+    struct Header
+    {
+        std::uint32_t Size;
+        std::uint8_t Type; // MILE_CIRNO_PROTOCOL_MESSAGE_TYPE
+        std::uint16_t Tag;
+    };
+
+    using String = std::string;
+
+    struct Qid
+    {
+        std::uint8_t Type; // MILE_CIRNO_PROTOCOL_QID_TYPE
+        std::uint32_t Version;
+        std::uint64_t Path;
+    };
+
+    struct DirectoryEntry
+    {
+        Qid Qid;
+        std::uint64_t Offset;
+        std::uint8_t Type;
+        std::string Name;
+    };
+
+    struct Stat
+    {
+        std::uint16_t Type;
+        std::uint32_t Dev;
+        Qid Qid;
+        std::uint32_t Mode;
+        std::uint32_t LastAccessTime; // atime
+        std::uint32_t LastWriteTime; // mtime
+        std::uint64_t FileSize; // length
+        std::string FileName; // name
+        std::string OwnerUserId; // uid
+        std::string GroupId; // gid
+        std::string LastWriteUserId; // muid
+    };
+
+    struct UnixStat
+    {
+        std::uint16_t Type;
+        std::uint32_t Dev;
+        Qid Qid;
+        std::uint32_t Mode;
+        std::uint32_t LastAccessTime; // atime
+        std::uint32_t LastWriteTime; // mtime
+        std::uint64_t FileSize; // length
+        std::string FileName; // name
+        std::string OwnerUserId // uid
+        std::string GroupId; // gid
+        std::string LastWriteUserId; // muid
+        std::string UnixExtension; // extension
+        std::uint32_t NumericOwnerUserId; // n_uid
+        std::uint32_t NumericGroupId; // n_gid
+        std::uint32_t NumericLastWriteUserId; // n_muid
+    };
+
+    struct WindowsDirectoryEntry
+    {
+        DirectoryEntry Entry;
+        Stat Stat;
+    };
+
+    struct LinuxErrorResponse
+    {
+        std::uint32_t Code;
+    };
+
+    struct StatFsRequest
+    {
+        std::uint32_t Fid;
+    };
+
+    struct StatFsResponse
+    {
+        std::uint32_t FileSystemType; // type
+        std::uint32_t BlockSize; // bsize
+        std::uint64_t TotalBlocks; // blocks
+        std::uint64_t FreeBlocks; // bfree
+        std::uint64_t AvailableBlocks; // bavail
+        std::uint64_t TotalFiles; // files
+        std::uint64_t FreeFileNodes; // ffree
+        std::uint64_t FileSystemId; // fsid
+        std::uint32_t MaximumFileNameLength; // namelen
+    };
+
+    struct LinuxOpenRequest
+    {
+        std::uint32_t Fid;
+        std::uint32_t Flags; // MILE_CIRNO_PROTOCOL_LINUX_OPEN_CREATE_FLAGS
+    };
+
+    struct LinuxOpenResponse
+    {
+        Qid Qid;
+        std::uint32_t IoUnit;
+    };
+
+    struct LinuxCreateRequest
+    {
+        std::uint32_t Fid;
+        std::string Name;
+        std::uint32_t Flags; // MILE_CIRNO_PROTOCOL_LINUX_OPEN_CREATE_FLAGS
+        std::uint32_t Mode;
+        std::uint32_t Gid;
+    };
+
+    struct LinuxCreateResponse
+    {
+        Qid Qid;
+        std::uint32_t IoUnit;
+    };
+
+    struct SymLinkRequest
+    {
+        std::uint32_t Fid;
+        std::string Name;
+        std::string Target;
+        std::uint32_t Gid;
+    };
+
+    struct SymLinkResponse
+    {
+        Qid Qid;
+    };
+
+    struct MkNodRequest
+    {
+        std::uint32_t DirectoryFid;
+        std::string Name;
+        std::uint32_t Mode;
+        std::uint32_t Major;
+        std::uint32_t Minor;
+        std::uint32_t Gid;
+    };
+
+    struct MkNodResponse
+    {
+        Qid Qid;
+    };
+
+    struct RenameRequest
+    {
+        std::uint32_t Fid;
+        std::uint32_t DirectoryFid;
+        std::string Name;
+    };
+
+    // RenameResponse
+
+    struct ReadLinkRequest
+    {
+        std::uint32_t Fid;
+    };
+
+    struct ReadLinkResponse
+    {
+        std::string Target;
+    };
+
+    struct GetAttrRequest
+    {
+        std::uint32_t Fid;
+        std::uint64_t RequestMask; // request_mask
+    };
+
+    struct GetAttrResponse
+    {
+        std::uint64_t Valid; // MILE_CIRNO_PROTOCOL_LINUX_GETATTR_FLAGS
+        Qid Qid;
+        std::uint32_t Mode;
+        std::uint32_t OwnerUserId; // uid
+        std::uint32_t GroupId; // gid
+        std::uint64_t NumberOfHardLinks; // nlink
+        std::uint64_t DeviceId; // rdev
+        std::uint64_t FileSize; // size
+        std::uint64_t BlockSize; // blksize
+        std::uint64_t AllocatedBlocks; // blocks
+        std::uint64_t LastAccessTimeSeconds; // atime_sec
+        std::uint64_t LastAccessTimeNanoseconds; // atime_nsec
+        std::uint64_t LastWriteTimeSeconds; // mtime_sec
+        std::uint64_t LastWriteTimeNanoseconds; // mtime_nsec
+        std::uint64_t ChangeTimeSeconds; // ctime_sec
+        std::uint64_t ChangeTimeNanoseconds; // ctime_nsec
+        std::uint64_t BirthTimeSeconds; // btime_sec
+        std::uint64_t BirthTimeNanoseconds; // btime_nsec
+        std::uint64_t Generation; // gen
+        std::uint64_t DataVersion; // data_version
+    };
+
+    struct SetAttrRequest
+    {
+        std::uint32_t Fid;
+        std::uint32_t Valid; // MILE_CIRNO_PROTOCOL_LINUX_SETATTR_FLAGS
+        std::uint32_t Mode;
+        std::uint32_t OwnerUserId; // uid
+        std::uint32_t GroupId; // gid
+        std::uint64_t FileSize; // size
+        std::uint64_t LastAccessTimeSeconds; // atime_sec
+        std::uint64_t LastAccessTimeNanoseconds; // atime_nsec
+        std::uint64_t LastWriteTimeSeconds; // mtime_sec
+        std::uint64_t LastWriteTimeNanoseconds; // mtime_nsec
+    };
+
+    // SetAttrResponse
+
+    struct XattrWalkRequest
+    {
+        std::uint32_t Fid;
+        std::uint32_t NewFid;
+        std::string Name;
+    };
+
+    struct XattrWalkResponse
+    {
+        std::uint64_t Size;
+    };
+
+    struct XattrCreateRequest
+    {
+        std::uint32_t Fid;
+        std::string Name;
+        std::uint64_t Size;
+        std::uint32_t Flags;
+    };
+
+    // XattrCreateResponse
+
+    struct ReadDirRequest
+    {
+        std::uint32_t Fid;
+        std::uint64_t Offset;
+        std::uint32_t Count;
+    };
+
+    struct ReadDirResponse
+    {
+        std::vector<DirectoryEntry> Data;
+    };
+
+    struct FsyncRequest
+    {
+        std::uint32_t Fid;
+    };
+
+    // FsyncResponse
+
+    struct LockRequest
+    {
+        std::uint32_t Fid;
+        std::uint8_t Type; // MILE_CIRNO_PROTOCOL_LINUX_LOCK_TYPE
+        std::uint32_t Flags; // MILE_CIRNO_PROTOCOL_LINUX_LOCK_FLAGS
+        std::uint64_t Start;
+        std::uint64_t Length;
+        std::uint32_t ProcessId;
+        std::string ClientId;
+    };
+
+    struct LockResponse
+    {
+        std::uint8_t Status; // MILE_CIRNO_PROTOCOL_LINUX_LOCK_STATUS
+    };
+
+    struct GetLockRequest
+    {
+        std::uint32_t Fid;
+        std::uint8_t Type; // MILE_CIRNO_PROTOCOL_LINUX_LOCK_TYPE
+        std::uint64_t Start;
+        std::uint64_t Length;
+        std::uint32_t ProcessId;
+        std::string ClientId;
+    };
+
+    struct GetLockResponse
+    {
+        std::uint8_t Type; // MILE_CIRNO_PROTOCOL_LINUX_LOCK_TYPE
+        std::uint64_t Start;
+        std::uint64_t Length;
+        std::uint32_t ProcessId;
+        std::string ClientId;
+    };
+
+    struct LinkRequest
+    {
+        std::uint32_t DirectoryFid;
+        std::uint32_t Fid;
+        std::string Name;
+    };
+
+    // LinkResponse
+
+    struct MkDirRequest
+    {
+        std::uint32_t DirectoryFid;
+        std::string Name;
+        std::uint32_t Mode;
+        std::uint32_t Gid;
+    };
+
+    struct MkDirResponse
+    {
+        Qid Qid;
+    };
+
+    struct RenameAtRequest
+    {
+        std::uint32_t OldDirectoryFid;
+        std::string OldName;
+        std::uint32_t NewDirectoryFid;
+        std::string NewName;
+    };
+
+    // RenameAtResponse
+
+    struct UnlinkAtRequest
+    {
+        std::uint32_t OldDirectoryFid;
+        std::string Name;
+        std::uint32_t Flags; // MILE_CIRNO_PROTOCOL_LINUX_OPEN_CREATE_FLAGS
+    };
+
+    // UnlinkAtResponse
+
+    struct VersionRequest
+    {
+        std::uint32_t MaximumMessageSize;
+        std::string ProtocolVersion;
+    };
+
+    struct VersionResponse
+    {
+        std::uint32_t MaximumMessageSize;
+        std::string ProtocolVersion;
+    };
+
+    struct AuthRequest
+    {
+        std::uint32_t AuthFid; // afid
+        std::string UserName; // uname
+        std::string AccessName; // aname
+    };
+
+    struct UnixAuthRequest
+    {
+        std::uint32_t AuthFid; // afid
+        std::string UserName; // uname
+        std::string AccessName; // aname
+        std::uint32_t NumericUserName; // n_uname
+    };
+
+    struct AuthResponse
+    {
+        Qid AuthQid; // aqid
+    };
+
+    struct AttachRequest
+    {
+        std::uint32_t Fid;
+        std::uint32_t AuthFid; // afid
+        std::string UserName; // uname
+        std::string AccessName; // aname
+    };
+
+    struct UnixAttachRequest
+    {
+        std::uint32_t Fid;
+        std::uint32_t AuthFid; // afid
+        std::string UserName; // uname
+        std::string AccessName; // aname
+        std::uint32_t NumericUserName; // n_uname
+    };
+
+    struct AttachResponse
+    {
+        Qid Qid;
+    };
+
+    struct ErrorResponse
+    {
+        std::string Message;
+    };
+
+    struct UnixErrorResponse
+    {
+        std::string Message;
+        std::uint32_t Code;
+    };
+
+    struct FlushRequest
+    {
+        std::uint16_t OldTag;
+    };
+
+    // FlushResponse
+
+    struct WalkRequest
+    {
+        std::uint32_t Fid;
+        std::uint32_t NewFid;
+        std::vector<std::string> Names;
+    };
+
+    struct WalkResponse
+    {
+        std::vector<Qid> Qids;
+    };
+
+    struct OpenRequest
+    {
+        std::uint32_t Fid;
+        std::uint8_t Mode; // MILE_CIRNO_PROTOCOL_OPEN_MODE
+    };
+
+    struct OpenResponse
+    {
+        Qid Qid;
+        std::uint32_t IoUnit;
+    };
+
+    struct CreateRequest
+    {
+        std::uint32_t Fid;
+        std::string Name;
+        std::uint32_t Permission; // perm, MILE_CIRNO_PROTOCOL_PERMISSION_MODE
+        std::uint32_t Mode;
+    };
+
+    struct UnixCreateRequest
+    {
+        std::uint32_t Fid;
+        std::string Name;
+        std::uint32_t Permission; // perm, MILE_CIRNO_PROTOCOL_PERMISSION_MODE
+        std::uint32_t Mode;
+        std::string UnixExtension; // extension
+    };
+
+    struct CreateResponse
+    {
+        Qid Qid;
+        std::uint32_t IoUnit;
+    };
+
+    struct ReadRequest
+    {
+        std::uint32_t Fid;
+        std::uint64_t Offset;
+        std::uint32_t Count;
+    };
+
+    struct ReadResponse
+    {
+        std::vector<std::uint8_t> Data;
+    };
+
+    struct WriteRequest
+    {
+        std::uint32_t Fid;
+        std::uint64_t Offset;
+        std::vector<std::uint8_t> Data;
+    };
+
+    struct WriteResponse
+    {
+        std::uint32_t Count;
+    };
+
+    struct ClunkRequest
+    {
+        std::uint32_t Fid;
+    };
+
+    // ClunkResponse
+
+    struct RemoveRequest
+    {
+        std::uint32_t Fid;
+    };
+
+    // RemoveResponse
+
+    struct StatRequest
+    {
+        std::uint32_t Fid;
+    };
+
+    struct StatResponse
+    {
+        std::vector<Stat> Stat;
+    };
+
+    struct WriteStatRequest
+    {
+        std::uint32_t Fid;
+        std::vector<Stat> Stat;
+    };
+
+    // WriteStatResponse
+
+    struct AccessRequest
+    {
+        std::uint32_t Fid;
+        std::uint32_t Flags;
+    };
+
+    // AccessResponse
+
+    struct WindowsReadDirRequest
+    {
+        std::uint32_t Fid;
+        std::uint64_t Offset;
+        std::uint32_t Count;
+    };
+
+    struct WindowsReadDirResponse
+    {
+        std::vector<WindowsDirectoryEntry> Data;
+    };
+
+    // WindowsOpenRequest
+
+    // WindowsOpenResponse
+}
 
 #endif // ! MILE_CIRNO_PROTOCOL_PRIVATE
