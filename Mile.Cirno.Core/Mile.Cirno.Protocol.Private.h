@@ -25,7 +25,7 @@ namespace Mile::Cirno
     {
         std::uint32_t Size;
         std::uint8_t Type; // MILE_CIRNO_PROTOCOL_MESSAGE_TYPE
-        std::uint16_t Tag;
+        MILE_CIRNO_TAG Tag;
     };
 
     using String = std::string;
@@ -92,7 +92,7 @@ namespace Mile::Cirno
 
     struct StatFsRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
     };
 
     struct StatFsResponse
@@ -110,7 +110,7 @@ namespace Mile::Cirno
 
     struct LinuxOpenRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
         std::uint32_t Flags; // MILE_CIRNO_PROTOCOL_LINUX_OPEN_CREATE_FLAGS
     };
 
@@ -122,7 +122,7 @@ namespace Mile::Cirno
 
     struct LinuxCreateRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
         std::string Name;
         std::uint32_t Flags; // MILE_CIRNO_PROTOCOL_LINUX_OPEN_CREATE_FLAGS
         std::uint32_t Mode;
@@ -137,7 +137,7 @@ namespace Mile::Cirno
 
     struct SymLinkRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
         std::string Name;
         std::string Target;
         std::uint32_t Gid;
@@ -150,7 +150,7 @@ namespace Mile::Cirno
 
     struct MkNodRequest
     {
-        std::uint32_t DirectoryFid;
+        MILE_CIRNO_FID DirectoryFid;
         std::string Name;
         std::uint32_t Mode;
         std::uint32_t Major;
@@ -165,8 +165,8 @@ namespace Mile::Cirno
 
     struct RenameRequest
     {
-        std::uint32_t Fid;
-        std::uint32_t DirectoryFid;
+        MILE_CIRNO_FID Fid;
+        MILE_CIRNO_FID DirectoryFid;
         std::string Name;
     };
 
@@ -174,7 +174,7 @@ namespace Mile::Cirno
 
     struct ReadLinkRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
     };
 
     struct ReadLinkResponse
@@ -184,7 +184,7 @@ namespace Mile::Cirno
 
     struct GetAttrRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
         std::uint64_t RequestMask; // request_mask
     };
 
@@ -214,7 +214,7 @@ namespace Mile::Cirno
 
     struct SetAttrRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
         std::uint32_t Valid; // MILE_CIRNO_PROTOCOL_LINUX_SETATTR_FLAGS
         std::uint32_t Mode;
         std::uint32_t OwnerUserId; // uid
@@ -230,8 +230,8 @@ namespace Mile::Cirno
 
     struct XattrWalkRequest
     {
-        std::uint32_t Fid;
-        std::uint32_t NewFid;
+        MILE_CIRNO_FID Fid;
+        MILE_CIRNO_FID NewFid;
         std::string Name;
     };
 
@@ -242,7 +242,7 @@ namespace Mile::Cirno
 
     struct XattrCreateRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
         std::string Name;
         std::uint64_t Size;
         std::uint32_t Flags;
@@ -252,7 +252,7 @@ namespace Mile::Cirno
 
     struct ReadDirRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
         std::uint64_t Offset;
         std::uint32_t Count;
     };
@@ -264,14 +264,14 @@ namespace Mile::Cirno
 
     struct FsyncRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
     };
 
     // FsyncResponse
 
     struct LockRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
         std::uint8_t Type; // MILE_CIRNO_PROTOCOL_LINUX_LOCK_TYPE
         std::uint32_t Flags; // MILE_CIRNO_PROTOCOL_LINUX_LOCK_FLAGS
         std::uint64_t Start;
@@ -287,7 +287,7 @@ namespace Mile::Cirno
 
     struct GetLockRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
         std::uint8_t Type; // MILE_CIRNO_PROTOCOL_LINUX_LOCK_TYPE
         std::uint64_t Start;
         std::uint64_t Length;
@@ -306,8 +306,8 @@ namespace Mile::Cirno
 
     struct LinkRequest
     {
-        std::uint32_t DirectoryFid;
-        std::uint32_t Fid;
+        MILE_CIRNO_FID DirectoryFid;
+        MILE_CIRNO_FID Fid;
         std::string Name;
     };
 
@@ -315,7 +315,7 @@ namespace Mile::Cirno
 
     struct MkDirRequest
     {
-        std::uint32_t DirectoryFid;
+        MILE_CIRNO_FID DirectoryFid;
         std::string Name;
         std::uint32_t Mode;
         std::uint32_t Gid;
@@ -328,9 +328,9 @@ namespace Mile::Cirno
 
     struct RenameAtRequest
     {
-        std::uint32_t OldDirectoryFid;
+        MILE_CIRNO_FID OldDirectoryFid;
         std::string OldName;
-        std::uint32_t NewDirectoryFid;
+        MILE_CIRNO_FID NewDirectoryFid;
         std::string NewName;
     };
 
@@ -338,7 +338,7 @@ namespace Mile::Cirno
 
     struct UnlinkAtRequest
     {
-        std::uint32_t OldDirectoryFid;
+        MILE_CIRNO_FID OldDirectoryFid;
         std::string Name;
         std::uint32_t Flags; // MILE_CIRNO_PROTOCOL_LINUX_OPEN_CREATE_FLAGS
     };
@@ -359,17 +359,17 @@ namespace Mile::Cirno
 
     struct AuthRequest
     {
-        std::uint32_t AuthFid; // afid
+        MILE_CIRNO_FID AuthFid; // afid
         std::string UserName; // uname
         std::string AccessName; // aname
     };
 
     struct UnixAuthRequest
     {
-        std::uint32_t AuthFid; // afid
+        MILE_CIRNO_FID AuthFid; // afid
         std::string UserName; // uname
         std::string AccessName; // aname
-        std::uint32_t NumericUserName; // n_uname
+        MILE_CIRNO_NUNAME NumericUserName; // n_uname
     };
 
     struct AuthResponse
@@ -379,19 +379,19 @@ namespace Mile::Cirno
 
     struct AttachRequest
     {
-        std::uint32_t Fid;
-        std::uint32_t AuthFid; // afid
+        MILE_CIRNO_FID Fid;
+        MILE_CIRNO_FID AuthFid; // afid
         std::string UserName; // uname
         std::string AccessName; // aname
     };
 
     struct UnixAttachRequest
     {
-        std::uint32_t Fid;
-        std::uint32_t AuthFid; // afid
+        MILE_CIRNO_FID Fid;
+        MILE_CIRNO_FID AuthFid; // afid
         std::string UserName; // uname
         std::string AccessName; // aname
-        std::uint32_t NumericUserName; // n_uname
+        MILE_CIRNO_NUNAME NumericUserName; // n_uname
     };
 
     struct AttachResponse
@@ -412,15 +412,15 @@ namespace Mile::Cirno
 
     struct FlushRequest
     {
-        std::uint16_t OldTag;
+        MILE_CIRNO_TAG OldTag;
     };
 
     // FlushResponse
 
     struct WalkRequest
     {
-        std::uint32_t Fid;
-        std::uint32_t NewFid;
+        MILE_CIRNO_FID Fid;
+        MILE_CIRNO_FID NewFid;
         std::vector<std::string> Names;
     };
 
@@ -431,7 +431,7 @@ namespace Mile::Cirno
 
     struct OpenRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
         std::uint8_t Mode; // MILE_CIRNO_PROTOCOL_OPEN_MODE
     };
 
@@ -443,7 +443,7 @@ namespace Mile::Cirno
 
     struct CreateRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
         std::string Name;
         std::uint32_t Permission; // perm, MILE_CIRNO_PROTOCOL_PERMISSION_MODE
         std::uint32_t Mode;
@@ -451,7 +451,7 @@ namespace Mile::Cirno
 
     struct UnixCreateRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
         std::string Name;
         std::uint32_t Permission; // perm, MILE_CIRNO_PROTOCOL_PERMISSION_MODE
         std::uint32_t Mode;
@@ -466,7 +466,7 @@ namespace Mile::Cirno
 
     struct ReadRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
         std::uint64_t Offset;
         std::uint32_t Count;
     };
@@ -478,7 +478,7 @@ namespace Mile::Cirno
 
     struct WriteRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
         std::uint64_t Offset;
         std::vector<std::uint8_t> Data;
     };
@@ -490,21 +490,21 @@ namespace Mile::Cirno
 
     struct ClunkRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
     };
 
     // ClunkResponse
 
     struct RemoveRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
     };
 
     // RemoveResponse
 
     struct StatRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
     };
 
     struct StatResponse
@@ -514,7 +514,7 @@ namespace Mile::Cirno
 
     struct WriteStatRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
         std::vector<Stat> Stat;
     };
 
@@ -522,7 +522,7 @@ namespace Mile::Cirno
 
     struct AccessRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
         std::uint32_t Flags;
     };
 
@@ -530,7 +530,7 @@ namespace Mile::Cirno
 
     struct WindowsReadDirRequest
     {
-        std::uint32_t Fid;
+        MILE_CIRNO_FID Fid;
         std::uint64_t Offset;
         std::uint32_t Count;
     };
