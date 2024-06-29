@@ -264,6 +264,7 @@ typedef enum _MILE_CIRNO_PROTOCOL_MESSAGE_TYPE
 #define MILE_CIRNO_NOFID 0xFFFFFFFF
 #define MILE_CIRNO_NONUNAME 0xFFFFFFFF
 #define MILE_CIRNO_FSTYPE 0x01021997
+#define MILE_CIRNO_MAXWELEM 16
 
 /*
  * @brief Type code bits in (the first byte of) a qid.
@@ -364,25 +365,25 @@ typedef enum _MILE_CIRNO_PROTOCOL_LINUX_GETATTR_FLAGS
     // Everything up to and including MileCirnoLinuxGetAttrFlagBlocks is
     // MileCirnoLinuxGetAttrFlagBasic.
     MileCirnoLinuxGetAttrFlagBasic =
-    MileCirnoLinuxGetAttrFlagMode |
-    MileCirnoLinuxGetAttrFlagNLink |
-    MileCirnoLinuxGetAttrFlagUid |
-    MileCirnoLinuxGetAttrFlagGid |
-    MileCirnoLinuxGetAttrFlagRawDevice |
-    MileCirnoLinuxGetAttrFlagAccessTime |
-    MileCirnoLinuxGetAttrFlagModifiedTime |
-    MileCirnoLinuxGetAttrFlagChangeTime |
-    MileCirnoLinuxGetAttrFlagInodeNumber |
-    MileCirnoLinuxGetAttrFlagSize |
-    MileCirnoLinuxGetAttrFlagBlocks,
+        MileCirnoLinuxGetAttrFlagMode |
+        MileCirnoLinuxGetAttrFlagNLink |
+        MileCirnoLinuxGetAttrFlagUid |
+        MileCirnoLinuxGetAttrFlagGid |
+        MileCirnoLinuxGetAttrFlagRawDevice |
+        MileCirnoLinuxGetAttrFlagAccessTime |
+        MileCirnoLinuxGetAttrFlagModifiedTime |
+        MileCirnoLinuxGetAttrFlagChangeTime |
+        MileCirnoLinuxGetAttrFlagInodeNumber |
+        MileCirnoLinuxGetAttrFlagSize |
+        MileCirnoLinuxGetAttrFlagBlocks,
     MileCirnoLinuxGetAttrFlagBirthTime = 0x00000800,
     MileCirnoLinuxGetAttrFlagGenration = 0x00001000,
     MileCirnoLinuxGetAttrFlagDataVersion = 0x00002000,
     MileCirnoLinuxGetAttrFlagAll =
-    MileCirnoLinuxGetAttrFlagBasic |
-    MileCirnoLinuxGetAttrFlagBirthTime |
-    MileCirnoLinuxGetAttrFlagGenration |
-    MileCirnoLinuxGetAttrFlagDataVersion
+        MileCirnoLinuxGetAttrFlagBasic |
+        MileCirnoLinuxGetAttrFlagBirthTime |
+        MileCirnoLinuxGetAttrFlagGenration |
+        MileCirnoLinuxGetAttrFlagDataVersion,
 } MILE_CIRNO_PROTOCOL_LINUX_GETATTR_FLAGS, *PMILE_CIRNO_PROTOCOL_LINUX_GETATTR_FLAGS;
 
 /**
