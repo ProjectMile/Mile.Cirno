@@ -392,130 +392,332 @@ typedef struct _MILE_CIRNO_READLINK_RESPONSE
     MILE_CIRNO_STRING Target;
 } MILE_CIRNO_READLINK_RESPONSE, *PMILE_CIRNO_READLINK_RESPONSE;
 
-// MILE_CIRNO_GETATTR_REQUEST
+typedef struct _MILE_CIRNO_GETATTR_REQUEST
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t FileId[4]; // fid
+    uint8_t RequestMask[8]; // request_mask
+} MILE_CIRNO_GETATTR_REQUEST, *PMILE_CIRNO_GETATTR_REQUEST;
 
-// MILE_CIRNO_GETATTR_RESPONSE
+typedef struct _MILE_CIRNO_GETATTR_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t Valid[8];
+    MILE_CIRNO_QID UniqueId; // qid
+    uint8_t Mode[4];
+    uint8_t OwnerUserId[4]; // uid
+    uint8_t GroupId[4]; // gid
+    uint8_t NumberOfHardLinks[8]; // nlink
+    uint8_t DeviceId[8]; // rdev
+    uint8_t FileSize[8]; // size
+    uint8_t BlockSize[8]; // blksize
+    uint8_t AllocatedBlocks[8]; // blocks
+    uint8_t LastAccessTimeSeconds[8]; // atime_sec
+    uint8_t LastAccessTimeNanoseconds[8]; // atime_nsec
+    uint8_t LastWriteTimeSeconds[8]; // mtime_sec
+    uint8_t LastWriteTimeNanoseconds[8]; // mtime_nsec
+    uint8_t ChangeTimeSeconds[8]; // ctime_sec
+    uint8_t ChangeTimeNanoseconds[8]; // ctime_nsec
+    uint8_t BirthTimeSeconds[8]; // btime_sec
+    uint8_t BirthTimeNanoseconds[8]; // btime_nsec
+    uint8_t Generation[8]; // gen
+    uint8_t DataVersion[8]; // data_version
+} MILE_CIRNO_GETATTR_RESPONSE, *PMILE_CIRNO_GETATTR_RESPONSE;
 
-// MILE_CIRNO_SETATTR_REQUEST
+typedef struct _MILE_CIRNO_SETATTR_REQUEST
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t FileId[4]; // fid
+    uint8_t Valid[4];
+    uint8_t Mode[4];
+    uint8_t OwnerUserId[4]; // uid
+    uint8_t GroupId[4]; // gid
+    uint8_t FileSize[8]; // size
+    uint8_t LastAccessTimeSeconds[8]; // atime_sec
+    uint8_t LastAccessTimeNanoseconds[8]; // atime_nsec
+    uint8_t LastWriteTimeSeconds[8]; // mtime_sec
+    uint8_t LastWriteTimeNanoseconds[8]; // mtime_nsec
+} MILE_CIRNO_SETATTR_REQUEST, *PMILE_CIRNO_SETATTR_REQUEST;
 
-// MILE_CIRNO_SETATTR_RESPONSE
+typedef struct _MILE_CIRNO_SETATTR_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+} MILE_CIRNO_SETATTR_RESPONSE, *PMILE_CIRNO_SETATTR_RESPONSE;
 
-// MILE_CIRNO_XATTRWALK_REQUEST
+typedef struct _MILE_CIRNO_XATTRWALK_REQUEST
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t FileId[4]; // fid
+    uint8_t NewFileId[4]; // newfid
+    MILE_CIRNO_STRING Name;
+} MILE_CIRNO_XATTRWALK_REQUEST, *PMILE_CIRNO_XATTRWALK_REQUEST;
 
-// MILE_CIRNO_XATTRWALK_RESPONSE
+typedef struct _MILE_CIRNO_XATTRWALK_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t Size[8];
+} MILE_CIRNO_XATTRWALK_RESPONSE, *PMILE_CIRNO_XATTRWALK_RESPONSE;
 
 // MILE_CIRNO_XATTRCREATE_REQUEST
 
-// MILE_CIRNO_XATTRCREATE_RESPONSE
+typedef struct _MILE_CIRNO_XATTRCREATE_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+} MILE_CIRNO_XATTRCREATE_RESPONSE, *PMILE_CIRNO_XATTRCREATE_RESPONSE;
 
-// MILE_CIRNO_READDIR_REQUEST
+typedef struct _MILE_CIRNO_READDIR_REQUEST
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t FileId[4]; // fid
+    uint8_t Offset[8];
+    uint8_t Count[4];
+} MILE_CIRNO_READDIR_REQUEST, *PMILE_CIRNO_READDIR_REQUEST;
 
 // MILE_CIRNO_READDIR_RESPONSE
 
-// MILE_CIRNO_FSYNC_REQUEST
+typedef struct _MILE_CIRNO_FSYNC_REQUEST
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t FileId[4]; // fid
+} MILE_CIRNO_FSYNC_REQUEST, *PMILE_CIRNO_FSYNC_REQUEST;
 
-// MILE_CIRNO_FSYNC_RESPONSE
+typedef struct _MILE_CIRNO_FSYNC_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+} MILE_CIRNO_FSYNC_RESPONSE, *PMILE_CIRNO_FSYNC_RESPONSE;
 
-// MILE_CIRNO_LOCK_REQUEST
+typedef struct _MILE_CIRNO_LOCK_REQUEST
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t FileId[4]; // fid
+    uint8_t Type[1];
+    uint8_t Flags[4];
+    uint8_t Start[8];
+    uint8_t Length[8];
+    uint8_t ProcessId[4]; // proc_id
+    MILE_CIRNO_STRING ClientId; // client_id
+} MILE_CIRNO_LOCK_REQUEST, *PMILE_CIRNO_LOCK_REQUEST;
 
-// MILE_CIRNO_LOCK_RESPONSE
+typedef struct _MILE_CIRNO_LOCK_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t Status[1];
+} MILE_CIRNO_LOCK_RESPONSE, *PMILE_CIRNO_LOCK_RESPONSE;
 
-// MILE_CIRNO_GETLOCK_REQUEST
+typedef struct _MILE_CIRNO_GETLOCK_REQUEST
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t FileId[4]; // fid
+    uint8_t Type[1];
+    uint8_t Start[8];
+    uint8_t Length[8];
+    uint8_t ProcessId[4]; // proc_id
+    MILE_CIRNO_STRING ClientId; // client_id
+} MILE_CIRNO_GETLOCK_REQUEST, *PMILE_CIRNO_GETLOCK_REQUEST;
 
-// MILE_CIRNO_GETLOCK_RESPONSE
+typedef struct _MILE_CIRNO_GETLOCK_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t Type[1];
+    uint8_t Start[8];
+    uint8_t Length[8];
+    uint8_t ProcessId[4]; // proc_id
+    MILE_CIRNO_STRING ClientId; // client_id
+} MILE_CIRNO_GETLOCK_RESPONSE, *PMILE_CIRNO_GETLOCK_RESPONSE;
 
-// MILE_CIRNO_LINK_REQUEST
+typedef struct _MILE_CIRNO_LINK_REQUEST
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t DirectoryFileId[4]; // dfid
+    uint8_t FileId[4]; // fid
+    MILE_CIRNO_STRING Name;
+} MILE_CIRNO_LINK_REQUEST, *PMILE_CIRNO_LINK_REQUEST;
 
-// MILE_CIRNO_LINK_RESPONSE
+typedef struct _MILE_CIRNO_LINK_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+} MILE_CIRNO_LINK_RESPONSE, *PMILE_CIRNO_LINK_RESPONSE;
 
 // MILE_CIRNO_MKDIR_REQUEST
 
-// MILE_CIRNO_MKDIR_RESPONSE
+typedef struct _MILE_CIRNO_MKDIR_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+    MILE_CIRNO_QID UniqueId; // qid
+} MILE_CIRNO_MKDIR_RESPONSE, *PMILE_CIRNO_MKDIR_RESPONSE;
 
 // MILE_CIRNO_RENAMEAT_REQUEST
 
-// MILE_CIRNO_RENAMEAT_RESPONSE
+typedef struct _MILE_CIRNO_RENAMEAT_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+} MILE_CIRNO_RENAMEAT_RESPONSE, *PMILE_CIRNO_RENAMEAT_RESPONSE;
 
 // MILE_CIRNO_UNLINKAT_REQUEST
 
-// MILE_CIRNO_UNLINKAT_RESPONSE
+typedef struct _MILE_CIRNO_UNLINKAT_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+} MILE_CIRNO_UNLINKAT_RESPONSE, *PMILE_CIRNO_UNLINKAT_RESPONSE;
 
-// MILE_CIRNO_VERSION_REQUEST
+typedef struct _MILE_CIRNO_VERSION_REQUEST
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t MaximumMessageSize[4]; // msize
+    MILE_CIRNO_STRING ProtocolVersion; // version
+} MILE_CIRNO_VERSION_REQUEST, *PMILE_CIRNO_VERSION_REQUEST;
 
-// MILE_CIRNO_VERSION_RESPONSE
+typedef struct _MILE_CIRNO_VERSION_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t MaximumMessageSize[4]; // msize
+    MILE_CIRNO_STRING ProtocolVersion; // version
+} MILE_CIRNO_VERSION_RESPONSE, *PMILE_CIRNO_VERSION_RESPONSE;
 
 // MILE_CIRNO_AUTH_REQUEST
 
-// MILE_CIRNO_AUTH_RESPONSE
+typedef struct _MILE_CIRNO_AUTH_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+    MILE_CIRNO_QID AuthenticationUniqueId; // aqid
+} MILE_CIRNO_AUTH_RESPONSE, *PMILE_CIRNO_AUTH_RESPONSE;
 
 // MILE_CIRNO_ATTACH_REQUEST
 
-// MILE_CIRNO_ATTACH_RESPONSE
-
-// MILE_CIRNO_ERROR_REQUEST
+typedef struct _MILE_CIRNO_ATTACH_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+    MILE_CIRNO_QID UniqueId; // qid
+} MILE_CIRNO_ATTACH_RESPONSE, *PMILE_CIRNO_ATTACH_RESPONSE;
 
 // MILE_CIRNO_ERROR_RESPONSE
 
-// MILE_CIRNO_FLUSH_REQUEST
+typedef struct _MILE_CIRNO_FLUSH_REQUEST
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t OldTag[2];
+} MILE_CIRNO_FLUSH_REQUEST, *PMILE_CIRNO_FLUSH_REQUEST;
 
-// MILE_CIRNO_FLUSH_RESPONSE
+typedef struct _MILE_CIRNO_FLUSH_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+} MILE_CIRNO_FLUSH_RESPONSE, *PMILE_CIRNO_FLUSH_RESPONSE;
 
 // MILE_CIRNO_WALK_REQUEST
 
-// MILE_CIRNO_WALK_RESPONSE
+typedef struct _MILE_CIRNO_WALK_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t UniqueIdCount[2]; // nwqid
+    MILE_CIRNO_QID UniqueIdList[0]; // wqid
+} MILE_CIRNO_WALK_RESPONSE, *PMILE_CIRNO_WALK_RESPONSE;
 
-// MILE_CIRNO_OPEN_REQUEST
+typedef struct _MILE_CIRNO_OPEN_REQUEST
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t FileId[4]; // fid
+    uint8_t Mode[1];
+} MILE_CIRNO_OPEN_REQUEST, *PMILE_CIRNO_OPEN_REQUEST;
 
-// MILE_CIRNO_OPEN_RESPONSE
+typedef struct _MILE_CIRNO_OPEN_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+    MILE_CIRNO_QID UniqueId; // qid
+    uint8_t IoUnit[4];
+} MILE_CIRNO_OPEN_RESPONSE, *PMILE_CIRNO_OPEN_RESPONSE;
 
 // MILE_CIRNO_CREATE_REQUEST
 
-// MILE_CIRNO_CREATE_RESPONSE
+typedef struct _MILE_CIRNO_CREATE_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+    MILE_CIRNO_QID UniqueId; // qid
+    uint8_t IoUnit[4];
+} MILE_CIRNO_CREATE_RESPONSE, *PMILE_CIRNO_CREATE_RESPONSE;
 
-// MILE_CIRNO_READ_REQUEST
+typedef struct _MILE_CIRNO_READ_REQUEST
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t FileId[4]; // fid
+    uint8_t Offset[8];
+    uint8_t Count[4];
+} MILE_CIRNO_READ_REQUEST, *PMILE_CIRNO_READ_REQUEST;
 
-// MILE_CIRNO_READ_RESPONSE
+typedef struct _MILE_CIRNO_READ_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t Count[4];
+    uint8_t Data[0];
+} MILE_CIRNO_READ_RESPONSE, *PMILE_CIRNO_READ_RESPONSE;
 
-// MILE_CIRNO_WRITE_REQUEST
+typedef struct _MILE_CIRNO_WRITE_REQUEST
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t FileId[4]; // fid
+    uint8_t Offset[8];
+    uint8_t Count[4];
+    uint8_t Data[0];
+} MILE_CIRNO_WRITE_REQUEST, *PMILE_CIRNO_WRITE_REQUEST;
 
-// MILE_CIRNO_WRITE_RESPONSE
+typedef struct _MILE_CIRNO_WRITE_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t Count[4];
+} MILE_CIRNO_WRITE_RESPONSE, *PMILE_CIRNO_WRITE_RESPONSE;
 
-// MILE_CIRNO_CLUNK_REQUEST
+typedef struct _MILE_CIRNO_CLUNK_REQUEST
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t FileId[4]; // fid
+} MILE_CIRNO_CLUNK_REQUEST, *PMILE_CIRNO_CLUNK_REQUEST;
 
-// MILE_CIRNO_CLUNK_RESPONSE
+typedef struct _MILE_CIRNO_CLUNK_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+} MILE_CIRNO_CLUNK_RESPONSE, *PMILE_CIRNO_CLUNK_RESPONSE;
 
-// MILE_CIRNO_REMOVE_REQUEST
+typedef struct _MILE_CIRNO_REMOVE_REQUEST
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t FileId[4]; // fid
+} MILE_CIRNO_REMOVE_REQUEST, *PMILE_CIRNO_REMOVE_REQUEST;
 
-// MILE_CIRNO_REMOVE_RESPONSE
+typedef struct _MILE_CIRNO_REMOVE_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+} MILE_CIRNO_REMOVE_RESPONSE, *PMILE_CIRNO_REMOVE_RESPONSE;
 
-// MILE_CIRNO_STAT_REQUEST
+typedef struct _MILE_CIRNO_STAT_REQUEST
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t FileId[4]; // fid
+} MILE_CIRNO_STAT_REQUEST, *PMILE_CIRNO_STAT_REQUEST;
 
 // MILE_CIRNO_STAT_RESPONSE
 
 // MILE_CIRNO_WRITESTAT_REQUEST
 
-// MILE_CIRNO_WRITESTAT_RESPONSE
+typedef struct _MILE_CIRNO_WRITESTAT_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+} MILE_CIRNO_WRITESTAT_RESPONSE, *PMILE_CIRNO_WRITESTAT_RESPONSE;
 
-// MILE_CIRNO_ACCESS_REQUEST
+// MILE_CIRNO_ACCESS_REQUEST (Undocumented)
 
-// MILE_CIRNO_ACCESS_RESPONSE
+// MILE_CIRNO_ACCESS_RESPONSE (Undocumented)
 
-// MILE_CIRNO_WINDOWS_READDIR_REQUEST
+// MILE_CIRNO_WINDOWS_READDIR_REQUEST (Undocumented)
 
-// MILE_CIRNO_WINDOWS_READDIR_RESPONSE
+// MILE_CIRNO_WINDOWS_READDIR_RESPONSE (Undocumented)
 
-// MILE_CIRNO_WINDOWS_OPEN_REQUEST
+// MILE_CIRNO_WINDOWS_OPEN_REQUEST (Undocumented)
 
-// MILE_CIRNO_WINDOWS_OPEN_RESPONSE
+// MILE_CIRNO_WINDOWS_OPEN_RESPONSE (Undocumented)
 
 #define MILE_CIRNO_NOTAG ((uint16_t)~0)
-
 #define MILE_CIRNO_NOFID ((uint32_t)~0)
-
 #define MILE_CIRNO_NONUNAME ((uint32_t)~0)
-
 #define MILE_CIRNO_FSTYPE 0x01021997
-
 #define MILE_CIRNO_MAXWELEM 16
 
 /*

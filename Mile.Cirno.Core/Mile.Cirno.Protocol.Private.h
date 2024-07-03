@@ -231,7 +231,7 @@ namespace Mile::Cirno
     struct XattrWalkRequest
     {
         std::uint32_t FileId; // fid
-        std::uint32_t NewFid;
+        std::uint32_t NewFileId; // newfid
         std::string Name;
     };
 
@@ -276,8 +276,8 @@ namespace Mile::Cirno
         std::uint32_t Flags; // MILE_CIRNO_PROTOCOL_LINUX_LOCK_FLAGS
         std::uint64_t Start;
         std::uint64_t Length;
-        std::uint32_t ProcessId;
-        std::string ClientId;
+        std::uint32_t ProcessId; // proc_id
+        std::string ClientId; // client_id
     };
 
     struct LockResponse
@@ -347,14 +347,14 @@ namespace Mile::Cirno
 
     struct VersionRequest
     {
-        std::uint32_t MaximumMessageSize;
-        std::string ProtocolVersion;
+        std::uint32_t MaximumMessageSize; // msize
+        std::string ProtocolVersion; // version
     };
 
     struct VersionResponse
     {
-        std::uint32_t MaximumMessageSize;
-        std::string ProtocolVersion;
+        std::uint32_t MaximumMessageSize; // msize
+        std::string ProtocolVersion; // version
     };
 
     struct AuthRequest
@@ -473,14 +473,14 @@ namespace Mile::Cirno
 
     struct ReadResponse
     {
-        std::vector<std::uint8_t> Data;
+        std::vector<std::uint8_t> Data; // count, data
     };
 
     struct WriteRequest
     {
         std::uint32_t FileId; // fid
         std::uint64_t Offset;
-        std::vector<std::uint8_t> Data;
+        std::vector<std::uint8_t> Data; // count, data
     };
 
     struct WriteResponse
@@ -519,30 +519,6 @@ namespace Mile::Cirno
     };
 
     // WriteStatResponse
-
-    struct AccessRequest
-    {
-        std::uint32_t FileId; // fid
-        std::uint32_t Flags;
-    };
-
-    // AccessResponse
-
-    struct WindowsReadDirRequest
-    {
-        std::uint32_t FileId; // fid
-        std::uint64_t Offset;
-        std::uint32_t Count;
-    };
-
-    struct WindowsReadDirResponse
-    {
-        std::vector<WindowsDirectoryEntry> Data; // count, data
-    };
-
-    // WindowsOpenRequest
-
-    // WindowsOpenResponse
 }
 
 #endif // ! MILE_CIRNO_PROTOCOL_PRIVATE
