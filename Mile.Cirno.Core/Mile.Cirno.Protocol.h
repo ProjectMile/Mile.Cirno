@@ -9,18 +9,34 @@
  *             per1cycle (pericycle.cc@gmail.com)
  */
 
+// References
+// - https://9p.io/sys/man/5/INDEX.html
+// - https://github.com/9fans/plan9port/blob/master/include/fcall.h
+// - https://ericvh.github.io/9p-rfc/rfc9p2000.html
+// - https://ericvh.github.io/9p-rfc/rfc9p2000.u.html
+// - https://github.com/freebsd/freebsd-src/blob/main/contrib/lib9p/fcall.h
+// - https://github.com/pfpacket/rust-9p/blob/master/src/fcall.rs
+// - https://github.com/piscisaureus/rust-9p/blob/master/src/fcall.rs
+
 #ifndef MILE_CIRNO_PROTOCOL
 #define MILE_CIRNO_PROTOCOL
 
 #include <stdint.h>
 
-// References
-// - https://github.com/freebsd/freebsd-src/blob/main/contrib/lib9p/fcall.h
+#ifdef _MSC_VER
+#if _MSC_VER > 1000
+#pragma once
+#endif
+#if (_MSC_VER >= 1200)
+#pragma warning(push)
+#endif
+#pragma warning(disable:4200) // zero length array
+#endif
 
 /**
  * @brief The definition of Plan 9 File System Protocol Message Type.
  */
-typedef enum _MILE_CIRNO_PROTOCOL_MESSAGE_TYPE
+typedef enum _MILE_CIRNO_MESSAGE_TYPE
 {
     // Structures Definitions (%Name%<%Type%>[%Length%])
     //
@@ -258,19 +274,245 @@ typedef enum _MILE_CIRNO_PROTOCOL_MESSAGE_TYPE
     // Undocumented
     // header<Header>[1] (Unknown)
     MileCirnoWindowsOpenResponseMessage,
-} MILE_CIRNO_PROTOCOL_MESSAGE_TYPE, *PMILE_CIRNO_PROTOCOL_MESSAGE_TYPE;
+} MILE_CIRNO_MESSAGE_TYPE, *PMILE_CIRNO_MESSAGE_TYPE;
 
-typedef uint16_t MILE_CIRNO_TAG, *PMILE_CIRNO_TAG;
+typedef struct _MILE_CIRNO_HEADER
+{
+    uint8_t Size[4];
+    uint8_t Type[1];
+    uint8_t Tag[2];
+} MILE_CIRNO_HEADER, *PMILE_CIRNO_HEADER;
 
-#define MILE_CIRNO_NOTAG ((MILE_CIRNO_TAG)~0)
+typedef struct _MILE_CIRNO_STRING
+{
+    uint8_t Length[2];
+    uint8_t String[0];
+} MILE_CIRNO_STRING, *PMILE_CIRNO_STRING;
 
-typedef uint32_t MILE_CIRNO_FID, *PMILE_CIRNO_FID;
+typedef struct _MILE_CIRNO_QID
+{
+    uint8_t Type[1];
+    uint8_t Version[4];
+    uint8_t Path[8];
+} MILE_CIRNO_QID, *PMILE_CIRNO_QID;
 
-#define MILE_CIRNO_NOFID ((MILE_CIRNO_FID)~0)
+// %Name%<DirectoryEntry>[%Length%]
 
-typedef uint32_t MILE_CIRNO_NUNAME, *PMILE_CIRNO_NUNAME;
+// %Name%<Stat>[%Length%]
 
-#define MILE_CIRNO_NONUNAME ((MILE_CIRNO_NUNAME)~0)
+// %Name%<WindowsDirectoryEntry>[%Length%]
+
+typedef struct _MILE_CIRNO_LINUX_ERROR_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t Code[4]; // ecode
+} MILE_CIRNO_LINUX_ERROR_RESPONSE, *PMILE_CIRNO_LINUX_ERROR_RESPONSE;
+
+typedef struct _MILE_CIRNO_STATFS_REQUEST
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t FileId[4]; // fid
+} MILE_CIRNO_STATFS_REQUEST, *PMILE_CIRNO_STATFS_REQUEST;
+
+typedef struct _MILE_CIRNO_STATFS_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t FileSystemType[4]; // type
+    uint8_t BlockSize[4]; // bsize
+    uint8_t TotalBlocks[8]; // blocks
+    uint8_t FreeBlocks[8]; // bfree
+    uint8_t AvailableBlocks[8]; // bavail
+    uint8_t TotalFiles[8]; // files
+    uint8_t FreeFileNodes[8]; // ffree
+    uint8_t FileSystemId[8]; // fsid
+    uint8_t MaximumFileNameLength[4]; // namelen
+} MILE_CIRNO_STATFS_RESPONSE, *PMILE_CIRNO_STATFS_RESPONSE;
+
+typedef struct _MILE_CIRNO_LINUX_OPEN_REQUEST
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t FileId[4]; // fid
+    uint8_t Flags[4];
+} MILE_CIRNO_LINUX_OPEN_REQUEST, *PMILE_CIRNO_LINUX_OPEN_REQUEST;
+
+typedef struct _MILE_CIRNO_LINUX_OPEN_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+    MILE_CIRNO_QID UniqueId; // qid
+    uint8_t IoUnit[4];
+} MILE_CIRNO_LINUX_OPEN_RESPONSE, *PMILE_CIRNO_LINUX_OPEN_RESPONSE;
+
+// MILE_CIRNO_LINUX_CREATE_REQUEST
+
+typedef struct _MILE_CIRNO_LINUX_CREATE_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+    MILE_CIRNO_QID UniqueId; // qid
+    uint8_t IoUnit[4];
+} MILE_CIRNO_LINUX_CREATE_RESPONSE, *PMILE_CIRNO_LINUX_CREATE_RESPONSE;
+
+// MILE_CIRNO_SYMLINK_REQUEST
+
+typedef struct _MILE_CIRNO_SYMLINK_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+    MILE_CIRNO_QID UniqueId; // qid
+} MILE_CIRNO_SYMLINK_RESPONSE, *PMILE_CIRNO_SYMLINK_RESPONSE;
+
+// MILE_CIRNO_MKNOD_REQUEST
+
+typedef struct _MILE_CIRNO_MKNOD_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+    MILE_CIRNO_QID UniqueId; // qid
+} MILE_CIRNO_MKNOD_RESPONSE, *PMILE_CIRNO_MKNOD_RESPONSE;
+
+typedef struct _MILE_CIRNO_RENAME_REQUEST
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t FileId[4]; // fid
+    uint8_t DirectoryFid[4]; // dfid
+    MILE_CIRNO_STRING Name;
+} MILE_CIRNO_RENAME_REQUEST, *PMILE_CIRNO_RENAME_REQUEST;
+
+typedef struct _MILE_CIRNO_RENAME_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+} MILE_CIRNO_RENAME_RESPONSE, *PMILE_CIRNO_RENAME_RESPONSE;
+
+typedef struct _MILE_CIRNO_READLINK_REQUEST
+{
+    MILE_CIRNO_HEADER Header;
+    uint8_t FileId[4]; // fid
+} MILE_CIRNO_READLINK_REQUEST, *PMILE_CIRNO_READLINK_REQUEST;
+
+typedef struct _MILE_CIRNO_READLINK_RESPONSE
+{
+    MILE_CIRNO_HEADER Header;
+    MILE_CIRNO_STRING Target;
+} MILE_CIRNO_READLINK_RESPONSE, *PMILE_CIRNO_READLINK_RESPONSE;
+
+// MILE_CIRNO_GETATTR_REQUEST
+
+// MILE_CIRNO_GETATTR_RESPONSE
+
+// MILE_CIRNO_SETATTR_REQUEST
+
+// MILE_CIRNO_SETATTR_RESPONSE
+
+// MILE_CIRNO_XATTRWALK_REQUEST
+
+// MILE_CIRNO_XATTRWALK_RESPONSE
+
+// MILE_CIRNO_XATTRCREATE_REQUEST
+
+// MILE_CIRNO_XATTRCREATE_RESPONSE
+
+// MILE_CIRNO_READDIR_REQUEST
+
+// MILE_CIRNO_READDIR_RESPONSE
+
+// MILE_CIRNO_FSYNC_REQUEST
+
+// MILE_CIRNO_FSYNC_RESPONSE
+
+// MILE_CIRNO_LOCK_REQUEST
+
+// MILE_CIRNO_LOCK_RESPONSE
+
+// MILE_CIRNO_GETLOCK_REQUEST
+
+// MILE_CIRNO_GETLOCK_RESPONSE
+
+// MILE_CIRNO_LINK_REQUEST
+
+// MILE_CIRNO_LINK_RESPONSE
+
+// MILE_CIRNO_MKDIR_REQUEST
+
+// MILE_CIRNO_MKDIR_RESPONSE
+
+// MILE_CIRNO_RENAMEAT_REQUEST
+
+// MILE_CIRNO_RENAMEAT_RESPONSE
+
+// MILE_CIRNO_UNLINKAT_REQUEST
+
+// MILE_CIRNO_UNLINKAT_RESPONSE
+
+// MILE_CIRNO_VERSION_REQUEST
+
+// MILE_CIRNO_VERSION_RESPONSE
+
+// MILE_CIRNO_AUTH_REQUEST
+
+// MILE_CIRNO_AUTH_RESPONSE
+
+// MILE_CIRNO_ATTACH_REQUEST
+
+// MILE_CIRNO_ATTACH_RESPONSE
+
+// MILE_CIRNO_ERROR_REQUEST
+
+// MILE_CIRNO_ERROR_RESPONSE
+
+// MILE_CIRNO_FLUSH_REQUEST
+
+// MILE_CIRNO_FLUSH_RESPONSE
+
+// MILE_CIRNO_WALK_REQUEST
+
+// MILE_CIRNO_WALK_RESPONSE
+
+// MILE_CIRNO_OPEN_REQUEST
+
+// MILE_CIRNO_OPEN_RESPONSE
+
+// MILE_CIRNO_CREATE_REQUEST
+
+// MILE_CIRNO_CREATE_RESPONSE
+
+// MILE_CIRNO_READ_REQUEST
+
+// MILE_CIRNO_READ_RESPONSE
+
+// MILE_CIRNO_WRITE_REQUEST
+
+// MILE_CIRNO_WRITE_RESPONSE
+
+// MILE_CIRNO_CLUNK_REQUEST
+
+// MILE_CIRNO_CLUNK_RESPONSE
+
+// MILE_CIRNO_REMOVE_REQUEST
+
+// MILE_CIRNO_REMOVE_RESPONSE
+
+// MILE_CIRNO_STAT_REQUEST
+
+// MILE_CIRNO_STAT_RESPONSE
+
+// MILE_CIRNO_WRITESTAT_REQUEST
+
+// MILE_CIRNO_WRITESTAT_RESPONSE
+
+// MILE_CIRNO_ACCESS_REQUEST
+
+// MILE_CIRNO_ACCESS_RESPONSE
+
+// MILE_CIRNO_WINDOWS_READDIR_REQUEST
+
+// MILE_CIRNO_WINDOWS_READDIR_RESPONSE
+
+// MILE_CIRNO_WINDOWS_OPEN_REQUEST
+
+// MILE_CIRNO_WINDOWS_OPEN_RESPONSE
+
+#define MILE_CIRNO_NOTAG ((uint16_t)~0)
+
+#define MILE_CIRNO_NOFID ((uint32_t)~0)
+
+#define MILE_CIRNO_NONUNAME ((uint32_t)~0)
 
 #define MILE_CIRNO_FSTYPE 0x01021997
 
@@ -279,7 +521,7 @@ typedef uint32_t MILE_CIRNO_NUNAME, *PMILE_CIRNO_NUNAME;
 /*
  * @brief Type code bits in (the first byte of) a qid.
  */
-typedef enum _MILE_CIRNO_PROTOCOL_QID_TYPE
+typedef enum _MILE_CIRNO_QID_TYPE
 {
     MileCirnoQidTypeDirectory = 0x80,
     MileCirnoQidTypeAppendOnlyFiles = 0x40,
@@ -289,12 +531,12 @@ typedef enum _MILE_CIRNO_PROTOCOL_QID_TYPE
     MileCirnoQidTypeTemporaryFile = 0x04,
     MileCirnoQidTypeSymbolicLink = 0x02,
     MileCirnoQidTypePlainFile = 0x00,
-} MILE_CIRNO_PROTOCOL_QID_TYPE, *PMILE_CIRNO_PROTOCOL_QID_TYPE;
+} MILE_CIRNO_QID_TYPE, *PMILE_CIRNO_QID_TYPE;
 
 /*
  * @brief The perm field flags used in MileCirnoCreateRequestMessage.
  */
-typedef enum _MILE_CIRNO_PROTOCOL_PERMISSION_MODE
+typedef enum _MILE_CIRNO_PERMISSION_MODE
 {
     MileCirnoPermissionModeDirectory = 0x80000000,
     MileCirnoPermissionModeAppend = 0x40000000,
@@ -311,13 +553,13 @@ typedef enum _MILE_CIRNO_PROTOCOL_PERMISSION_MODE
     MileCirnoPermissionModeSocket = 0x00100000,
     MileCirnoPermissionModeSetUid = 0x00080000,
     MileCirnoPermissionModeSetGid = 0x00040000,
-} MILE_CIRNO_PROTOCOL_PERMISSION_MODE, *PMILE_CIRNO_PROTOCOL_PERMISSION_MODE;
+} MILE_CIRNO_PERMISSION_MODE, *PMILE_CIRNO_PERMISSION_MODE;
 
 /**
  * @brief The flags used in MileCirnoOpenRequestMessage and
  *        MileCirnoCreateRequestMessage.
  */
-typedef enum _MILE_CIRNO_PROTOCOL_OPEN_MODE
+typedef enum _MILE_CIRNO_OPEN_MODE
 {
     MileCirnoOpenModeRead = 0,
     MileCirnoOpenModeWrite = 1,
@@ -328,13 +570,13 @@ typedef enum _MILE_CIRNO_PROTOCOL_OPEN_MODE
     MileCirnoOpenModeCloseOnExecute = 32,
     MileCirnoOpenModeRemoveOnClose = 64,
     MileCirnoOpenModeDirectAccess = 128,
-} MILE_CIRNO_PROTOCOL_OPEN_MODE, *PMILE_CIRNO_PROTOCOL_OPEN_MODE;
+} MILE_CIRNO_OPEN_MODE, *PMILE_CIRNO_OPEN_MODE;
 
 /**
  * @brief The flags used in MileCirnoLinuxOpenRequestMessage and
  *        MileCirnoLinuxCreateRequestMessage.
  */
-typedef enum _MILE_CIRNO_PROTOCOL_LINUX_OPEN_CREATE_FLAGS
+typedef enum _MILE_CIRNO_LINUX_OPEN_CREATE_FLAGS
 {
     MileCirnoLinuxOpenCreateFlagCreate = 000000100U,
     MileCirnoLinuxOpenCreateFlagExclude = 000000200U,
@@ -353,13 +595,13 @@ typedef enum _MILE_CIRNO_PROTOCOL_LINUX_OPEN_CREATE_FLAGS
     MileCirnoLinuxOpenCreateFlagSynchronize = 004000000U,
     MileCirnoLinuxOpenCreateFlagPath = 010000000U,
     MileCirnoLinuxOpenCreateFlagTemporaryFile = 020000000U,
-} MILE_CIRNO_PROTOCOL_LINUX_OPEN_CREATE_FLAGS, *PMILE_CIRNO_PROTOCOL_LINUX_OPEN_CREATE_FLAGS;
+} MILE_CIRNO_LINUX_OPEN_CREATE_FLAGS, *PMILE_CIRNO_LINUX_OPEN_CREATE_FLAGS;
 
 /**
  * @brief The request_mask field flags used in MileCirnoGetAttrRequestMessage
  *        and the valid flags used in MileCirnoGetAttrResponseMessage.
  */
-typedef enum _MILE_CIRNO_PROTOCOL_LINUX_GETATTR_FLAGS
+typedef enum _MILE_CIRNO_LINUX_GETATTR_FLAGS
 {
     MileCirnoLinuxGetAttrFlagMode = 0x00000001,
     MileCirnoLinuxGetAttrFlagNLink = 0x00000002,
@@ -394,12 +636,12 @@ typedef enum _MILE_CIRNO_PROTOCOL_LINUX_GETATTR_FLAGS
         MileCirnoLinuxGetAttrFlagBirthTime |
         MileCirnoLinuxGetAttrFlagGenration |
         MileCirnoLinuxGetAttrFlagDataVersion,
-} MILE_CIRNO_PROTOCOL_LINUX_GETATTR_FLAGS, *PMILE_CIRNO_PROTOCOL_LINUX_GETATTR_FLAGS;
+} MILE_CIRNO_LINUX_GETATTR_FLAGS, *PMILE_CIRNO_LINUX_GETATTR_FLAGS;
 
 /**
  * @brief The valid field flags used in MileCirnoSetAttrRequestMessage.
  */
-typedef enum _MILE_CIRNO_PROTOCOL_LINUX_SETATTR_FLAGS
+typedef enum _MILE_CIRNO_LINUX_SETATTR_FLAGS
 {
     MileCirnoLinuxSetAttrFlagMode = 0x00000001,
     MileCirnoLinuxSetAttrFlagUid = 0x00000002,
@@ -410,35 +652,43 @@ typedef enum _MILE_CIRNO_PROTOCOL_LINUX_SETATTR_FLAGS
     MileCirnoLinuxSetAttrFlagChangeTime = 0x00000040,
     MileCirnoLinuxSetAttrFlagAccessTimeSet = 0x00000080,
     MileCirnoLinuxSetAttrFlagModifiedTimeSet = 0x00000100,
-} MILE_CIRNO_PROTOCOL_LINUX_SETATTR_FLAGS, *PMILE_CIRNO_PROTOCOL_LINUX_SETATTR_FLAGS;
+} MILE_CIRNO_LINUX_SETATTR_FLAGS, *PMILE_CIRNO_LINUX_SETATTR_FLAGS;
 
-typedef enum _MILE_CIRNO_PROTOCOL_LINUX_LOCK_TYPE
+typedef enum _MILE_CIRNO_LINUX_LOCK_TYPE
 {
     MileCirnoLinuxLockTypeRead = 0,
     MileCirnoLinuxLockTypeWrite = 1,
     MileCirnoLinuxLockTypeUnlock = 2,
-} MILE_CIRNO_PROTOCOL_LINUX_LOCK_TYPE, *PMILE_CIRNO_PROTOCOL_LINUX_LOCK_TYPE;
+} MILE_CIRNO_LINUX_LOCK_TYPE, *PMILE_CIRNO_LINUX_LOCK_TYPE;
 
-typedef enum _MILE_CIRNO_PROTOCOL_LINUX_LOCK_FLAGS
+typedef enum _MILE_CIRNO_LINUX_LOCK_FLAGS
 {
     MileCirnoLinuxLockFlagBlock = 1,
     MileCirnoLinuxLockFlagReclaim = 2,
-} MILE_CIRNO_PROTOCOL_LINUX_LOCK_FLAGS, *PMILE_CIRNO_PROTOCOL_LINUX_LOCK_FLAGS;
+} MILE_CIRNO_LINUX_LOCK_FLAGS, *PMILE_CIRNO_LINUX_LOCK_FLAGS;
 
-typedef enum _MILE_CIRNO_PROTOCOL_LINUX_LOCK_STATUS
+typedef enum _MILE_CIRNO_LINUX_LOCK_STATUS
 {
     MileCirnoLinuxLockStatusSuccess = 0,
     MileCirnoLinuxLockStatusBlocked = 1,
     MileCirnoLinuxLockStatusError = 2,
     MileCirnoLinuxLockStatusGrace = 3,
-} MILE_CIRNO_PROTOCOL_LINUX_LOCK_STATUS, *PMILE_CIRNO_PROTOCOL_LINUX_LOCK_STATUS;
+} MILE_CIRNO_LINUX_LOCK_STATUS, *PMILE_CIRNO_LINUX_LOCK_STATUS;
 
 /**
  * @brief The flags used in MileCirnoUnlinkAtRequestMessage.
  */
-typedef enum _MILE_CIRNO_PROTOCOL_LINUX_UNLINKAT_FLAGS
+typedef enum _MILE_CIRNO_LINUX_UNLINKAT_FLAGS
 {
     MileCirnoLinuxUnlinkAtFlagRemoveDirectory = 0x00000200,
-} MILE_CIRNO_PROTOCOL_LINUX_UNLINKAT_FLAGS, *PMILE_CIRNO_PROTOCOL_LINUX_UNLINKAT_FLAGS;
+} MILE_CIRNO_LINUX_UNLINKAT_FLAGS, *PMILE_CIRNO_LINUX_UNLINKAT_FLAGS;
+
+#ifdef _MSC_VER
+#if (_MSC_VER >= 1200)
+#pragma warning(pop)
+#else
+#pragma warning(default:4200) // zero length array
+#endif
+#endif
 
 #endif // !MILE_CIRNO_PROTOCOL
