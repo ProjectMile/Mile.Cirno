@@ -1,7 +1,7 @@
 ﻿/*
  * PROJECT:   Mouri Internal Library Essentials
- * FILE:      Mile.Cirno.Protocol.Private.h
- * PURPOSE:   Definition for Plan 9 File System Protocol
+ * FILE:      Mile.Cirno.Core.h
+ * PURPOSE:   Definition for Mile.Cirno Core API
  *
  * LICENSE:   The MIT License
  *
@@ -9,8 +9,8 @@
  *             per1cycle (pericycle.cc@gmail.com)
  */
 
-#ifndef MILE_CIRNO_PROTOCOL_PRIVATE
-#define MILE_CIRNO_PROTOCOL_PRIVATE
+#ifndef MILE_CIRNO_CORE
+#define MILE_CIRNO_CORE
 
 #include "Mile.Cirno.Protocol.h"
 
@@ -521,4 +521,4 @@ namespace Mile::Cirno
     // WriteStatResponse
 }
 
-#endif // ! MILE_CIRNO_PROTOCOL_PRIVATE
+#endif // ! MILE_CIRNO_CORE
