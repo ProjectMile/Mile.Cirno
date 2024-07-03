@@ -28,7 +28,7 @@
 #include <vector>
 #include <string>
 
-#include "../Mile.Cirno.Core/Mile.Cirno.Protocol.h"
+#include "Mile.Cirno.Protocol.h"
 
 namespace Mile::Cirno
 {

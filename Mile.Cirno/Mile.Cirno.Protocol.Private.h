@@ -12,7 +12,7 @@
 #ifndef MILE_CIRNO_PROTOCOL_PRIVATE
 #define MILE_CIRNO_PROTOCOL_PRIVATE
 
-#include <Mile.Cirno.Protocol.h>
+#include "Mile.Cirno.Protocol.h"
 
 #include <cstdint>
 

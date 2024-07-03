@@ -24,6 +24,7 @@
   <Import Project="..\Mile.Cirno.Dokany\Mile.Cirno.Dokany.props" />
   <ItemGroup>
     <ClCompile Include="Mile.Cirno.cpp" />
+    <ClCompile Include="Mile.Cirno.Protocol.Private.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="Mile.Cirno.manifest" />
@@ -32,6 +33,10 @@
     <PackageReference Include="Mile.Windows.Helpers">
       <Version>1.0.593</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Mile.Cirno.Protocol.h" />
+    <ClInclude Include="Mile.Cirno.Protocol.Private.h" />
   </ItemGroup>
   <Import Project="..\Mile.Project.Windows\Mile.Project.Cpp.targets" />
 </Project>
