@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   PROJECT:   Mouri Internal Library Essentials
-  FILE:      Mile.Cirno.Dokany.targets
-  PURPOSE:   MSBuild targets file for Mile.Cirno.Dokany
+  FILE:      Mile.Cirno.Dokany.props
+  PURPOSE:   MSBuild props file for Mile.Cirno.Dokany
 
   LICENSE:   The MIT License
 
