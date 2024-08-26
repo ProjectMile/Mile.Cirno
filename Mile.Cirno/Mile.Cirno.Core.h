@@ -28,7 +28,13 @@ namespace Mile::Cirno
         std::uint16_t Tag;
     };
 
+    std::vector<uint8_t> FromHeader(
+        Header const& Value);
+
     // String
+
+    std::vector<uint8_t> FromString(
+        std::string const& Value);
 
     struct Qid
     {
@@ -37,6 +43,9 @@ namespace Mile::Cirno
         std::uint64_t Path;
     };
 
+    std::vector<uint8_t> FromQid(
+        Qid const& Value);
+
     struct DirectoryEntry
     {
         Qid UniqueId; // qid
@@ -44,6 +53,9 @@ namespace Mile::Cirno
         std::uint8_t Type;
         std::string Name;
     };
+
+    std::vector<uint8_t> FromDirectoryEntry(
+        DirectoryEntry const& Value);
 
     struct Stat
     {
@@ -59,6 +71,9 @@ namespace Mile::Cirno
         std::string GroupId; // gid
         std::string LastWriteUserId; // muid
     };
+
+    std::vector<uint8_t> FromStat(
+        Stat const& Value);
 
     struct UnixStat
     {
@@ -79,21 +94,33 @@ namespace Mile::Cirno
         std::uint32_t NumericLastWriteUserId; // n_muid
     };
 
+    std::vector<uint8_t> FromUnixStat(
+        UnixStat const& Value);
+
     struct WindowsDirectoryEntry
     {
         DirectoryEntry Entry;
         Stat Stat;
     };
 
+    std::vector<uint8_t> FromWindowsDirectoryEntry(
+        WindowsDirectoryEntry const& Value);
+
     struct LinuxErrorResponse
     {
         std::uint32_t Code;
     };
 
+    std::vector<uint8_t> FromLinuxErrorResponse(
+        LinuxErrorResponse const& Value);
+
     struct StatFsRequest
     {
         std::uint32_t FileId; // fid
     };
+
+    std::vector<uint8_t> FromStatFsRequest(
+        StatFsRequest const& Value);
 
     struct StatFsResponse
     {
@@ -108,17 +135,26 @@ namespace Mile::Cirno
         std::uint32_t MaximumFileNameLength; // namelen
     };
 
+    std::vector<uint8_t> FromStatFsResponse(
+        StatFsResponse const& Value);
+
     struct LinuxOpenRequest
     {
         std::uint32_t FileId; // fid
         std::uint32_t Flags; // MILE_CIRNO_PROTOCOL_LINUX_OPEN_CREATE_FLAGS
     };
 
+    std::vector<uint8_t> FromLinuxOpenRequest(
+        LinuxOpenRequest const& Value);
+
     struct LinuxOpenResponse
     {
         Qid UniqueId; // qid
         std::uint32_t IoUnit;
     };
+
+    std::vector<uint8_t> FromLinuxOpenRequest(
+        LinuxOpenRequest const& Value);
 
     struct LinuxCreateRequest
     {
@@ -129,11 +165,17 @@ namespace Mile::Cirno
         std::uint32_t Gid;
     };
 
+    std::vector<uint8_t> FromLinuxCreateRequest(
+        LinuxCreateRequest const& Value);
+
     struct LinuxCreateResponse
     {
         Qid UniqueId; // qid
         std::uint32_t IoUnit;
     };
+
+    std::vector<uint8_t> FromLinuxCreateResponse(
+        LinuxCreateResponse const& Value);
 
     struct SymLinkRequest
     {
@@ -143,10 +185,16 @@ namespace Mile::Cirno
         std::uint32_t Gid;
     };
 
+    std::vector<uint8_t> FromSymLinkRequest(
+        SymLinkRequest const& Value);
+
     struct SymLinkResponse
     {
         Qid UniqueId; // qid
     };
+
+    std::vector<uint8_t> FromSymLinkResponse(
+        SymLinkResponse const& Value);
 
     struct MkNodRequest
     {
@@ -158,10 +206,16 @@ namespace Mile::Cirno
         std::uint32_t Gid;
     };
 
+    std::vector<uint8_t> FromMkNodRequest(
+        MkNodRequest const& Value);
+
     struct MkNodResponse
     {
         Qid UniqueId; // qid
     };
+
+    std::vector<uint8_t> FromMkNodResponse(
+        MkNodResponse const& Value);
 
     struct RenameRequest
     {
@@ -170,6 +224,9 @@ namespace Mile::Cirno
         std::string Name;
     };
 
+    std::vector<uint8_t> FromRenameRequest(
+        RenameRequest const& Value);
+
     // RenameResponse
 
     struct ReadLinkRequest
@@ -177,16 +234,25 @@ namespace Mile::Cirno
         std::uint32_t FileId; // fid
     };
 
+    std::vector<uint8_t> FromReadLinkRequest(
+        ReadLinkRequest const& Value);
+
     struct ReadLinkResponse
     {
         std::string Target;
     };
+
+    std::vector<uint8_t> FromReadLinkResponse(
+        ReadLinkResponse const& Value);
 
     struct GetAttrRequest
     {
         std::uint32_t FileId; // fid
         std::uint64_t RequestMask; // request_mask
     };
+
+    std::vector<uint8_t> FromGetAttrRequest(
+        GetAttrRequest const& Value);
 
     struct GetAttrResponse
     {
@@ -212,6 +278,9 @@ namespace Mile::Cirno
         std::uint64_t DataVersion; // data_version
     };
 
+    std::vector<uint8_t> FromGetAttrResponse(
+        GetAttrResponse const& Value);
+
     struct SetAttrRequest
     {
         std::uint32_t FileId; // fid
@@ -226,6 +295,9 @@ namespace Mile::Cirno
         std::uint64_t LastWriteTimeNanoseconds; // mtime_nsec
     };
 
+    std::vector<uint8_t> FromSetAttrRequest(
+        SetAttrRequest const& Value);
+
     // SetAttrResponse
 
     struct XattrWalkRequest
@@ -235,10 +307,16 @@ namespace Mile::Cirno
         std::string Name;
     };
 
+    std::vector<uint8_t> FromXattrWalkRequest(
+        XattrWalkRequest const& Value);
+
     struct XattrWalkResponse
     {
         std::uint64_t Size;
     };
+
+    std::vector<uint8_t> FromXattrWalkResponse(
+        XattrWalkResponse const& Value);
 
     struct XattrCreateRequest
     {
@@ -247,6 +325,9 @@ namespace Mile::Cirno
         std::uint64_t Size;
         std::uint32_t Flags;
     };
+
+    std::vector<uint8_t> FromXattrCreateRequest(
+        XattrCreateRequest const& Value);
 
     // XattrCreateResponse
 
@@ -257,15 +338,24 @@ namespace Mile::Cirno
         std::uint32_t Count;
     };
 
+    std::vector<uint8_t> FromReadDirRequest(
+        ReadDirRequest const& Value);
+
     struct ReadDirResponse
     {
         std::vector<DirectoryEntry> Data;
     };
 
+    std::vector<uint8_t> FromReadDirResponse(
+        ReadDirResponse const& Value);
+
     struct FsyncRequest
     {
         std::uint32_t FileId; // fid
     };
+
+    std::vector<uint8_t> FromFsyncRequest(
+        FsyncRequest const& Value);
 
     // FsyncResponse
 
@@ -280,10 +370,16 @@ namespace Mile::Cirno
         std::string ClientId; // client_id
     };
 
+    std::vector<uint8_t> FromLockRequest(
+        LockRequest const& Value);
+
     struct LockResponse
     {
         std::uint8_t Status; // MILE_CIRNO_PROTOCOL_LINUX_LOCK_STATUS
     };
+
+    std::vector<uint8_t> FromLockResponse(
+        LockResponse const& Value);
 
     struct GetLockRequest
     {
@@ -295,6 +391,9 @@ namespace Mile::Cirno
         std::string ClientId;
     };
 
+    std::vector<uint8_t> FromGetLockRequest(
+        GetLockRequest const& Value);
+
     struct GetLockResponse
     {
         std::uint8_t Type; // MILE_CIRNO_PROTOCOL_LINUX_LOCK_TYPE
@@ -304,12 +403,18 @@ namespace Mile::Cirno
         std::string ClientId;
     };
 
+    std::vector<uint8_t> FromGetLockResponse(
+        GetLockResponse const& Value);
+
     struct LinkRequest
     {
         std::uint32_t DirectoryFileId; // dfid
         std::uint32_t FileId; // fid
         std::string Name;
     };
+
+    std::vector<uint8_t> FromLinkRequest(
+        LinkRequest const& Value);
 
     // LinkResponse
 
@@ -321,10 +426,16 @@ namespace Mile::Cirno
         std::uint32_t Gid;
     };
 
+    std::vector<uint8_t> FromMkDirRequest(
+        MkDirRequest const& Value);
+
     struct MkDirResponse
     {
         Qid UniqueId; // qid
     };
+
+    std::vector<uint8_t> FromMkDirResponse(
+        MkDirResponse const& Value);
 
     struct RenameAtRequest
     {
@@ -333,6 +444,9 @@ namespace Mile::Cirno
         std::uint32_t NewDirectoryFileId; // newdirfid
         std::string NewName;
     };
+
+    std::vector<uint8_t> FromRenameAtRequest(
+        RenameAtRequest const& Value);
 
     // RenameAtResponse
 
@@ -343,6 +457,9 @@ namespace Mile::Cirno
         std::uint32_t Flags; // MILE_CIRNO_PROTOCOL_LINUX_OPEN_CREATE_FLAGS
     };
 
+    std::vector<uint8_t> FromUnlinkAtRequest(
+        UnlinkAtRequest const& Value);
+
     // UnlinkAtResponse
 
     struct VersionRequest
@@ -351,11 +468,17 @@ namespace Mile::Cirno
         std::string ProtocolVersion; // version
     };
 
+    std::vector<uint8_t> FromVersionRequest(
+        VersionRequest const& Value);
+
     struct VersionResponse
     {
         std::uint32_t MaximumMessageSize; // msize
         std::string ProtocolVersion; // version
     };
+
+    std::vector<uint8_t> FromVersionResponse(
+        VersionResponse const& Value);
 
     struct AuthRequest
     {
@@ -363,6 +486,9 @@ namespace Mile::Cirno
         std::string UserName; // uname
         std::string AccessName; // aname
     };
+
+    std::vector<uint8_t> FromAuthRequest(
+        AuthRequest const& Value);
 
     struct UnixAuthRequest
     {
@@ -372,10 +498,16 @@ namespace Mile::Cirno
         std::uint32_t NumericUserName; // n_uname
     };
 
+    std::vector<uint8_t> FromUnixAuthRequest(
+        UnixAuthRequest const& Value);
+
     struct AuthResponse
     {
         Qid AuthenticationUniqueId; // aqid
     };
+
+    std::vector<uint8_t> FromAuthResponse(
+        AuthResponse const& Value);
 
     struct AttachRequest
     {
@@ -384,6 +516,9 @@ namespace Mile::Cirno
         std::string UserName; // uname
         std::string AccessName; // aname
     };
+
+    std::vector<uint8_t> FromAttachRequest(
+        AttachRequest const& Value);
 
     struct UnixAttachRequest
     {
@@ -394,15 +529,24 @@ namespace Mile::Cirno
         std::uint32_t NumericUserName; // n_uname
     };
 
+    std::vector<uint8_t> FromUnixAttachRequest(
+        UnixAttachRequest const& Value);
+
     struct AttachResponse
     {
         Qid UniqueId; // qid
     };
 
+    std::vector<uint8_t> FromAttachResponse(
+        AttachResponse const& Value);
+
     struct ErrorResponse
     {
         std::string Message;
     };
+
+    std::vector<uint8_t> FromErrorResponse(
+        ErrorResponse const& Value);
 
     struct UnixErrorResponse
     {
@@ -410,10 +554,16 @@ namespace Mile::Cirno
         std::uint32_t Code;
     };
 
+    std::vector<uint8_t> FromUnixErrorResponse(
+        UnixErrorResponse const& Value);
+
     struct FlushRequest
     {
         std::uint16_t OldTag;
     };
+
+    std::vector<uint8_t> FromFlushRequest(
+        FlushRequest const& Value);
 
     // FlushResponse
 
@@ -424,10 +574,16 @@ namespace Mile::Cirno
         std::vector<std::string> Names;
     };
 
+    std::vector<uint8_t> FromWalkRequest(
+        WalkRequest const& Value);
+
     struct WalkResponse
     {
         std::vector<Qid> UniqueIds; // nwqid, wqid
     };
+
+    std::vector<uint8_t> FromWalkResponse(
+        WalkResponse const& Value);
 
     struct OpenRequest
     {
@@ -435,11 +591,17 @@ namespace Mile::Cirno
         std::uint8_t Mode; // MILE_CIRNO_PROTOCOL_OPEN_MODE
     };
 
+    std::vector<uint8_t> FromOpenRequest(
+        OpenRequest const& Value);
+
     struct OpenResponse
     {
         Qid UniqueId; // qid
         std::uint32_t IoUnit;
     };
+
+    std::vector<uint8_t> FromOpenResponse(
+        OpenResponse const& Value);
 
     struct CreateRequest
     {
@@ -448,6 +610,9 @@ namespace Mile::Cirno
         std::uint32_t Permission; // perm, MILE_CIRNO_PROTOCOL_PERMISSION_MODE
         std::uint32_t Mode;
     };
+
+    std::vector<uint8_t> FromCreateRequest(
+        CreateRequest const& Value);
 
     struct UnixCreateRequest
     {
@@ -458,11 +623,17 @@ namespace Mile::Cirno
         std::string UnixExtension; // extension
     };
 
+    std::vector<uint8_t> FromUnixCreateRequest(
+        UnixCreateRequest const& Value);
+
     struct CreateResponse
     {
         Qid UniqueId; // qid
         std::uint32_t IoUnit;
     };
+
+    std::vector<uint8_t> FromCreateResponse(
+        CreateResponse const& Value);
 
     struct ReadRequest
     {
@@ -471,10 +642,16 @@ namespace Mile::Cirno
         std::uint32_t Count;
     };
 
+    std::vector<uint8_t> FromReadRequest(
+        ReadRequest const& Value);
+
     struct ReadResponse
     {
         std::vector<std::uint8_t> Data; // count, data
     };
+
+    std::vector<uint8_t> FromReadResponse(
+        ReadResponse const& Value);
 
     struct WriteRequest
     {
@@ -483,15 +660,24 @@ namespace Mile::Cirno
         std::vector<std::uint8_t> Data; // count, data
     };
 
+    std::vector<uint8_t> FromWriteRequest(
+        WriteRequest const& Value);
+
     struct WriteResponse
     {
         std::uint32_t Count;
     };
 
+    std::vector<uint8_t> FromWriteResponse(
+        WriteResponse const& Value);
+
     struct ClunkRequest
     {
         std::uint32_t FileId; // fid
     };
+
+    std::vector<uint8_t> FromClunkRequest(
+        ClunkRequest const& Value);
 
     // ClunkResponse
 
@@ -500,6 +686,9 @@ namespace Mile::Cirno
         std::uint32_t FileId; // fid
     };
 
+    std::vector<uint8_t> FromRemoveRequest(
+        RemoveRequest const& Value);
+
     // RemoveResponse
 
     struct StatRequest
@@ -507,10 +696,16 @@ namespace Mile::Cirno
         std::uint32_t FileId; // fid
     };
 
+    std::vector<uint8_t> FromStatRequest(
+        StatRequest const& Value);
+
     struct StatResponse
     {
         std::vector<Stat> Stat;
     };
+
+    std::vector<uint8_t> FromStatResponse(
+        StatResponse const& Value);
 
     struct WriteStatRequest
     {
@@ -518,6 +713,9 @@ namespace Mile::Cirno
         std::vector<Stat> Stat;
     };
 
+    std::vector<uint8_t> FromWriteStatRequest(
+        WriteStatRequest const& Value);
+    
     // WriteStatResponse
 }
 
