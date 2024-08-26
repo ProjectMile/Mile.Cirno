@@ -742,11 +742,14 @@ typedef enum _MILE_CIRNO_PERMISSION_MODE
 {
     MileCirnoPermissionModeDirectory = 0x80000000,
     MileCirnoPermissionModeAppend = 0x40000000,
-    MileCirnoPermissionModeExclude = 0x20000000,
+    MileCirnoPermissionModeExclusive = 0x20000000,
     MileCirnoPermissionModeMount = 0x10000000,
     MileCirnoPermissionModeAuthenticationFile = 0x08000000,
     MileCirnoPermissionModeTemporaryFile = 0x04000000,
     MileCirnoPermissionModeSymbolicLink = 0x02000000,
+    MileCirnoPermissionModeRead = 0x00000004,
+    MileCirnoPermissionModeWrite = 0x00000002,
+    MileCirnoPermissionModeExecute = 0x00000001,
 
     /* 9P2000.u */
 
