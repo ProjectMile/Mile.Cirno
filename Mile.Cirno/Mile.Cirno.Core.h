@@ -24,7 +24,7 @@ namespace Mile::Cirno
     struct Header
     {
         std::uint32_t Size;
-        std::uint8_t Type; // MILE_CIRNO_PROTOCOL_MESSAGE_TYPE
+        uint8_t Type; // MILE_CIRNO_PROTOCOL_MESSAGE_TYPE
         std::uint16_t Tag;
     };
 
@@ -38,7 +38,7 @@ namespace Mile::Cirno
 
     struct Qid
     {
-        std::uint8_t Type; // MILE_CIRNO_PROTOCOL_QID_TYPE
+        uint8_t Type; // MILE_CIRNO_PROTOCOL_QID_TYPE
         std::uint32_t Version;
         std::uint64_t Path;
     };
@@ -50,7 +50,7 @@ namespace Mile::Cirno
     {
         Qid UniqueId; // qid
         std::uint64_t Offset;
-        std::uint8_t Type;
+        uint8_t Type;
         std::string Name;
     };
 
@@ -153,8 +153,8 @@ namespace Mile::Cirno
         std::uint32_t IoUnit;
     };
 
-    std::vector<uint8_t> FromLinuxOpenRequest(
-        LinuxOpenRequest const& Value);
+    std::vector<uint8_t> FromLinuxOpenResponse(
+        LinuxOpenResponse const& Value);
 
     struct LinuxCreateRequest
     {
@@ -362,7 +362,7 @@ namespace Mile::Cirno
     struct LockRequest
     {
         std::uint32_t FileId; // fid
-        std::uint8_t Type; // MILE_CIRNO_PROTOCOL_LINUX_LOCK_TYPE
+        uint8_t Type; // MILE_CIRNO_PROTOCOL_LINUX_LOCK_TYPE
         std::uint32_t Flags; // MILE_CIRNO_PROTOCOL_LINUX_LOCK_FLAGS
         std::uint64_t Start;
         std::uint64_t Length;
@@ -375,7 +375,7 @@ namespace Mile::Cirno
 
     struct LockResponse
     {
-        std::uint8_t Status; // MILE_CIRNO_PROTOCOL_LINUX_LOCK_STATUS
+        uint8_t Status; // MILE_CIRNO_PROTOCOL_LINUX_LOCK_STATUS
     };
 
     std::vector<uint8_t> FromLockResponse(
@@ -384,7 +384,7 @@ namespace Mile::Cirno
     struct GetLockRequest
     {
         std::uint32_t FileId; // fid
-        std::uint8_t Type; // MILE_CIRNO_PROTOCOL_LINUX_LOCK_TYPE
+        uint8_t Type; // MILE_CIRNO_PROTOCOL_LINUX_LOCK_TYPE
         std::uint64_t Start;
         std::uint64_t Length;
         std::uint32_t ProcessId;
@@ -396,7 +396,7 @@ namespace Mile::Cirno
 
     struct GetLockResponse
     {
-        std::uint8_t Type; // MILE_CIRNO_PROTOCOL_LINUX_LOCK_TYPE
+        uint8_t Type; // MILE_CIRNO_PROTOCOL_LINUX_LOCK_TYPE
         std::uint64_t Start;
         std::uint64_t Length;
         std::uint32_t ProcessId;
@@ -588,7 +588,7 @@ namespace Mile::Cirno
     struct OpenRequest
     {
         std::uint32_t FileId; // fid
-        std::uint8_t Mode; // MILE_CIRNO_PROTOCOL_OPEN_MODE
+        uint8_t Mode; // MILE_CIRNO_PROTOCOL_OPEN_MODE
     };
 
     std::vector<uint8_t> FromOpenRequest(
@@ -647,7 +647,7 @@ namespace Mile::Cirno
 
     struct ReadResponse
     {
-        std::vector<std::uint8_t> Data; // count, data
+        std::vector<uint8_t> Data; // count, data
     };
 
     std::vector<uint8_t> FromReadResponse(
@@ -657,7 +657,7 @@ namespace Mile::Cirno
     {
         std::uint32_t FileId; // fid
         std::uint64_t Offset;
-        std::vector<std::uint8_t> Data; // count, data
+        std::vector<uint8_t> Data; // count, data
     };
 
     std::vector<uint8_t> FromWriteRequest(
