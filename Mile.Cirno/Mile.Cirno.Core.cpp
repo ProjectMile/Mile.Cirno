@@ -20,28 +20,20 @@ namespace Mile::Cirno
         Dest.insert(Dest.end(), Temp.begin(), Temp.end());
     }
 
-    template<typename T>
-    std::vector<std::uint8_t> FromUInt8(T const& Value)
+    std::vector<std::uint8_t> FromUInt8(std::uint8_t const& Value)
     {
-        static_assert(std::is_same_v<T, std::uint8_t>, "Unsupport parameter type in function 'FromUInt8'.");
         return { Value };
     }
 
-    template<typename T>
-    std::vector<std::uint8_t> FromUInt16(T const& Value)
+    std::vector<std::uint8_t> FromUInt16(std::uint16_t const& Value)
     {
-        static_assert(std::is_same_v<T, std::uint16_t>, "Unsupport parameter type in function 'FromUInt16'.");
-
         std::uint8_t u1 = (Value & 0xff);
         std::uint8_t u2 = (Value >> 8);
         return { u1, u2 };
     }
 
-    template<typename T>
-    std::vector<std::uint8_t> FromUInt32(T const& Value)
+    std::vector<std::uint8_t> FromUInt32(std::uint32_t const& Value)
     {
-        static_assert(std::is_same_v<T, std::uint32_t>, "Unsupport parameter type in function 'FromUInt32'.");
-
         std::uint8_t u1 = (Value & 0xff);
         std::uint8_t u2 = ((Value & 0xff00) >> 8);
         std::uint8_t u3 = ((Value & 0xff0000) >> 16);
@@ -49,11 +41,8 @@ namespace Mile::Cirno
         return { u1, u2, u3, u4 };
     }
 
-    template<typename T>
-    std::vector<std::uint8_t> FromUInt64(T const& Value)
+    std::vector<std::uint8_t> FromUInt64(std::uint64_t const& Value)
     {
-        static_assert(std::is_same_v<T, std::uint64_t>, "Unsupport parameter type in function 'FromUInt64'.");
-
         std::uint8_t u1 = (Value & 0xff);
         std::uint8_t u2 = ((Value & 0xff00) >> 8);
         std::uint8_t u3 = ((Value & 0xff0000) >> 16);
