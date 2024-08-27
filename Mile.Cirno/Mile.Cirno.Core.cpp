@@ -27,30 +27,30 @@ namespace Mile::Cirno
 
     std::vector<std::uint8_t> FromUInt16(std::uint16_t const& Value)
     {
-        std::uint8_t u1 = (Value & 0xff);
-        std::uint8_t u2 = (Value >> 8);
+        std::uint8_t u1 = (std::uint8_t)(Value & 0xff);
+        std::uint8_t u2 = (std::uint8_t)(Value >> 8);
         return { u1, u2 };
     }
 
     std::vector<std::uint8_t> FromUInt32(std::uint32_t const& Value)
     {
-        std::uint8_t u1 = (Value & 0xff);
-        std::uint8_t u2 = ((Value & 0xff00) >> 8);
-        std::uint8_t u3 = ((Value & 0xff0000) >> 16);
-        std::uint8_t u4 = ((Value & 0xff000000) >> 24);
+        std::uint8_t u1 = (std::uint8_t)(Value & 0xff);
+        std::uint8_t u2 = (std::uint8_t)((Value & 0xff00) >> 8);
+        std::uint8_t u3 = (std::uint8_t)((Value & 0xff0000) >> 16);
+        std::uint8_t u4 = (std::uint8_t)((Value & 0xff000000) >> 24);
         return { u1, u2, u3, u4 };
     }
 
     std::vector<std::uint8_t> FromUInt64(std::uint64_t const& Value)
     {
-        std::uint8_t u1 = (Value & 0xff);
-        std::uint8_t u2 = ((Value & 0xff00) >> 8);
-        std::uint8_t u3 = ((Value & 0xff0000) >> 16);
-        std::uint8_t u4 = ((Value & 0xff000000) >> 24);
-        std::uint8_t u5 = ((Value & 0xff00000000) >> 32);
-        std::uint8_t u6 = ((Value & 0xff0000000000) >> 40);
-        std::uint8_t u7 = ((Value & 0xff000000000000) >> 48);
-        std::uint8_t u8 = ((Value & 0xff00000000000000) >> 56);
+        std::uint8_t u1 = (std::uint8_t)(Value & 0xff);
+        std::uint8_t u2 = (std::uint8_t)((Value & 0xff00) >> 8);
+        std::uint8_t u3 = (std::uint8_t)((Value & 0xff0000) >> 16);
+        std::uint8_t u4 = (std::uint8_t)((Value & 0xff000000) >> 24);
+        std::uint8_t u5 = (std::uint8_t)((Value & 0xff00000000) >> 32);
+        std::uint8_t u6 = (std::uint8_t)((Value & 0xff0000000000) >> 40);
+        std::uint8_t u7 = (std::uint8_t)((Value & 0xff000000000000) >> 48);
+        std::uint8_t u8 = (std::uint8_t)((Value & 0xff00000000000000) >> 56);
         return { u1, u2, u3, u4, u5, u6, u7, u8 };
     }
 
@@ -378,8 +378,8 @@ namespace Mile::Cirno
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         CopyFromTemp(vReturn, FromString(Value.Name));
-        CopyFromTemp(vReturn, FromUInt32(Value.Size));
-        CopyFromTemp(vReturn, FromUInt64(Value.Flags));
+        CopyFromTemp(vReturn, FromUInt64(Value.Size));
+        CopyFromTemp(vReturn, FromUInt32(Value.Flags));
 
         return vReturn;
     }
