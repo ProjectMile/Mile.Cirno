@@ -20,9 +20,20 @@ namespace Mile::Cirno
         Dest.insert(Dest.end(), Temp.begin(), Temp.end());
     }
 
+    void EmplaceUInt8(std::vector<std::uint8_t>& Vector, std::uint8_t const& Value)
+    {
+        Vector.emplace_back(Value);
+    }
+
     std::vector<std::uint8_t> FromUInt8(std::uint8_t const& Value)
     {
         return { Value };
+    }
+
+    void EmplaceUInt16(std::vector<std::uint8_t>& Vector, std::uint16_t const& Value)
+    {
+        Vector.emplace_back((std::uint8_t)(Value & 0xff));
+        Vector.emplace_back((std::uint8_t)(Value >> 8));
     }
 
     std::vector<std::uint8_t> FromUInt16(std::uint16_t const& Value)
@@ -32,6 +43,14 @@ namespace Mile::Cirno
         return { u1, u2 };
     }
 
+    void EmplaceUInt32(std::vector<std::uint8_t>& Vector, std::uint32_t const& Value)
+    {
+        Vector.emplace_back((std::uint8_t)(Value & 0xff));
+        Vector.emplace_back((std::uint8_t)((Value & 0xff00) >> 8));
+        Vector.emplace_back((std::uint8_t)((Value & 0xff0000) >> 16));
+        Vector.emplace_back((std::uint8_t)((Value & 0xff000000) >> 24));
+    }
+
     std::vector<std::uint8_t> FromUInt32(std::uint32_t const& Value)
     {
         std::uint8_t u1 = (std::uint8_t)(Value & 0xff);
@@ -39,6 +58,18 @@ namespace Mile::Cirno
         std::uint8_t u3 = (std::uint8_t)((Value & 0xff0000) >> 16);
         std::uint8_t u4 = (std::uint8_t)((Value & 0xff000000) >> 24);
         return { u1, u2, u3, u4 };
+    }
+
+    void EmplaceUInt64(std::vector<std::uint8_t>& Vector, std::uint64_t const& Value)
+    {
+        Vector.emplace_back((std::uint8_t)(Value & 0xff));
+        Vector.emplace_back((std::uint8_t)((Value & 0xff00) >> 8));
+        Vector.emplace_back((std::uint8_t)((Value & 0xff0000) >> 16));
+        Vector.emplace_back((std::uint8_t)((Value & 0xff000000) >> 24));
+        Vector.emplace_back((std::uint8_t)((Value & 0xff00000000) >> 32));
+        Vector.emplace_back((std::uint8_t)((Value & 0xff0000000000) >> 40));
+        Vector.emplace_back((std::uint8_t)((Value & 0xff000000000000) >> 48));
+        Vector.emplace_back((std::uint8_t)((Value & 0xff00000000000000) >> 56));
     }
 
     std::vector<std::uint8_t> FromUInt64(std::uint64_t const& Value)
@@ -66,11 +97,11 @@ namespace Mile::Cirno
         return Return;
     }
 
-    std::vector<std::uint8_t> FromString(
-        std::string const& Value)
+    void EmplaceString(
+        std::vector<std::uint8_t>& Vector,
+        MILE_CIRNO_STRING& Value)
     {
-        std::vector<std::uint8_t> Return = { Value.begin(), Value.end() };
-        return Return;
+
     }
 
     std::vector<std::uint8_t> FromQid(
