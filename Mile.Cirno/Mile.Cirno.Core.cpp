@@ -15,60 +15,60 @@
 
 namespace Mile::Cirno
 {
-    inline void CopyFromTemp(std::vector<uint8_t>& Dest, std::vector<uint8_t> const& Temp)
+    inline void CopyFromTemp(std::vector<std::uint8_t>& Dest, std::vector<std::uint8_t> const& Temp)
     {
         Dest.insert(Dest.end(), Temp.begin(), Temp.end());
     }
 
     template<typename T>
-    std::vector<uint8_t> FromUInt8(T const& Value)
+    std::vector<std::uint8_t> FromUInt8(T const& Value)
     {
-        static_assert(std::is_same_v<T, uint8_t>, "Unsupport parameter type in function 'FromUInt8'.");
+        static_assert(std::is_same_v<T, std::uint8_t>, "Unsupport parameter type in function 'FromUInt8'.");
         return { Value };
     }
 
     template<typename T>
-    std::vector<uint8_t> FromUInt16(T const& Value)
+    std::vector<std::uint8_t> FromUInt16(T const& Value)
     {
-        static_assert(std::is_same_v<T, uint16_t>, "Unsupport parameter type in function 'FromUInt16'.");
+        static_assert(std::is_same_v<T, std::uint16_t>, "Unsupport parameter type in function 'FromUInt16'.");
 
-        uint8_t u1 = (Value & 0xff);
-        uint8_t u2 = (Value >> 8);
+        std::uint8_t u1 = (Value & 0xff);
+        std::uint8_t u2 = (Value >> 8);
         return { u1, u2 };
     }
 
     template<typename T>
-    std::vector<uint8_t> FromUInt32(T const& Value)
+    std::vector<std::uint8_t> FromUInt32(T const& Value)
     {
-        static_assert(std::is_same_v<T, uint32_t>, "Unsupport parameter type in function 'FromUInt32'.");
+        static_assert(std::is_same_v<T, std::uint32_t>, "Unsupport parameter type in function 'FromUInt32'.");
 
-        uint8_t u1 = (Value & 0xff);
-        uint8_t u2 = ((Value & 0xff00) >> 8);
-        uint8_t u3 = ((Value & 0xff0000) >> 16);
-        uint8_t u4 = ((Value & 0xff000000) >> 24);
+        std::uint8_t u1 = (Value & 0xff);
+        std::uint8_t u2 = ((Value & 0xff00) >> 8);
+        std::uint8_t u3 = ((Value & 0xff0000) >> 16);
+        std::uint8_t u4 = ((Value & 0xff000000) >> 24);
         return { u1, u2, u3, u4 };
     }
 
     template<typename T>
-    std::vector<uint8_t> FromUInt64(T const& Value)
+    std::vector<std::uint8_t> FromUInt64(T const& Value)
     {
-        static_assert(std::is_same_v<T, uint64_t>, "Unsupport parameter type in function 'FromUInt64'.");
+        static_assert(std::is_same_v<T, std::uint64_t>, "Unsupport parameter type in function 'FromUInt64'.");
 
-        uint8_t u1 = (Value & 0xff);
-        uint8_t u2 = ((Value & 0xff00) >> 8);
-        uint8_t u3 = ((Value & 0xff0000) >> 16);
-        uint8_t u4 = ((Value & 0xff000000) >> 24);
-        uint8_t u5 = ((Value & 0xff00000000) >> 32);
-        uint8_t u6 = ((Value & 0xff0000000000) >> 40);
-        uint8_t u7 = ((Value & 0xff000000000000) >> 48);
-        uint8_t u8 = ((Value & 0xff00000000000000) >> 56);
+        std::uint8_t u1 = (Value & 0xff);
+        std::uint8_t u2 = ((Value & 0xff00) >> 8);
+        std::uint8_t u3 = ((Value & 0xff0000) >> 16);
+        std::uint8_t u4 = ((Value & 0xff000000) >> 24);
+        std::uint8_t u5 = ((Value & 0xff00000000) >> 32);
+        std::uint8_t u6 = ((Value & 0xff0000000000) >> 40);
+        std::uint8_t u7 = ((Value & 0xff000000000000) >> 48);
+        std::uint8_t u8 = ((Value & 0xff00000000000000) >> 56);
         return { u1, u2, u3, u4, u5, u6, u7, u8 };
     }
 
-    std::vector<uint8_t> FromHeader(
+    std::vector<std::uint8_t> FromHeader(
         Header const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.Size));
         CopyFromTemp(vReturn, FromUInt8(Value.Type));
@@ -77,17 +77,17 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromString(
+    std::vector<std::uint8_t> FromString(
         std::string const& Value)
     {
-        std::vector<uint8_t> vReturn = { Value.begin(), Value.end() };
+        std::vector<std::uint8_t> vReturn = { Value.begin(), Value.end() };
         return vReturn;
     }
 
-    std::vector<uint8_t> FromQid(
+    std::vector<std::uint8_t> FromQid(
         Qid const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt8(Value.Type));
         CopyFromTemp(vReturn, FromUInt32(Value.Version));
@@ -96,10 +96,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromDirectoryEntry(
+    std::vector<std::uint8_t> FromDirectoryEntry(
         DirectoryEntry const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromQid(Value.UniqueId));
         CopyFromTemp(vReturn, FromUInt64(Value.Offset));
@@ -109,10 +109,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromStat(
+    std::vector<std::uint8_t> FromStat(
         Stat const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt16(Value.Type));
         CopyFromTemp(vReturn, FromUInt32(Value.Dev));
@@ -129,10 +129,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromUnixStat(
+    std::vector<std::uint8_t> FromUnixStat(
         UnixStat const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt16(Value.Type));
         CopyFromTemp(vReturn, FromUInt32(Value.Dev));
@@ -153,10 +153,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromWindowsDirectoryEntry(
+    std::vector<std::uint8_t> FromWindowsDirectoryEntry(
         WindowsDirectoryEntry const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromDirectoryEntry(Value.Entry));
         CopyFromTemp(vReturn, FromStat(Value.Stat));
@@ -164,30 +164,30 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromLinuxErrorResponse(
+    std::vector<std::uint8_t> FromLinuxErrorResponse(
         LinuxErrorResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.Code));
 
         return vReturn;
     }
 
-    std::vector<uint8_t> FromStatFsRequest(
+    std::vector<std::uint8_t> FromStatFsRequest(
         StatFsRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
 
         return vReturn;
     }
 
-    std::vector<uint8_t> FromStatFsResponse(
+    std::vector<std::uint8_t> FromStatFsResponse(
         StatFsResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileSystemType));
         CopyFromTemp(vReturn, FromUInt32(Value.BlockSize));
@@ -202,10 +202,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromLinuxOpenRequest(
+    std::vector<std::uint8_t> FromLinuxOpenRequest(
         LinuxOpenRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         CopyFromTemp(vReturn, FromUInt32(Value.Flags));
@@ -213,10 +213,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromLinuxOpenResponse(
+    std::vector<std::uint8_t> FromLinuxOpenResponse(
         LinuxOpenResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromQid(Value.UniqueId));
         CopyFromTemp(vReturn, FromUInt32(Value.IoUnit));
@@ -224,10 +224,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromLinuxCreateRequest(
+    std::vector<std::uint8_t> FromLinuxCreateRequest(
         LinuxCreateRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         CopyFromTemp(vReturn, FromString(Value.Name));
@@ -238,10 +238,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromLinuxCreateResponse(
+    std::vector<std::uint8_t> FromLinuxCreateResponse(
         LinuxCreateResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromQid(Value.UniqueId));
         CopyFromTemp(vReturn, FromUInt32(Value.IoUnit));
@@ -249,10 +249,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromSymLinkRequest(
+    std::vector<std::uint8_t> FromSymLinkRequest(
         SymLinkRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         CopyFromTemp(vReturn, FromString(Value.Name));
@@ -262,20 +262,20 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromSymLinkResponse(
+    std::vector<std::uint8_t> FromSymLinkResponse(
         SymLinkResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromQid(Value.UniqueId));
 
         return vReturn;
     }
 
-    std::vector<uint8_t> FromMkNodRequest(
+    std::vector<std::uint8_t> FromMkNodRequest(
         MkNodRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.DirectoryFileId));
         CopyFromTemp(vReturn, FromString(Value.Name));
@@ -287,20 +287,20 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromMkNodResponse(
+    std::vector<std::uint8_t> FromMkNodResponse(
         MkNodResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromQid(Value.UniqueId));
 
         return vReturn;
     }
 
-    std::vector<uint8_t> FromRenameRequest(
+    std::vector<std::uint8_t> FromRenameRequest(
         RenameRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         CopyFromTemp(vReturn, FromUInt32(Value.DirectoryFid));
@@ -309,30 +309,30 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromReadLinkRequest(
+    std::vector<std::uint8_t> FromReadLinkRequest(
         ReadLinkRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
 
         return vReturn;
     }
 
-    std::vector<uint8_t> FromReadLinkResponse(
+    std::vector<std::uint8_t> FromReadLinkResponse(
         ReadLinkResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromString(Value.Target));
 
         return vReturn;
     }
 
-    std::vector<uint8_t> FromGetAttrRequest(
+    std::vector<std::uint8_t> FromGetAttrRequest(
         GetAttrRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         CopyFromTemp(vReturn, FromUInt64(Value.RequestMask));
@@ -340,10 +340,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromGetAttrResponse(
+    std::vector<std::uint8_t> FromGetAttrResponse(
         GetAttrResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt64(Value.Valid));
         CopyFromTemp(vReturn, FromQid(Value.UniqueId));
@@ -369,10 +369,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromSetAttrRequest(
+    std::vector<std::uint8_t> FromSetAttrRequest(
         SetAttrRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         CopyFromTemp(vReturn, FromUInt32(Value.Valid));
@@ -388,10 +388,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromXattrWalkRequest(
+    std::vector<std::uint8_t> FromXattrWalkRequest(
         XattrWalkRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         CopyFromTemp(vReturn, FromUInt32(Value.NewFileId));
@@ -400,20 +400,20 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromXattrWalkResponse(
+    std::vector<std::uint8_t> FromXattrWalkResponse(
         XattrWalkResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt64(Value.Size));
 
         return vReturn;
     }
 
-    std::vector<uint8_t> FromXattrCreateRequest(
+    std::vector<std::uint8_t> FromXattrCreateRequest(
         XattrCreateRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         CopyFromTemp(vReturn, FromString(Value.Name));
@@ -423,10 +423,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromReadDirRequest(
+    std::vector<std::uint8_t> FromReadDirRequest(
         ReadDirRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         CopyFromTemp(vReturn, FromUInt64(Value.Offset));
@@ -435,10 +435,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromReadDirResponse(
+    std::vector<std::uint8_t> FromReadDirResponse(
         ReadDirResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         for (auto& data : Value.Data)
         {
@@ -448,20 +448,20 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromFsyncRequest(
+    std::vector<std::uint8_t> FromFsyncRequest(
         FsyncRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
 
         return vReturn;
     }
 
-    std::vector<uint8_t> FromLockRequest(
+    std::vector<std::uint8_t> FromLockRequest(
         LockRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         CopyFromTemp(vReturn, FromUInt8(Value.Type));
@@ -474,20 +474,20 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromLockResponse(
+    std::vector<std::uint8_t> FromLockResponse(
         LockResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt8(Value.Status));
 
         return vReturn;
     }
 
-    std::vector<uint8_t> FromGetLockRequest(
+    std::vector<std::uint8_t> FromGetLockRequest(
         GetLockRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         CopyFromTemp(vReturn, FromUInt8(Value.Type));
@@ -499,10 +499,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromGetLockResponse(
+    std::vector<std::uint8_t> FromGetLockResponse(
         GetLockResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt8(Value.Type));
         CopyFromTemp(vReturn, FromUInt64(Value.Start));
@@ -513,10 +513,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromLinkRequest(
+    std::vector<std::uint8_t> FromLinkRequest(
         LinkRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.DirectoryFileId));
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
@@ -525,10 +525,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromMkDirRequest(
+    std::vector<std::uint8_t> FromMkDirRequest(
         MkDirRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.DirectoryFileId));
         CopyFromTemp(vReturn, FromString(Value.Name));
@@ -538,20 +538,20 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromMkDirResponse(
+    std::vector<std::uint8_t> FromMkDirResponse(
         MkDirResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromQid(Value.UniqueId));
 
         return vReturn;
     }
 
-    std::vector<uint8_t> FromRenameAtRequest(
+    std::vector<std::uint8_t> FromRenameAtRequest(
         RenameAtRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.OldDirectoryFileId));
         CopyFromTemp(vReturn, FromString(Value.OldName));
@@ -561,10 +561,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromUnlinkAtRequest(
+    std::vector<std::uint8_t> FromUnlinkAtRequest(
         UnlinkAtRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.DirectoryFileId));
         CopyFromTemp(vReturn, FromString(Value.Name));
@@ -573,10 +573,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromVersionRequest(
+    std::vector<std::uint8_t> FromVersionRequest(
         VersionRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.MaximumMessageSize));
         CopyFromTemp(vReturn, FromString(Value.ProtocolVersion));
@@ -584,10 +584,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromVersionResponse(
+    std::vector<std::uint8_t> FromVersionResponse(
         VersionResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.MaximumMessageSize));
         CopyFromTemp(vReturn, FromString(Value.ProtocolVersion));
@@ -595,10 +595,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromAuthRequest(
+    std::vector<std::uint8_t> FromAuthRequest(
         AuthRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.AuthenticationFileId));
         CopyFromTemp(vReturn, FromString(Value.UserName));
@@ -607,10 +607,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromUnixAuthRequest(
+    std::vector<std::uint8_t> FromUnixAuthRequest(
         UnixAuthRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.AuthenticationFileId));
         CopyFromTemp(vReturn, FromString(Value.UserName));
@@ -620,20 +620,20 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromAuthResponse(
+    std::vector<std::uint8_t> FromAuthResponse(
         AuthResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromQid(Value.AuthenticationUniqueId));
 
         return vReturn;
     }
 
-    std::vector<uint8_t> FromAttachRequest(
+    std::vector<std::uint8_t> FromAttachRequest(
         AttachRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         CopyFromTemp(vReturn, FromUInt32(Value.AuthenticationFileId));
@@ -643,10 +643,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromUnixAttachRequest(
+    std::vector<std::uint8_t> FromUnixAttachRequest(
         UnixAttachRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         CopyFromTemp(vReturn, FromUInt32(Value.AuthenticationFileId));
@@ -657,30 +657,30 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromAttachResponse(
+    std::vector<std::uint8_t> FromAttachResponse(
         AttachResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromQid(Value.UniqueId));
 
         return vReturn;
     }
 
-    std::vector<uint8_t> FromErrorResponse(
+    std::vector<std::uint8_t> FromErrorResponse(
         ErrorResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromString(Value.Message));
 
         return vReturn;
     }
 
-    std::vector<uint8_t> FromUnixErrorResponse(
+    std::vector<std::uint8_t> FromUnixErrorResponse(
         UnixErrorResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromString(Value.Message));
         CopyFromTemp(vReturn, FromUInt32(Value.Code));
@@ -688,20 +688,20 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromFlushRequest(
+    std::vector<std::uint8_t> FromFlushRequest(
         FlushRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt16(Value.OldTag));
 
         return vReturn;
     }
 
-    std::vector<uint8_t> FromWalkRequest(
+    std::vector<std::uint8_t> FromWalkRequest(
         WalkRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         CopyFromTemp(vReturn, FromUInt32(Value.NewFileId));
@@ -713,10 +713,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromWalkResponse(
+    std::vector<std::uint8_t> FromWalkResponse(
         WalkResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         for (auto& qid : Value.UniqueIds) {
             CopyFromTemp(vReturn, FromQid(qid));
@@ -725,10 +725,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromOpenRequest(
+    std::vector<std::uint8_t> FromOpenRequest(
         OpenRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         CopyFromTemp(vReturn, FromUInt8(Value.Mode));
@@ -736,10 +736,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromOpenResponse(
+    std::vector<std::uint8_t> FromOpenResponse(
         OpenResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromQid(Value.UniqueId));
         CopyFromTemp(vReturn, FromUInt32(Value.IoUnit));
@@ -747,10 +747,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromCreateRequest(
+    std::vector<std::uint8_t> FromCreateRequest(
         CreateRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         CopyFromTemp(vReturn, FromString(Value.Name));
@@ -760,10 +760,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromUnixCreateRequest(
+    std::vector<std::uint8_t> FromUnixCreateRequest(
         UnixCreateRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         CopyFromTemp(vReturn, FromString(Value.Name));
@@ -774,20 +774,20 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromCreateResponse(
+    std::vector<std::uint8_t> FromCreateResponse(
         CreateResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromQid(Value.UniqueId));
 
         return vReturn;
     }
 
-    std::vector<uint8_t> FromReadRequest(
+    std::vector<std::uint8_t> FromReadRequest(
         ReadRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         CopyFromTemp(vReturn, FromUInt64(Value.Offset));
@@ -796,18 +796,18 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromReadResponse(
+    std::vector<std::uint8_t> FromReadResponse(
         ReadResponse const& Value)
     {
-        std::vector<uint8_t> vReturn = {Value.Data};
+        std::vector<std::uint8_t> vReturn = {Value.Data};
 
         return vReturn;
     }
 
-    std::vector<uint8_t> FromWriteRequest(
+    std::vector<std::uint8_t> FromWriteRequest(
         WriteRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         CopyFromTemp(vReturn, FromUInt64(Value.Offset));
@@ -816,50 +816,50 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromWriteResponse(
+    std::vector<std::uint8_t> FromWriteResponse(
         WriteResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.Count));
 
         return vReturn;
     }
 
-    std::vector<uint8_t> FromClunkRequest(
+    std::vector<std::uint8_t> FromClunkRequest(
         ClunkRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
 
         return vReturn;
     }
 
-    std::vector<uint8_t> FromRemoveRequest(
+    std::vector<std::uint8_t> FromRemoveRequest(
         RemoveRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
 
         return vReturn;
     }
 
-    std::vector<uint8_t> FromStatRequest(
+    std::vector<std::uint8_t> FromStatRequest(
         StatRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
 
         return vReturn;
     }
 
-    std::vector<uint8_t> FromStatResponse(
+    std::vector<std::uint8_t> FromStatResponse(
         StatResponse const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         for (auto& stat : Value.Stat)
         {
@@ -869,10 +869,10 @@ namespace Mile::Cirno
         return vReturn;
     }
 
-    std::vector<uint8_t> FromWriteStatRequest(
+    std::vector<std::uint8_t> FromWriteStatRequest(
         WriteStatRequest const& Value)
     {
-        std::vector<uint8_t> vReturn;
+        std::vector<std::uint8_t> vReturn;
 
         CopyFromTemp(vReturn, FromUInt32(Value.FileId));
         for (auto& stat : Value.Stat)
