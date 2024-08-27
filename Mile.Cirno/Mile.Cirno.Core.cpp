@@ -57,100 +57,100 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromHeader(
         Header const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.Size));
-        CopyFromTemp(vReturn, FromUInt8(Value.Type));
-        CopyFromTemp(vReturn, FromUInt16(Value.Tag));
+        CopyFromTemp(Return, FromUInt32(Value.Size));
+        CopyFromTemp(Return, FromUInt8(Value.Type));
+        CopyFromTemp(Return, FromUInt16(Value.Tag));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromString(
         std::string const& Value)
     {
-        std::vector<std::uint8_t> vReturn = { Value.begin(), Value.end() };
-        return vReturn;
+        std::vector<std::uint8_t> Return = { Value.begin(), Value.end() };
+        return Return;
     }
 
     std::vector<std::uint8_t> FromQid(
         Qid const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt8(Value.Type));
-        CopyFromTemp(vReturn, FromUInt32(Value.Version));
-        CopyFromTemp(vReturn, FromUInt64(Value.Path));
+        CopyFromTemp(Return, FromUInt8(Value.Type));
+        CopyFromTemp(Return, FromUInt32(Value.Version));
+        CopyFromTemp(Return, FromUInt64(Value.Path));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromDirectoryEntry(
         DirectoryEntry const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromQid(Value.UniqueId));
-        CopyFromTemp(vReturn, FromUInt64(Value.Offset));
-        CopyFromTemp(vReturn, FromUInt8(Value.Type));
-        CopyFromTemp(vReturn, FromString(Value.Name));
+        CopyFromTemp(Return, FromQid(Value.UniqueId));
+        CopyFromTemp(Return, FromUInt64(Value.Offset));
+        CopyFromTemp(Return, FromUInt8(Value.Type));
+        CopyFromTemp(Return, FromString(Value.Name));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromStat(
         Stat const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt16(Value.Type));
-        CopyFromTemp(vReturn, FromUInt32(Value.Dev));
-        CopyFromTemp(vReturn, FromQid(Value.UniqueId));
-        CopyFromTemp(vReturn, FromUInt32(Value.Mode));
-        CopyFromTemp(vReturn, FromUInt32(Value.LastAccessTime));
-        CopyFromTemp(vReturn, FromUInt32(Value.LastWriteTime));
-        CopyFromTemp(vReturn, FromUInt64(Value.FileSize));
-        CopyFromTemp(vReturn, FromString(Value.FileName));
-        CopyFromTemp(vReturn, FromString(Value.OwnerUserId));
-        CopyFromTemp(vReturn, FromString(Value.GroupId));
-        CopyFromTemp(vReturn, FromString(Value.LastWriteUserId));
+        CopyFromTemp(Return, FromUInt16(Value.Type));
+        CopyFromTemp(Return, FromUInt32(Value.Dev));
+        CopyFromTemp(Return, FromQid(Value.UniqueId));
+        CopyFromTemp(Return, FromUInt32(Value.Mode));
+        CopyFromTemp(Return, FromUInt32(Value.LastAccessTime));
+        CopyFromTemp(Return, FromUInt32(Value.LastWriteTime));
+        CopyFromTemp(Return, FromUInt64(Value.FileSize));
+        CopyFromTemp(Return, FromString(Value.FileName));
+        CopyFromTemp(Return, FromString(Value.OwnerUserId));
+        CopyFromTemp(Return, FromString(Value.GroupId));
+        CopyFromTemp(Return, FromString(Value.LastWriteUserId));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromUnixStat(
         UnixStat const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt16(Value.Type));
-        CopyFromTemp(vReturn, FromUInt32(Value.Dev));
-        CopyFromTemp(vReturn, FromQid(Value.UniqueId));
-        CopyFromTemp(vReturn, FromUInt32(Value.Mode));
-        CopyFromTemp(vReturn, FromUInt32(Value.LastAccessTime));
-        CopyFromTemp(vReturn, FromUInt32(Value.LastWriteTime));
-        CopyFromTemp(vReturn, FromUInt64(Value.FileSize));
-        CopyFromTemp(vReturn, FromString(Value.FileName));
-        CopyFromTemp(vReturn, FromString(Value.OwnerUserId));
-        CopyFromTemp(vReturn, FromString(Value.GroupId));
-        CopyFromTemp(vReturn, FromString(Value.LastWriteUserId));
-        CopyFromTemp(vReturn, FromString(Value.UnixExtension));
-        CopyFromTemp(vReturn, FromUInt32(Value.NumericOwnerUserId));
-        CopyFromTemp(vReturn, FromUInt32(Value.NumericGroupId));
-        CopyFromTemp(vReturn, FromUInt32(Value.NumericLastWriteUserId));
+        CopyFromTemp(Return, FromUInt16(Value.Type));
+        CopyFromTemp(Return, FromUInt32(Value.Dev));
+        CopyFromTemp(Return, FromQid(Value.UniqueId));
+        CopyFromTemp(Return, FromUInt32(Value.Mode));
+        CopyFromTemp(Return, FromUInt32(Value.LastAccessTime));
+        CopyFromTemp(Return, FromUInt32(Value.LastWriteTime));
+        CopyFromTemp(Return, FromUInt64(Value.FileSize));
+        CopyFromTemp(Return, FromString(Value.FileName));
+        CopyFromTemp(Return, FromString(Value.OwnerUserId));
+        CopyFromTemp(Return, FromString(Value.GroupId));
+        CopyFromTemp(Return, FromString(Value.LastWriteUserId));
+        CopyFromTemp(Return, FromString(Value.UnixExtension));
+        CopyFromTemp(Return, FromUInt32(Value.NumericOwnerUserId));
+        CopyFromTemp(Return, FromUInt32(Value.NumericGroupId));
+        CopyFromTemp(Return, FromUInt32(Value.NumericLastWriteUserId));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromWindowsDirectoryEntry(
         WindowsDirectoryEntry const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromDirectoryEntry(Value.Entry));
-        CopyFromTemp(vReturn, FromStat(Value.Stat));
+        CopyFromTemp(Return, FromDirectoryEntry(Value.Entry));
+        CopyFromTemp(Return, FromStat(Value.Stat));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromLinuxErrorResponse(
@@ -168,79 +168,79 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromStatFsResponse(
         StatFsResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileSystemType));
-        CopyFromTemp(vReturn, FromUInt32(Value.BlockSize));
-        CopyFromTemp(vReturn, FromUInt64(Value.TotalBlocks));
-        CopyFromTemp(vReturn, FromUInt64(Value.FreeBlocks));
-        CopyFromTemp(vReturn, FromUInt64(Value.AvailableBlocks));
-        CopyFromTemp(vReturn, FromUInt64(Value.TotalFiles));
-        CopyFromTemp(vReturn, FromUInt64(Value.FreeFileNodes));
-        CopyFromTemp(vReturn, FromUInt64(Value.FileSystemId));
-        CopyFromTemp(vReturn, FromUInt32(Value.MaximumFileNameLength));
+        CopyFromTemp(Return, FromUInt32(Value.FileSystemType));
+        CopyFromTemp(Return, FromUInt32(Value.BlockSize));
+        CopyFromTemp(Return, FromUInt64(Value.TotalBlocks));
+        CopyFromTemp(Return, FromUInt64(Value.FreeBlocks));
+        CopyFromTemp(Return, FromUInt64(Value.AvailableBlocks));
+        CopyFromTemp(Return, FromUInt64(Value.TotalFiles));
+        CopyFromTemp(Return, FromUInt64(Value.FreeFileNodes));
+        CopyFromTemp(Return, FromUInt64(Value.FileSystemId));
+        CopyFromTemp(Return, FromUInt32(Value.MaximumFileNameLength));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromLinuxOpenRequest(
         LinuxOpenRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-        CopyFromTemp(vReturn, FromUInt32(Value.Flags));
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromUInt32(Value.Flags));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromLinuxOpenResponse(
         LinuxOpenResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromQid(Value.UniqueId));
-        CopyFromTemp(vReturn, FromUInt32(Value.IoUnit));
+        CopyFromTemp(Return, FromQid(Value.UniqueId));
+        CopyFromTemp(Return, FromUInt32(Value.IoUnit));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromLinuxCreateRequest(
         LinuxCreateRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-        CopyFromTemp(vReturn, FromString(Value.Name));
-        CopyFromTemp(vReturn, FromUInt32(Value.Flags));
-        CopyFromTemp(vReturn, FromUInt32(Value.Mode));
-        CopyFromTemp(vReturn, FromUInt32(Value.Gid));
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromString(Value.Name));
+        CopyFromTemp(Return, FromUInt32(Value.Flags));
+        CopyFromTemp(Return, FromUInt32(Value.Mode));
+        CopyFromTemp(Return, FromUInt32(Value.Gid));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromLinuxCreateResponse(
         LinuxCreateResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromQid(Value.UniqueId));
-        CopyFromTemp(vReturn, FromUInt32(Value.IoUnit));
+        CopyFromTemp(Return, FromQid(Value.UniqueId));
+        CopyFromTemp(Return, FromUInt32(Value.IoUnit));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromSymLinkRequest(
         SymLinkRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-        CopyFromTemp(vReturn, FromString(Value.Name));
-        CopyFromTemp(vReturn, FromString(Value.Target));
-        CopyFromTemp(vReturn, FromUInt32(Value.Gid));
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromString(Value.Name));
+        CopyFromTemp(Return, FromString(Value.Target));
+        CopyFromTemp(Return, FromUInt32(Value.Gid));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromSymLinkResponse(
@@ -252,16 +252,16 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromMkNodRequest(
         MkNodRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.DirectoryFileId));
-        CopyFromTemp(vReturn, FromString(Value.Name));
-        CopyFromTemp(vReturn, FromUInt32(Value.Mode));
-        CopyFromTemp(vReturn, FromUInt32(Value.Major));
-        CopyFromTemp(vReturn, FromUInt32(Value.Minor));
-        CopyFromTemp(vReturn, FromUInt32(Value.Gid));
+        CopyFromTemp(Return, FromUInt32(Value.DirectoryFileId));
+        CopyFromTemp(Return, FromString(Value.Name));
+        CopyFromTemp(Return, FromUInt32(Value.Mode));
+        CopyFromTemp(Return, FromUInt32(Value.Major));
+        CopyFromTemp(Return, FromUInt32(Value.Minor));
+        CopyFromTemp(Return, FromUInt32(Value.Gid));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromMkNodResponse(
@@ -273,13 +273,13 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromRenameRequest(
         RenameRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-        CopyFromTemp(vReturn, FromUInt32(Value.DirectoryFid));
-        CopyFromTemp(vReturn, FromString(Value.Name));
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromUInt32(Value.DirectoryFid));
+        CopyFromTemp(Return, FromString(Value.Name));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromReadLinkRequest(
@@ -297,72 +297,72 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromGetAttrRequest(
         GetAttrRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-        CopyFromTemp(vReturn, FromUInt64(Value.RequestMask));
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromUInt64(Value.RequestMask));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromGetAttrResponse(
         GetAttrResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt64(Value.Valid));
-        CopyFromTemp(vReturn, FromQid(Value.UniqueId));
-        CopyFromTemp(vReturn, FromUInt32(Value.Mode));
-        CopyFromTemp(vReturn, FromUInt32(Value.OwnerUserId));
-        CopyFromTemp(vReturn, FromUInt32(Value.GroupId));
-        CopyFromTemp(vReturn, FromUInt64(Value.NumberOfHardLinks));
-        CopyFromTemp(vReturn, FromUInt64(Value.DeviceId));
-        CopyFromTemp(vReturn, FromUInt64(Value.FileSize));
-        CopyFromTemp(vReturn, FromUInt64(Value.BlockSize));
-        CopyFromTemp(vReturn, FromUInt64(Value.AllocatedBlocks));
-        CopyFromTemp(vReturn, FromUInt64(Value.LastAccessTimeSeconds));
-        CopyFromTemp(vReturn, FromUInt64(Value.LastAccessTimeNanoseconds));
-        CopyFromTemp(vReturn, FromUInt64(Value.LastWriteTimeSeconds));
-        CopyFromTemp(vReturn, FromUInt64(Value.LastWriteTimeNanoseconds));
-        CopyFromTemp(vReturn, FromUInt64(Value.ChangeTimeSeconds));
-        CopyFromTemp(vReturn, FromUInt64(Value.ChangeTimeNanoseconds));
-        CopyFromTemp(vReturn, FromUInt64(Value.BirthTimeSeconds));
-        CopyFromTemp(vReturn, FromUInt64(Value.BirthTimeNanoseconds));
-        CopyFromTemp(vReturn, FromUInt64(Value.Generation));
-        CopyFromTemp(vReturn, FromUInt64(Value.DataVersion));
+        CopyFromTemp(Return, FromUInt64(Value.Valid));
+        CopyFromTemp(Return, FromQid(Value.UniqueId));
+        CopyFromTemp(Return, FromUInt32(Value.Mode));
+        CopyFromTemp(Return, FromUInt32(Value.OwnerUserId));
+        CopyFromTemp(Return, FromUInt32(Value.GroupId));
+        CopyFromTemp(Return, FromUInt64(Value.NumberOfHardLinks));
+        CopyFromTemp(Return, FromUInt64(Value.DeviceId));
+        CopyFromTemp(Return, FromUInt64(Value.FileSize));
+        CopyFromTemp(Return, FromUInt64(Value.BlockSize));
+        CopyFromTemp(Return, FromUInt64(Value.AllocatedBlocks));
+        CopyFromTemp(Return, FromUInt64(Value.LastAccessTimeSeconds));
+        CopyFromTemp(Return, FromUInt64(Value.LastAccessTimeNanoseconds));
+        CopyFromTemp(Return, FromUInt64(Value.LastWriteTimeSeconds));
+        CopyFromTemp(Return, FromUInt64(Value.LastWriteTimeNanoseconds));
+        CopyFromTemp(Return, FromUInt64(Value.ChangeTimeSeconds));
+        CopyFromTemp(Return, FromUInt64(Value.ChangeTimeNanoseconds));
+        CopyFromTemp(Return, FromUInt64(Value.BirthTimeSeconds));
+        CopyFromTemp(Return, FromUInt64(Value.BirthTimeNanoseconds));
+        CopyFromTemp(Return, FromUInt64(Value.Generation));
+        CopyFromTemp(Return, FromUInt64(Value.DataVersion));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromSetAttrRequest(
         SetAttrRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-        CopyFromTemp(vReturn, FromUInt32(Value.Valid));
-        CopyFromTemp(vReturn, FromUInt32(Value.Mode));
-        CopyFromTemp(vReturn, FromUInt32(Value.OwnerUserId));
-        CopyFromTemp(vReturn, FromUInt32(Value.GroupId));
-        CopyFromTemp(vReturn, FromUInt64(Value.FileSize));
-        CopyFromTemp(vReturn, FromUInt64(Value.LastAccessTimeSeconds));
-        CopyFromTemp(vReturn, FromUInt64(Value.LastAccessTimeNanoseconds));
-        CopyFromTemp(vReturn, FromUInt64(Value.LastWriteTimeSeconds));
-        CopyFromTemp(vReturn, FromUInt64(Value.LastWriteTimeNanoseconds));
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromUInt32(Value.Valid));
+        CopyFromTemp(Return, FromUInt32(Value.Mode));
+        CopyFromTemp(Return, FromUInt32(Value.OwnerUserId));
+        CopyFromTemp(Return, FromUInt32(Value.GroupId));
+        CopyFromTemp(Return, FromUInt64(Value.FileSize));
+        CopyFromTemp(Return, FromUInt64(Value.LastAccessTimeSeconds));
+        CopyFromTemp(Return, FromUInt64(Value.LastAccessTimeNanoseconds));
+        CopyFromTemp(Return, FromUInt64(Value.LastWriteTimeSeconds));
+        CopyFromTemp(Return, FromUInt64(Value.LastWriteTimeNanoseconds));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromXattrWalkRequest(
         XattrWalkRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-        CopyFromTemp(vReturn, FromUInt32(Value.NewFileId));
-        CopyFromTemp(vReturn, FromString(Value.Name));
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromUInt32(Value.NewFileId));
+        CopyFromTemp(Return, FromString(Value.Name));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromXattrWalkResponse(
@@ -374,39 +374,39 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromXattrCreateRequest(
         XattrCreateRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-        CopyFromTemp(vReturn, FromString(Value.Name));
-        CopyFromTemp(vReturn, FromUInt64(Value.Size));
-        CopyFromTemp(vReturn, FromUInt32(Value.Flags));
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromString(Value.Name));
+        CopyFromTemp(Return, FromUInt64(Value.Size));
+        CopyFromTemp(Return, FromUInt32(Value.Flags));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromReadDirRequest(
         ReadDirRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-        CopyFromTemp(vReturn, FromUInt64(Value.Offset));
-        CopyFromTemp(vReturn, FromUInt32(Value.Count));
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromUInt64(Value.Offset));
+        CopyFromTemp(Return, FromUInt32(Value.Count));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromReadDirResponse(
         ReadDirResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
         for (auto& data : Value.Data)
         {
-            CopyFromTemp(vReturn, FromDirectoryEntry(data));
+            CopyFromTemp(Return, FromDirectoryEntry(data));
         }
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromFsyncRequest(
@@ -418,17 +418,17 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromLockRequest(
         LockRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-        CopyFromTemp(vReturn, FromUInt8(Value.Type));
-        CopyFromTemp(vReturn, FromUInt32(Value.Flags));
-        CopyFromTemp(vReturn, FromUInt64(Value.Start));
-        CopyFromTemp(vReturn, FromUInt64(Value.Length));
-        CopyFromTemp(vReturn, FromUInt32(Value.ProcessId));
-        CopyFromTemp(vReturn, FromString(Value.ClientId));
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromUInt8(Value.Type));
+        CopyFromTemp(Return, FromUInt32(Value.Flags));
+        CopyFromTemp(Return, FromUInt64(Value.Start));
+        CopyFromTemp(Return, FromUInt64(Value.Length));
+        CopyFromTemp(Return, FromUInt32(Value.ProcessId));
+        CopyFromTemp(Return, FromString(Value.ClientId));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromLockResponse(
@@ -440,55 +440,55 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromGetLockRequest(
         GetLockRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-        CopyFromTemp(vReturn, FromUInt8(Value.Type));
-        CopyFromTemp(vReturn, FromUInt64(Value.Start));
-        CopyFromTemp(vReturn, FromUInt64(Value.Length));
-        CopyFromTemp(vReturn, FromUInt32(Value.ProcessId));
-        CopyFromTemp(vReturn, FromString(Value.ClientId));
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromUInt8(Value.Type));
+        CopyFromTemp(Return, FromUInt64(Value.Start));
+        CopyFromTemp(Return, FromUInt64(Value.Length));
+        CopyFromTemp(Return, FromUInt32(Value.ProcessId));
+        CopyFromTemp(Return, FromString(Value.ClientId));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromGetLockResponse(
         GetLockResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt8(Value.Type));
-        CopyFromTemp(vReturn, FromUInt64(Value.Start));
-        CopyFromTemp(vReturn, FromUInt64(Value.Length));
-        CopyFromTemp(vReturn, FromUInt32(Value.ProcessId));
-        CopyFromTemp(vReturn, FromString(Value.ClientId));
+        CopyFromTemp(Return, FromUInt8(Value.Type));
+        CopyFromTemp(Return, FromUInt64(Value.Start));
+        CopyFromTemp(Return, FromUInt64(Value.Length));
+        CopyFromTemp(Return, FromUInt32(Value.ProcessId));
+        CopyFromTemp(Return, FromString(Value.ClientId));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromLinkRequest(
         LinkRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.DirectoryFileId));
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-        CopyFromTemp(vReturn, FromString(Value.Name));
+        CopyFromTemp(Return, FromUInt32(Value.DirectoryFileId));
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromString(Value.Name));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromMkDirRequest(
         MkDirRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.DirectoryFileId));
-        CopyFromTemp(vReturn, FromString(Value.Name));
-        CopyFromTemp(vReturn, FromUInt32(Value.Mode));
-        CopyFromTemp(vReturn, FromUInt32(Value.Gid));
+        CopyFromTemp(Return, FromUInt32(Value.DirectoryFileId));
+        CopyFromTemp(Return, FromString(Value.Name));
+        CopyFromTemp(Return, FromUInt32(Value.Mode));
+        CopyFromTemp(Return, FromUInt32(Value.Gid));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromMkDirResponse(
@@ -500,73 +500,73 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromRenameAtRequest(
         RenameAtRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.OldDirectoryFileId));
-        CopyFromTemp(vReturn, FromString(Value.OldName));
-        CopyFromTemp(vReturn, FromUInt32(Value.NewDirectoryFileId));
-        CopyFromTemp(vReturn, FromString(Value.NewName));
+        CopyFromTemp(Return, FromUInt32(Value.OldDirectoryFileId));
+        CopyFromTemp(Return, FromString(Value.OldName));
+        CopyFromTemp(Return, FromUInt32(Value.NewDirectoryFileId));
+        CopyFromTemp(Return, FromString(Value.NewName));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromUnlinkAtRequest(
         UnlinkAtRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.DirectoryFileId));
-        CopyFromTemp(vReturn, FromString(Value.Name));
-        CopyFromTemp(vReturn, FromUInt32(Value.Flags));
+        CopyFromTemp(Return, FromUInt32(Value.DirectoryFileId));
+        CopyFromTemp(Return, FromString(Value.Name));
+        CopyFromTemp(Return, FromUInt32(Value.Flags));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromVersionRequest(
         VersionRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.MaximumMessageSize));
-        CopyFromTemp(vReturn, FromString(Value.ProtocolVersion));
+        CopyFromTemp(Return, FromUInt32(Value.MaximumMessageSize));
+        CopyFromTemp(Return, FromString(Value.ProtocolVersion));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromVersionResponse(
         VersionResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.MaximumMessageSize));
-        CopyFromTemp(vReturn, FromString(Value.ProtocolVersion));
+        CopyFromTemp(Return, FromUInt32(Value.MaximumMessageSize));
+        CopyFromTemp(Return, FromString(Value.ProtocolVersion));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromAuthRequest(
         AuthRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.AuthenticationFileId));
-        CopyFromTemp(vReturn, FromString(Value.UserName));
-        CopyFromTemp(vReturn, FromString(Value.AccessName));
+        CopyFromTemp(Return, FromUInt32(Value.AuthenticationFileId));
+        CopyFromTemp(Return, FromString(Value.UserName));
+        CopyFromTemp(Return, FromString(Value.AccessName));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromUnixAuthRequest(
         UnixAuthRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.AuthenticationFileId));
-        CopyFromTemp(vReturn, FromString(Value.UserName));
-        CopyFromTemp(vReturn, FromString(Value.AccessName));
-        CopyFromTemp(vReturn, FromUInt32(Value.NumericUserName));
+        CopyFromTemp(Return, FromUInt32(Value.AuthenticationFileId));
+        CopyFromTemp(Return, FromString(Value.UserName));
+        CopyFromTemp(Return, FromString(Value.AccessName));
+        CopyFromTemp(Return, FromUInt32(Value.NumericUserName));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromAuthResponse(
@@ -578,28 +578,28 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromAttachRequest(
         AttachRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-        CopyFromTemp(vReturn, FromUInt32(Value.AuthenticationFileId));
-        CopyFromTemp(vReturn, FromString(Value.UserName));
-        CopyFromTemp(vReturn, FromString(Value.AccessName));
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromUInt32(Value.AuthenticationFileId));
+        CopyFromTemp(Return, FromString(Value.UserName));
+        CopyFromTemp(Return, FromString(Value.AccessName));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromUnixAttachRequest(
         UnixAttachRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-        CopyFromTemp(vReturn, FromUInt32(Value.AuthenticationFileId));
-        CopyFromTemp(vReturn, FromString(Value.UserName));
-        CopyFromTemp(vReturn, FromString(Value.AccessName));
-        CopyFromTemp(vReturn, FromUInt32(Value.NumericUserName));
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromUInt32(Value.AuthenticationFileId));
+        CopyFromTemp(Return, FromString(Value.UserName));
+        CopyFromTemp(Return, FromString(Value.AccessName));
+        CopyFromTemp(Return, FromUInt32(Value.NumericUserName));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromAttachResponse(
@@ -617,12 +617,12 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromUnixErrorResponse(
         UnixErrorResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromString(Value.Message));
-        CopyFromTemp(vReturn, FromUInt32(Value.Code));
+        CopyFromTemp(Return, FromString(Value.Message));
+        CopyFromTemp(Return, FromUInt32(Value.Code));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromFlushRequest(
@@ -634,77 +634,77 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromWalkRequest(
         WalkRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-        CopyFromTemp(vReturn, FromUInt32(Value.NewFileId));
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromUInt32(Value.NewFileId));
         for (auto& s : Value.Names)
         {
-            CopyFromTemp(vReturn, FromString(s));
+            CopyFromTemp(Return, FromString(s));
         }
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromWalkResponse(
         WalkResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
         for (auto& qid : Value.UniqueIds) {
-            CopyFromTemp(vReturn, FromQid(qid));
+            CopyFromTemp(Return, FromQid(qid));
         }
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromOpenRequest(
         OpenRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-        CopyFromTemp(vReturn, FromUInt8(Value.Mode));
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromUInt8(Value.Mode));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromOpenResponse(
         OpenResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromQid(Value.UniqueId));
-        CopyFromTemp(vReturn, FromUInt32(Value.IoUnit));
+        CopyFromTemp(Return, FromQid(Value.UniqueId));
+        CopyFromTemp(Return, FromUInt32(Value.IoUnit));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromCreateRequest(
         CreateRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-        CopyFromTemp(vReturn, FromString(Value.Name));
-        CopyFromTemp(vReturn, FromUInt32(Value.Permission));
-        CopyFromTemp(vReturn, FromUInt32(Value.Mode));
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromString(Value.Name));
+        CopyFromTemp(Return, FromUInt32(Value.Permission));
+        CopyFromTemp(Return, FromUInt32(Value.Mode));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromUnixCreateRequest(
         UnixCreateRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-        CopyFromTemp(vReturn, FromString(Value.Name));
-        CopyFromTemp(vReturn, FromUInt32(Value.Permission));
-        CopyFromTemp(vReturn, FromUInt32(Value.Mode));
-        CopyFromTemp(vReturn, FromString(Value.UnixExtension));
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromString(Value.Name));
+        CopyFromTemp(Return, FromUInt32(Value.Permission));
+        CopyFromTemp(Return, FromUInt32(Value.Mode));
+        CopyFromTemp(Return, FromString(Value.UnixExtension));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromCreateResponse(
@@ -716,33 +716,33 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromReadRequest(
         ReadRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-        CopyFromTemp(vReturn, FromUInt64(Value.Offset));
-        CopyFromTemp(vReturn, FromUInt32(Value.Count));
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromUInt64(Value.Offset));
+        CopyFromTemp(Return, FromUInt32(Value.Count));
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromReadResponse(
         ReadResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn = {Value.Data};
+        std::vector<std::uint8_t> Return = {Value.Data};
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromWriteRequest(
         WriteRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-        CopyFromTemp(vReturn, FromUInt64(Value.Offset));
-        CopyFromTemp(vReturn, Value.Data);
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromUInt64(Value.Offset));
+        CopyFromTemp(Return, Value.Data);
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromWriteResponse(
@@ -772,28 +772,28 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromStatResponse(
         StatResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
         for (auto& stat : Value.Stat)
         {
-            CopyFromTemp(vReturn, FromStat(stat));
+            CopyFromTemp(Return, FromStat(stat));
         }
 
-        return vReturn;
+        return Return;
     }
 
     std::vector<std::uint8_t> FromWriteStatRequest(
         WriteStatRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
+        std::vector<std::uint8_t> Return;
 
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
+        CopyFromTemp(Return, FromUInt32(Value.FileId));
         for (auto& stat : Value.Stat)
         {
-            CopyFromTemp(vReturn, FromStat(stat));
+            CopyFromTemp(Return, FromStat(stat));
         }
 
-        return vReturn;
+        return Return;
     }
 
 }
