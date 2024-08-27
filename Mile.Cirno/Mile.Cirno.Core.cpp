@@ -401,7 +401,7 @@ namespace Mile::Cirno
     {
         std::vector<std::uint8_t> Return;
 
-        for (auto& data : Value.Data)
+        for (auto const& data : Value.Data)
         {
             CopyFromTemp(Return, FromDirectoryEntry(data));
         }
@@ -638,7 +638,7 @@ namespace Mile::Cirno
 
         CopyFromTemp(Return, FromUInt32(Value.FileId));
         CopyFromTemp(Return, FromUInt32(Value.NewFileId));
-        for (auto& s : Value.Names)
+        for (auto const& s : Value.Names)
         {
             CopyFromTemp(Return, FromString(s));
         }
@@ -651,7 +651,7 @@ namespace Mile::Cirno
     {
         std::vector<std::uint8_t> Return;
 
-        for (auto& qid : Value.UniqueIds) {
+        for (auto const& qid : Value.UniqueIds) {
             CopyFromTemp(Return, FromQid(qid));
         }
 
@@ -774,7 +774,7 @@ namespace Mile::Cirno
     {
         std::vector<std::uint8_t> Return;
 
-        for (auto& stat : Value.Stat)
+        for (auto const& stat : Value.Stat)
         {
             CopyFromTemp(Return, FromStat(stat));
         }
@@ -788,7 +788,7 @@ namespace Mile::Cirno
         std::vector<std::uint8_t> Return;
 
         CopyFromTemp(Return, FromUInt32(Value.FileId));
-        for (auto& stat : Value.Stat)
+        for (auto const& stat : Value.Stat)
         {
             CopyFromTemp(Return, FromStat(stat));
         }
