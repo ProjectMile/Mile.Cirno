@@ -167,21 +167,13 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromLinuxErrorResponse(
         LinuxErrorResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
-
-        CopyFromTemp(vReturn, FromUInt32(Value.Code));
-
-        return vReturn;
+        return FromUInt32(Value.Code);
     }
 
     std::vector<std::uint8_t> FromStatFsRequest(
         StatFsRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
-
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-
-        return vReturn;
+        return FromUInt32(Value.FileId);
     }
 
     std::vector<std::uint8_t> FromStatFsResponse(
@@ -265,11 +257,7 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromSymLinkResponse(
         SymLinkResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
-
-        CopyFromTemp(vReturn, FromQid(Value.UniqueId));
-
-        return vReturn;
+        return FromQid(Value.UniqueId);
     }
 
     std::vector<std::uint8_t> FromMkNodRequest(
@@ -290,11 +278,7 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromMkNodResponse(
         MkNodResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
-
-        CopyFromTemp(vReturn, FromQid(Value.UniqueId));
-
-        return vReturn;
+        return FromQid(Value.UniqueId);
     }
 
     std::vector<std::uint8_t> FromRenameRequest(
@@ -312,21 +296,13 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromReadLinkRequest(
         ReadLinkRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
-
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-
-        return vReturn;
+        return FromUInt32(Value.FileId);
     }
 
     std::vector<std::uint8_t> FromReadLinkResponse(
         ReadLinkResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
-
-        CopyFromTemp(vReturn, FromString(Value.Target));
-
-        return vReturn;
+        return FromString(Value.Target);
     }
 
     std::vector<std::uint8_t> FromGetAttrRequest(
@@ -403,11 +379,7 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromXattrWalkResponse(
         XattrWalkResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
-
-        CopyFromTemp(vReturn, FromUInt64(Value.Size));
-
-        return vReturn;
+        return FromUInt64(Value.Size);
     }
 
     std::vector<std::uint8_t> FromXattrCreateRequest(
@@ -451,11 +423,7 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromFsyncRequest(
         FsyncRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
-
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-
-        return vReturn;
+        return FromUInt32(Value.FileId);
     }
 
     std::vector<std::uint8_t> FromLockRequest(
@@ -477,11 +445,7 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromLockResponse(
         LockResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
-
-        CopyFromTemp(vReturn, FromUInt8(Value.Status));
-
-        return vReturn;
+        return FromUInt8(Value.Status);
     }
 
     std::vector<std::uint8_t> FromGetLockRequest(
@@ -541,11 +505,7 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromMkDirResponse(
         MkDirResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
-
-        CopyFromTemp(vReturn, FromQid(Value.UniqueId));
-
-        return vReturn;
+        return FromQid(Value.UniqueId);
     }
 
     std::vector<std::uint8_t> FromRenameAtRequest(
@@ -623,11 +583,7 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromAuthResponse(
         AuthResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
-
-        CopyFromTemp(vReturn, FromQid(Value.AuthenticationUniqueId));
-
-        return vReturn;
+        return FromQid(Value.AuthenticationUniqueId);
     }
 
     std::vector<std::uint8_t> FromAttachRequest(
@@ -660,21 +616,13 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromAttachResponse(
         AttachResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
-
-        CopyFromTemp(vReturn, FromQid(Value.UniqueId));
-
-        return vReturn;
+        return FromQid(Value.UniqueId);
     }
 
     std::vector<std::uint8_t> FromErrorResponse(
         ErrorResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
-
-        CopyFromTemp(vReturn, FromString(Value.Message));
-
-        return vReturn;
+        return FromString(Value.Message);
     }
 
     std::vector<std::uint8_t> FromUnixErrorResponse(
@@ -691,11 +639,7 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromFlushRequest(
         FlushRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
-
-        CopyFromTemp(vReturn, FromUInt16(Value.OldTag));
-
-        return vReturn;
+        return FromUInt16(Value.OldTag);
     }
 
     std::vector<std::uint8_t> FromWalkRequest(
@@ -777,11 +721,7 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromCreateResponse(
         CreateResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
-
-        CopyFromTemp(vReturn, FromQid(Value.UniqueId));
-
-        return vReturn;
+        return FromQid(Value.UniqueId);
     }
 
     std::vector<std::uint8_t> FromReadRequest(
@@ -819,41 +759,25 @@ namespace Mile::Cirno
     std::vector<std::uint8_t> FromWriteResponse(
         WriteResponse const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
-
-        CopyFromTemp(vReturn, FromUInt32(Value.Count));
-
-        return vReturn;
+        return FromUInt32(Value.Count);
     }
 
     std::vector<std::uint8_t> FromClunkRequest(
         ClunkRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
-
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-
-        return vReturn;
+        return FromUInt32(Value.FileId);
     }
 
     std::vector<std::uint8_t> FromRemoveRequest(
         RemoveRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
-
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-
-        return vReturn;
+        return FromUInt32(Value.FileId);
     }
 
     std::vector<std::uint8_t> FromStatRequest(
         StatRequest const& Value)
     {
-        std::vector<std::uint8_t> vReturn;
-
-        CopyFromTemp(vReturn, FromUInt32(Value.FileId));
-
-        return vReturn;
+        return FromUInt32(Value.FileId);
     }
 
     std::vector<std::uint8_t> FromStatResponse(
