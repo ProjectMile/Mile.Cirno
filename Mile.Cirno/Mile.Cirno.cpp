@@ -28,77 +28,7 @@
 #include <vector>
 #include <string>
 
-#include "Mile.Cirno.Protocol.h"
-
-namespace Mile::Cirno
-{
-    std::uint8_t* AsUInt8(
-        std::uint8_t* Source)
-    {
-        return reinterpret_cast<std::uint8_t*>(Source);
-    }
-
-    std::uint16_t* AsUInt16(
-        std::uint8_t* Source)
-    {
-        return reinterpret_cast<std::uint16_t*>(Source);
-    }
-
-    std::uint32_t* AsUInt32(
-        std::uint8_t* Source)
-    {
-        return reinterpret_cast<std::uint32_t*>(Source);
-    }
-
-    std::uint64_t* AsUInt64(
-        std::uint8_t* Source)
-    {
-        return reinterpret_cast<std::uint64_t*>(Source);
-    }
-
-    bool ReceiveFrame(
-        _In_ SOCKET SocketHandle,
-        std::vector<std::uint8_t>& Content)
-    {
-        Content.clear();
-
-        Content.resize(sizeof(MILE_CIRNO_HEADER));
-        DWORD NumberOfBytesRecvd = 0;
-        DWORD Flags = 0;
-        if (::MileSocketRecv(
-            SocketHandle,
-            &Content[0],
-            static_cast<DWORD>(sizeof(MILE_CIRNO_HEADER)),
-            &NumberOfBytesRecvd,
-            &Flags))
-        {
-            if (sizeof(MILE_CIRNO_HEADER) == NumberOfBytesRecvd)
-            {
-                PMILE_CIRNO_HEADER Header =
-                    reinterpret_cast<PMILE_CIRNO_HEADER>(&Content[0]);
-                DWORD Size = *AsUInt32(Header->Size);
-                Content.resize(Size);
-                NumberOfBytesRecvd = 0;
-                Flags = 0;
-                if (::MileSocketRecv(
-                    SocketHandle,
-                    &Content[sizeof(MILE_CIRNO_HEADER)],
-                    Size - sizeof(MILE_CIRNO_HEADER),
-                    &NumberOfBytesRecvd,
-                    &Flags))
-                {
-                    if (Size - sizeof(MILE_CIRNO_HEADER) == NumberOfBytesRecvd)
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        Content.clear();
-        return false;
-    }
-}
+#include "Mile.Cirno.Core.h"
 
 void Test()
 {
@@ -162,60 +92,130 @@ void Test()
             break;
         }
 
-        std::string Version = "9P2000.L";
+        Mile::Cirno::VersionRequest RequestContent;
+        RequestContent.MaximumMessageSize = 1 << 16;
+        RequestContent.ProtocolVersion = "9P2000.L";
 
-        std::vector<std::uint8_t> SendBuffer(
-            sizeof(MILE_CIRNO_VERSION_REQUEST)
-            + Version.size());
+        std::vector<std::uint8_t> RequestContentBuffer;
+        Mile::Cirno::PushVersionRequest(RequestContentBuffer, RequestContent);
 
-        PMILE_CIRNO_VERSION_REQUEST Request =
-            reinterpret_cast<PMILE_CIRNO_VERSION_REQUEST>(&SendBuffer[0]);
-        *Mile::Cirno::AsUInt32(Request->Header.Size) =
-            static_cast<std::uint32_t>(SendBuffer.size());
-        *Mile::Cirno::AsUInt8(Request->Header.Type) =
-            MileCirnoVersionRequestMessage;
-        *Mile::Cirno::AsUInt16(Request->Header.Tag) =
-            MILE_CIRNO_NOTAG;
-        *Mile::Cirno::AsUInt32(Request->MaximumMessageSize) =
-            1 << 16;
-        *Mile::Cirno::AsUInt16(Request->ProtocolVersion.Length) =
-            static_cast<std::uint16_t>(Version.size());
-        std::memcpy(
-            Request->ProtocolVersion.String,
-            Version.c_str(),
-            *Mile::Cirno::AsUInt16(Request->ProtocolVersion.Length));
+        Mile::Cirno::Header RequestHeader;
+        RequestHeader.Size = static_cast<std::uint32_t>(
+            RequestContentBuffer.size());
+        RequestHeader.Type = MileCirnoVersionRequestMessage;
+        RequestHeader.Tag = MILE_CIRNO_NOTAG;
 
-        DWORD NumberOfBytesSent = 0;
-        if (!::MileSocketSend(
-            Socket,
-            Request,
-            *Mile::Cirno::AsUInt32(Request->Header.Size),
-            &NumberOfBytesSent,
-            0))
+        std::vector<std::uint8_t> RequestHeaderBuffer;
+        Mile::Cirno::PushHeader(RequestHeaderBuffer, RequestHeader);
+
         {
-            std::wprintf(
-                L"[ERROR] MileSocketSend failed (%d).\n",
-                ::WSAGetLastError());
-            break;
+            DWORD NumberOfBytesSent = 0;
+            if (!::MileSocketSend(
+                Socket,
+                &RequestHeaderBuffer[0],
+                static_cast<DWORD>(RequestHeaderBuffer.size()),
+                &NumberOfBytesSent,
+                0))
+            {
+                std::wprintf(
+                    L"[ERROR] MileSocketSend failed (%d).\n",
+                    ::WSAGetLastError());
+                break;
+            }
+        }
+        {
+            DWORD NumberOfBytesSent = 0;
+            if (!::MileSocketSend(
+                Socket,
+                &RequestContentBuffer[0],
+                static_cast<DWORD>(RequestContentBuffer.size()),
+                &NumberOfBytesSent,
+                0))
+            {
+                std::wprintf(
+                    L"[ERROR] MileSocketSend failed (%d).\n",
+                    ::WSAGetLastError());
+                break;
+            }
         }
 
-        std::vector<std::uint8_t> ResponseContent;
-        if (!Mile::Cirno::ReceiveFrame(Socket, ResponseContent))
         {
-            std::wprintf(
-                L"[ERROR] Mile::Cirno::ReceiveFrame failed.\n");
-            break;
+            std::vector<std::uint8_t> ResponseHeaderBuffer;
+            ResponseHeaderBuffer.resize(Mile::Cirno::HeaderSize);
+            {
+                DWORD NumberOfBytesRecvd = 0;
+                DWORD Flags = 0;
+                if (!::MileSocketRecv(
+                    Socket,
+                    &ResponseHeaderBuffer[0],
+                    Mile::Cirno::HeaderSize,
+                    &NumberOfBytesRecvd,
+                    &Flags))
+                {
+                    std::wprintf(
+                        L"[ERROR] MileSocketRecv failed (%d).\n",
+                        ::WSAGetLastError());
+                    break;
+                }
+                if (Mile::Cirno::HeaderSize != NumberOfBytesRecvd)
+                {
+                    std::wprintf(
+                        L"[ERROR] Invalid response header size.\n");
+                    break;
+                }
+            }
+
+            std::span<std::uint8_t> ResponseHeaderBufferSpan =
+                std::span<std::uint8_t>(ResponseHeaderBuffer);
+            Mile::Cirno::Header ResponseHeader =
+                Mile::Cirno::PopHeader(ResponseHeaderBufferSpan);
+            if (RequestHeader.Tag != ResponseHeader.Tag)
+            {
+                std::wprintf(
+                    L"[ERROR] Tag in Header should be equal.\n");
+                break;
+            }
+            if (MileCirnoVersionResponseMessage != ResponseHeader.Type)
+            {
+                std::wprintf(
+                    L"[ERROR] Invalid response type.\n");
+                break;
+            }
+
+            std::vector<std::uint8_t> ResponseContentBuffer;
+            ResponseContentBuffer.resize(ResponseHeader.Size);
+            {
+                DWORD NumberOfBytesRecvd = 0;
+                DWORD Flags = 0;
+                if (!::MileSocketRecv(
+                    Socket,
+                    &ResponseContentBuffer[0],
+                    ResponseHeader.Size,
+                    &NumberOfBytesRecvd,
+                    &Flags))
+                {
+                    std::wprintf(
+                        L"[ERROR] MileSocketRecv failed (%d).\n",
+                        ::WSAGetLastError());
+                    break;
+                }
+                if (ResponseHeader.Size != NumberOfBytesRecvd)
+                {
+                    std::wprintf(
+                        L"[ERROR] Invalid response content header size.\n");
+                    break;
+                }
+            }
+
+            std::span<std::uint8_t> ResponseContentBufferSpan =
+                std::span<std::uint8_t>(ResponseContentBuffer);
+            Mile::Cirno::VersionResponse ResponseContent =
+                Mile::Cirno::PopVersionResponse(ResponseContentBufferSpan);
+
+            std::printf(
+                "[INFO] Response.ProtocolVersion = %s\n",
+                ResponseContent.ProtocolVersion.c_str());
         }
-
-        PMILE_CIRNO_VERSION_RESPONSE Response =
-            reinterpret_cast<PMILE_CIRNO_VERSION_RESPONSE>(
-                &ResponseContent[0]);
-
-        std::printf(
-            "[INFO] Response.ProtocolVersion = %s\n",
-            std::string(
-                reinterpret_cast<char*>(Response->ProtocolVersion.String),
-                *Mile::Cirno::AsUInt16(Response->ProtocolVersion.Length)).c_str());
 
         break;
 
