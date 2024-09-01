@@ -10,3 +10,180 @@
  */
 
 #include "Mile.Cirno.Core.h"
+
+std::span<std::uint8_t> Mile::Cirno::PopBytes(
+    std::span<std::uint8_t>& Buffer,
+    std::size_t const& Size)
+{
+    std::span<std::uint8_t> Result = Buffer.subspan(0, Size);
+    Buffer = Buffer.subspan(Size);
+    return Result;
+}
+
+std::uint8_t Mile::Cirno::PopUInt8(
+    std::span<std::uint8_t>& Buffer)
+{
+    std::span<std::uint8_t> Content =
+        Mile::Cirno::PopBytes(Buffer, sizeof(std::uint8_t));
+    return Content[0];
+}
+
+void Mile::Cirno::PushUInt8(
+    std::vector<std::uint8_t>& Buffer,
+    std::uint8_t const& Value)
+{
+    Buffer.emplace_back(Value);
+}
+
+std::uint16_t Mile::Cirno::PopUInt16(
+    std::span<std::uint8_t>& Buffer)
+{
+    std::span<std::uint8_t> Content =
+        Mile::Cirno::PopBytes(Buffer, sizeof(std::uint16_t));
+    std::uint8_t* RawContent = Content.data();
+    return
+        (static_cast<std::uint16_t>(RawContent[0])) |
+        (static_cast<std::uint16_t>(RawContent[1]) << 8);
+}
+
+void Mile::Cirno::PushUInt16(
+    std::vector<std::uint8_t>& Buffer,
+    std::uint16_t const& Value)
+{
+    std::size_t PreviousEndIndex = Buffer.size();
+    Buffer.resize(PreviousEndIndex + sizeof(std::uint16_t));
+    std::uint8_t* RawContent = &Buffer[PreviousEndIndex];
+    RawContent[0] = static_cast<std::uint8_t>(Value);
+    RawContent[1] = static_cast<std::uint8_t>(Value >> 8);
+}
+
+std::uint32_t Mile::Cirno::PopUInt32(
+    std::span<std::uint8_t>& Buffer)
+{
+    std::span<std::uint8_t> Content =
+        Mile::Cirno::PopBytes(Buffer, sizeof(std::uint32_t));
+    std::uint8_t* RawContent = Content.data();
+    return
+        (static_cast<std::uint32_t>(RawContent[0])) |
+        (static_cast<std::uint32_t>(RawContent[1]) << 8) |
+        (static_cast<std::uint32_t>(RawContent[2]) << 16) |
+        (static_cast<std::uint32_t>(RawContent[3]) << 24);
+}
+
+void Mile::Cirno::PushUInt32(
+    std::vector<std::uint8_t>& Buffer,
+    std::uint32_t const& Value)
+{
+    std::size_t PreviousEndIndex = Buffer.size();
+    Buffer.resize(PreviousEndIndex + sizeof(std::uint32_t));
+    std::uint8_t* RawContent = &Buffer[PreviousEndIndex];
+    RawContent[0] = static_cast<std::uint8_t>(Value);
+    RawContent[1] = static_cast<std::uint8_t>(Value >> 8);
+    RawContent[2] = static_cast<std::uint8_t>(Value >> 16);
+    RawContent[3] = static_cast<std::uint8_t>(Value >> 24);
+}
+
+std::uint64_t Mile::Cirno::PopUInt64(
+    std::span<std::uint8_t>& Buffer)
+{
+    std::span<std::uint8_t> Content =
+        Mile::Cirno::PopBytes(Buffer, sizeof(std::uint64_t));
+    std::uint8_t* RawContent = Content.data();
+    return
+        (static_cast<std::uint64_t>(RawContent[0])) |
+        (static_cast<std::uint64_t>(RawContent[1]) << 8) |
+        (static_cast<std::uint64_t>(RawContent[2]) << 16) |
+        (static_cast<std::uint64_t>(RawContent[3]) << 24) |
+        (static_cast<std::uint64_t>(RawContent[4]) << 32) |
+        (static_cast<std::uint64_t>(RawContent[5]) << 40) |
+        (static_cast<std::uint64_t>(RawContent[6]) << 48) |
+        (static_cast<std::uint64_t>(RawContent[7]) << 56);
+}
+
+void Mile::Cirno::PushUInt64(
+    std::vector<std::uint8_t>& Buffer,
+    std::uint64_t const& Value)
+{
+    std::size_t PreviousEndIndex = Buffer.size();
+    Buffer.resize(PreviousEndIndex + sizeof(std::uint64_t));
+    std::uint8_t* RawContent = &Buffer[PreviousEndIndex];
+    RawContent[0] = static_cast<std::uint8_t>(Value);
+    RawContent[1] = static_cast<std::uint8_t>(Value >> 8);
+    RawContent[2] = static_cast<std::uint8_t>(Value >> 16);
+    RawContent[3] = static_cast<std::uint8_t>(Value >> 24);
+    RawContent[4] = static_cast<std::uint8_t>(Value >> 32);
+    RawContent[5] = static_cast<std::uint8_t>(Value >> 40);
+    RawContent[6] = static_cast<std::uint8_t>(Value >> 48);
+    RawContent[7] = static_cast<std::uint8_t>(Value >> 56);
+}
+
+Mile::Cirno::Header Mile::Cirno::PopHeader(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::Header Result;
+    Result.Size = Mile::Cirno::PopUInt32(Buffer) - Mile::Cirno::HeaderSize;
+    Result.Type = Mile::Cirno::PopUInt8(Buffer);
+    Result.Tag = Mile::Cirno::PopUInt16(Buffer);
+    return Result;
+}
+
+void Mile::Cirno::PushHeader(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::Header const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.Size + Mile::Cirno::HeaderSize);
+    Mile::Cirno::PushUInt8(Buffer, Value.Type);
+    Mile::Cirno::PushUInt16(Buffer, Value.Tag);
+}
+
+std::string Mile::Cirno::PopString(
+    std::span<std::uint8_t>& Buffer)
+{
+    std::uint16_t Length = Mile::Cirno::PopUInt16(Buffer);
+    std::span<std::uint8_t> Content = Mile::Cirno::PopBytes(Buffer, Length);
+    return std::string(Content.begin(), Content.end());
+}
+
+void Mile::Cirno::PushString(
+    std::vector<std::uint8_t>& Buffer,
+    std::string const& Value)
+{
+    Mile::Cirno::PushUInt16(Buffer, static_cast<std::uint16_t>(Value.size()));
+    Buffer.insert(Buffer.end(), Value.begin(), Value.end());
+}
+
+Mile::Cirno::Qid Mile::Cirno::PopQid(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::Qid Result;
+    Result.Type = Mile::Cirno::PopUInt8(Buffer);
+    Result.Version = Mile::Cirno::PopUInt32(Buffer);
+    Result.Path = Mile::Cirno::PopUInt64(Buffer);
+    return Result;
+}
+
+void Mile::Cirno::PushQid(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::Qid const& Value)
+{
+    Mile::Cirno::PushUInt8(Buffer, Value.Type);
+    Mile::Cirno::PushUInt32(Buffer, Value.Version);
+    Mile::Cirno::PushUInt64(Buffer, Value.Path);
+}
+
+void Mile::Cirno::PushVersionRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::VersionRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.MaximumMessageSize);
+    Mile::Cirno::PushString(Buffer, Value.ProtocolVersion);
+}
+
+Mile::Cirno::VersionResponse Mile::Cirno::PopVersionResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::VersionResponse Result;
+    Result.MaximumMessageSize = Mile::Cirno::PopUInt32(Buffer);
+    Result.ProtocolVersion = Mile::Cirno::PopString(Buffer);
+    return Result;
+}

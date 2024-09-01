@@ -16,11 +16,46 @@
 
 #include <cstdint>
 
+#include <span>
 #include <string>
 #include <vector>
 
 namespace Mile::Cirno
 {
+    std::span<std::uint8_t> PopBytes(
+        std::span<std::uint8_t>& Buffer,
+        std::size_t const& Size);
+
+    // No PushBytes because we have std::vector::insert.
+
+    std::uint8_t PopUInt8(
+        std::span<std::uint8_t>& Buffer);
+
+    void PushUInt8(
+        std::vector<std::uint8_t>& Buffer,
+        std::uint8_t const& Value);
+
+    std::uint16_t PopUInt16(
+        std::span<std::uint8_t>& Buffer);
+
+    void PushUInt16(
+        std::vector<std::uint8_t>& Buffer,
+        std::uint16_t const& Value);
+
+    std::uint32_t PopUInt32(
+        std::span<std::uint8_t>& Buffer);
+
+    void PushUInt32(
+        std::vector<std::uint8_t>& Buffer,
+        std::uint32_t const& Value);
+
+    std::uint64_t PopUInt64(
+        std::span<std::uint8_t>& Buffer);
+
+    void PushUInt64(
+        std::vector<std::uint8_t>& Buffer,
+        std::uint64_t const& Value);
+
     struct Header
     {
         std::uint32_t Size;
@@ -28,7 +63,24 @@ namespace Mile::Cirno
         std::uint16_t Tag;
     };
 
+    const std::uint32_t HeaderSize =
+        sizeof(std::uint32_t) + sizeof(std::uint8_t) + sizeof(std::uint16_t);
+
+    Header PopHeader(
+        std::span<std::uint8_t>& Buffer);
+
+    void PushHeader(
+        std::vector<std::uint8_t>& Buffer,
+        Header const& Value);
+
     // String
+
+    std::string PopString(
+        std::span<std::uint8_t>& Buffer);
+
+    void PushString(
+        std::vector<std::uint8_t>& Buffer,
+        std::string const& Value);
 
     struct Qid
     {
@@ -36,6 +88,13 @@ namespace Mile::Cirno
         std::uint32_t Version;
         std::uint64_t Path;
     };
+
+    Qid PopQid(
+        std::span<std::uint8_t>& Buffer);
+
+    void PushQid(
+        std::vector<std::uint8_t>& Buffer,
+        Qid const& Value);
 
     struct DirectoryEntry
     {
@@ -351,11 +410,18 @@ namespace Mile::Cirno
         std::string ProtocolVersion; // version
     };
 
+    void PushVersionRequest(
+        std::vector<std::uint8_t>& Buffer,
+        VersionRequest const& Value);
+
     struct VersionResponse
     {
         std::uint32_t MaximumMessageSize; // msize
         std::string ProtocolVersion; // version
     };
+
+    VersionResponse PopVersionResponse(
+        std::span<std::uint8_t>& Buffer);
 
     struct AuthRequest
     {
