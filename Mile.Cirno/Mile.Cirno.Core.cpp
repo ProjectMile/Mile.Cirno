@@ -621,3 +621,83 @@ Mile::Cirno::VersionResponse Mile::Cirno::PopVersionResponse(
     Result.ProtocolVersion = Mile::Cirno::PopString(Buffer);
     return Result;
 }
+
+void Mile::Cirno::PushAuthRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::AuthRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.AuthenticationFileId);
+    Mile::Cirno::PushString(Buffer, Value.UserName);
+    Mile::Cirno::PushString(Buffer, Value.AccessName);
+}
+
+void Mile::Cirno::PushUnixAuthRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::UnixAuthRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.AuthenticationFileId);
+    Mile::Cirno::PushString(Buffer, Value.UserName);
+    Mile::Cirno::PushString(Buffer, Value.AccessName);
+    Mile::Cirno::PushUInt32(Buffer, Value.NumericUserName);
+}
+
+Mile::Cirno::AuthResponse Mile::Cirno::PopAuthResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::AuthResponse Result;
+    Result.AuthenticationUniqueId = Mile::Cirno::PopQid(Buffer);
+    return Result;
+}
+
+void Mile::Cirno::PushAttachRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::AttachRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushUInt32(Buffer, Value.AuthenticationFileId);
+    Mile::Cirno::PushString(Buffer, Value.UserName);
+    Mile::Cirno::PushString(Buffer, Value.AccessName);
+}
+
+void Mile::Cirno::PushUnixAttachRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::UnixAttachRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushUInt32(Buffer, Value.AuthenticationFileId);
+    Mile::Cirno::PushString(Buffer, Value.UserName);
+    Mile::Cirno::PushString(Buffer, Value.AccessName);
+    Mile::Cirno::PushUInt32(Buffer, Value.NumericUserName);
+}
+
+Mile::Cirno::AttachResponse Mile::Cirno::PopAttachResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::AttachResponse Result;
+    Result.UniqueId = Mile::Cirno::PopQid(Buffer);
+    return Result;
+}
+
+Mile::Cirno::ErrorResponse Mile::Cirno::PopErrorResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::ErrorResponse Result;
+    Result.Message = Mile::Cirno::PopString(Buffer);
+    return Result;
+}
+
+Mile::Cirno::UnixErrorResponse Mile::Cirno::PopUnixErrorResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::UnixErrorResponse Result;
+    Result.Message = Mile::Cirno::PopString(Buffer);
+    Result.Message = Mile::Cirno::PopUInt32(Buffer);
+    return Result;
+}
+
+void Mile::Cirno::PushFlushRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::FlushRequest const& Value)
+{
+    Mile::Cirno::PushUInt16(Buffer, Value.OldTag);
+}
