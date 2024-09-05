@@ -596,7 +596,7 @@ void Mile::Cirno::PushRenameAtRequest(
     Mile::Cirno::PushString(Buffer, Value.NewName);
 }
 
-void Mile::Cirno::  (
+void Mile::Cirno::PushUnlinkAtRequest(
     std::vector<std::uint8_t>& Buffer,
     Mile::Cirno::UnlinkAtRequest const& Value)
 {
