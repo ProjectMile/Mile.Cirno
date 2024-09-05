@@ -760,3 +760,73 @@ Mile::Cirno::CreateResponse Mile::Cirno::PopCreateResponse(
     Result.IoUnit = Mile::Cirno::PopUInt32(Buffer);
     return Result;
 }
+
+void Mile::Cirno::PushReadRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::ReadRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushUInt64(Buffer, Value.Offset);
+    Mile::Cirno::PushUInt32(Buffer, Value.Count);
+}
+
+// TODO
+Mile::Cirno::ReadResponse Mile::Cirno::PopReadResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    
+}
+
+void Mile::Cirno::PushWriteRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::WriteRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushUInt64(Buffer, Value.Offset);
+    Mile::Cirno::PushUInt32(Buffer, static_cast<std::uint32_t>(Value.Data.size()));
+    Buffer.insert(Buffer.end(), Value.Data.begin(), Value.Data.end());
+}
+
+Mile::Cirno::WriteResponse Mile::Cirno::PopWriteResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::WriteResponse Result;
+    Result.Count = Mile::Cirno::PopUInt32(Buffer);
+    return Result;
+}
+
+void Mile::Cirno::PushClunkRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::ClunkRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+}
+
+void Mile::Cirno::PushRemoveRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::RemoveRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+}
+
+void Mile::Cirno::PushStatRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::StatRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+}
+
+// TODO
+Mile::Cirno::StatResponse Mile::Cirno::PopStatResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    
+}
+
+// TODO
+void Mile::Cirno::PushWriteStatRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::WriteStatRequest const& Value)
+{
+
+}
