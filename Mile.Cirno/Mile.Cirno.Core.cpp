@@ -322,6 +322,65 @@ void Mile::Cirno::PushLinuxOpenRequest(
     Mile::Cirno::PushUInt32(Buffer, Value.Flags);
 }
 
+Mile::Cirno::LinuxOpenResponse Mile::Cirno::PopLinuxOpenResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::LinuxOpenResponse Result;
+    Result.UniqueId = Mile::Cirno::PopQid(Buffer);
+    Result.IoUnit = Mile::Cirno::PopUInt32(Buffer);
+    return Result;
+}
+
+void Mile::Cirno::PushLinuxCreateRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::LinuxCreateRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushString(Buffer, Value.Name);
+    Mile::Cirno::PushUInt32(Buffer, Value.Flags);
+    Mile::Cirno::PushUInt32(Buffer, Value.Mode);
+    Mile::Cirno::PushUInt32(Buffer, Value.Gid);
+}
+
+Mile::Cirno::LinuxCreateResponse Mile::Cirno::PopLinuxCreateResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::LinuxCreateResponse Result;
+    Result.UniqueId = Mile::Cirno::PopQid(Buffer);
+    Result.IoUnit = Mile::Cirno::PopUInt32(Buffer);
+    return Result;
+}
+
+void Mile::Cirno::PushSymLinkRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::SymLinkRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushString(Buffer, Value.Name);
+    Mile::Cirno::PushString(Buffer, Value.Target);
+    Mile::Cirno::PushUInt32(Buffer, Value.Gid);
+}
+
+Mile::Cirno::SymLinkResponse Mile::Cirno::PopSymLinkResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::SymLinkResponse Result;
+    Result.UniqueId = Mile::Cirno::PopQid(Buffer);
+    return Result;
+}
+
+void PushMkNodRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::MkNodRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.DirectoryFileId);
+    Mile::Cirno::PushString(Buffer, Value.Name);
+    Mile::Cirno::PushUInt32(Buffer, Value.Mode);
+    Mile::Cirno::PushUInt32(Buffer, Value.Major);
+    Mile::Cirno::PushUInt32(Buffer, Value.Minor);
+    Mile::Cirno::PushUInt32(Buffer, Value.Gid);
+}
+
 void Mile::Cirno::PushVersionRequest(
     std::vector<std::uint8_t>& Buffer,
     Mile::Cirno::VersionRequest const& Value)
