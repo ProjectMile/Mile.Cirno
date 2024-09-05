@@ -369,7 +369,7 @@ Mile::Cirno::SymLinkResponse Mile::Cirno::PopSymLinkResponse(
     return Result;
 }
 
-void PushMkNodRequest(
+void Mile::Cirno::PushMkNodRequest(
     std::vector<std::uint8_t>& Buffer,
     Mile::Cirno::MkNodRequest const& Value)
 {
@@ -379,6 +379,106 @@ void PushMkNodRequest(
     Mile::Cirno::PushUInt32(Buffer, Value.Major);
     Mile::Cirno::PushUInt32(Buffer, Value.Minor);
     Mile::Cirno::PushUInt32(Buffer, Value.Gid);
+}
+
+Mile::Cirno::MkNodResponse Mile::Cirno::PopMkNodResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::MkNodResponse Result;
+    Result.UniqueId = Mile::Cirno::PopQid(Buffer);
+    return Result;
+}
+
+void Mile::Cirno::PushRenameRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::RenameRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushUInt32(Buffer, Value.DirectoryFid);
+    Mile::Cirno::PushString(Buffer, Value.Name);
+}
+
+void Mile::Cirno::PushReadLinkRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::ReadLinkRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+}
+
+Mile::Cirno::ReadLinkResponse Mile::Cirno::PopReadLinkResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::ReadLinkResponse Result;
+    Result.Target = Mile::Cirno::PopString(Buffer);
+    return Result;
+}
+
+void Mile::Cirno::PushGetAttrRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::GetAttrRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushUInt64(Buffer, Value.RequestMask);
+}
+
+Mile::Cirno::GetAttrResponse Mile::Cirno::PopGetAttrResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::GetAttrResponse Result;
+    Result.Valid = Mile::Cirno::PopUInt64(Buffer);
+    Result.UniqueId = Mile::Cirno::PopQid(Buffer);
+    Result.Mode = Mile::Cirno::PopUInt32(Buffer);
+    Result.OwnerUserId = Mile::Cirno::PopUInt32(Buffer);
+    Result.GroupId = Mile::Cirno::PopUInt32(Buffer);
+    Result.NumberOfHardLinks = Mile::Cirno::PopUInt64(Buffer);
+    Result.DeviceId = Mile::Cirno::PopUInt64(Buffer);
+    Result.FileSize = Mile::Cirno::PopUInt64(Buffer);
+    Result.BlockSize = Mile::Cirno::PopUInt64(Buffer);
+    Result.AllocatedBlocks = Mile::Cirno::PopUInt64(Buffer);
+    Result.LastAccessTimeSeconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.LastAccessTimeNanoseconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.LastWriteTimeSeconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.LastWriteTimeNanoseconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.ChangeTimeSeconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.ChangeTimeNanoseconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.BirthTimeSeconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.BirthTimeNanoseconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.Generation = Mile::Cirno::PopUInt64(Buffer);
+    Result.DataVersion = Mile::Cirno::PopUInt64(Buffer);
+    return Result;
+}
+
+void Mile::Cirno::PushSetAttrRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::SetAttrRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushUInt32(Buffer, Value.Valid);
+    Mile::Cirno::PushUInt32(Buffer, Value.Mode);
+    Mile::Cirno::PushUInt32(Buffer, Value.OwnerUserId);
+    Mile::Cirno::PushUInt32(Buffer, Value.GroupId);
+    Mile::Cirno::PushUInt64(Buffer, Value.FileSize);
+    Mile::Cirno::PushUInt64(Buffer, Value.LastAccessTimeSeconds);
+    Mile::Cirno::PushUInt64(Buffer, Value.LastAccessTimeNanoseconds);
+    Mile::Cirno::PushUInt64(Buffer, Value.LastWriteTimeSeconds);
+    Mile::Cirno::PushUInt64(Buffer, Value.LastWriteTimeNanoseconds);
+}
+
+void Mile::Cirno::PushXattrWalkRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::XattrWalkRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushUInt32(Buffer, Value.NewFileId);
+    Mile::Cirno::PushString(Buffer, Value.Name);
+}
+
+Mile::Cirno::XattrWalkResponse Mile::Cirno::PopXattrWalkResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::XattrWalkResponse Result;
+    Result.Size = PopUInt64(Buffer);
+    return Result;
 }
 
 void Mile::Cirno::PushVersionRequest(
