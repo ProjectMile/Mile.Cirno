@@ -171,6 +171,62 @@ void Mile::Cirno::PushQid(
     Mile::Cirno::PushUInt64(Buffer, Value.Path);
 }
 
+Mile::Cirno::DirectoryEntry Mile::Cirno::PopDirectoryEntry(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::DirectoryEntry Result;
+    Result.UniqueId = Mile::Cirno::PopQid(Buffer);
+    Result.Offset = Mile::Cirno::PopUInt64(Buffer);
+    Result.Type = Mile::Cirno::PopUInt8(Buffer);
+    Result.Name = Mile::Cirno::PopString(Buffer);
+    return Result;
+}
+
+void Mile::Cirno::PushDirectoryEntry(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::DirectoryEntry const& Value)
+{
+    Mile::Cirno::PushQid(Buffer, Value.UniqueId);
+    Mile::Cirno::PushUInt64(Buffer, Value.Offset);
+    Mile::Cirno::PushUInt8(Buffer, Value.Type);
+    Mile::Cirno::PushString(Buffer, Value.Name);
+}
+
+Mile::Cirno::Stat Mile::Cirno::PopStat(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::Stat Result;
+    Result.Type = Mile::Cirno::PopUInt16(Buffer);
+    Result.Dev = Mile::Cirno::PopUInt32(Buffer);
+    Result.UniqueId = Mile::Cirno::PopQid(Buffer);
+    Result.Mode = Mile::Cirno::PopUInt32(Buffer);
+    Result.LastAccessTime = Mile::Cirno::PopUInt32(Buffer);
+    Result.LastWriteTime = Mile::Cirno::PopUInt32(Buffer);
+    Result.FileSize = Mile::Cirno::PopUInt64(Buffer);
+    Result.FileName = Mile::Cirno::PopString(Buffer);
+    Result.OwnerUserId = Mile::Cirno::PopString(Buffer);
+    Result.GroupId = Mile::Cirno::PopString(Buffer);
+    Result.LastWriteUserId = Mile::Cirno::PopString(Buffer);
+    return Result;
+}
+
+void Mile::Cirno::PushStat(
+    std::vector<std::uint8_t>& Buffer,
+    Stat const& Value)
+{
+    Mile::Cirno::PushUInt16(Buffer, Value.Type);
+    Mile::Cirno::PushUInt32(Buffer, Value.Dev);
+    Mile::Cirno::PushQid(Buffer, Value.UniqueId);
+    Mile::Cirno::PushUInt32(Buffer, Value.Mode);
+    Mile::Cirno::PushUInt32(Buffer, Value.LastAccessTime);
+    Mile::Cirno::PushUInt32(Buffer, Value.LastWriteTime);
+    Mile::Cirno::PushUInt64(Buffer, Value.FileSize);
+    Mile::Cirno::PushString(Buffer, Value.FileName);
+    Mile::Cirno::PushString(Buffer, Value.OwnerUserId);
+    Mile::Cirno::PushString(Buffer, Value.GroupId);
+    Mile::Cirno::PushString(Buffer, Value.LastWriteUserId);
+}
+
 void Mile::Cirno::PushVersionRequest(
     std::vector<std::uint8_t>& Buffer,
     Mile::Cirno::VersionRequest const& Value)
