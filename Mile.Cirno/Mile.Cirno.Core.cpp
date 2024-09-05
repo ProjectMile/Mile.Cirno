@@ -284,6 +284,44 @@ void Mile::Cirno::PushWindowsDirectoryEntry(
     Mile::Cirno::PushStat(Buffer, Value.Stat);
 }
 
+Mile::Cirno::LinuxErrorResponse Mile::Cirno::PopLinuxErrorResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::LinuxErrorResponse Result;
+    Result.Code = Mile::Cirno::PopUInt32(Buffer);
+    return Result;
+}
+
+void Mile::Cirno::PushStatFsRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::StatFsRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+}
+
+Mile::Cirno::StatFsResponse Mile::Cirno::PopStatFsResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::StatFsResponse Result;
+    Result.FileSystemType = Mile::Cirno::PopUInt32(Buffer);
+    Result.BlockSize = Mile::Cirno::PopUInt32(Buffer);
+    Result.TotalBlocks = Mile::Cirno::PopUInt16(Buffer);
+    Result.FreeBlocks = Mile::Cirno::PopUInt64(Buffer);
+    Result.AvailableBlocks = Mile::Cirno::PopUInt64(Buffer);
+    Result.TotalFiles = Mile::Cirno::PopUInt64(Buffer);
+    Result.FreeFileNodes = Mile::Cirno::PopUInt64(Buffer);
+    Result.FileSystemId = Mile::Cirno::PopUInt64(Buffer);
+    Result.MaximumFileNameLength = Mile::Cirno::PopUInt32(Buffer);
+}
+
+void Mile::Cirno::PushLinuxOpenRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::LinuxOpenRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushUInt32(Buffer, Value.Flags);
+}
+
 void Mile::Cirno::PushVersionRequest(
     std::vector<std::uint8_t>& Buffer,
     Mile::Cirno::VersionRequest const& Value)
