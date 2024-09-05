@@ -227,6 +227,63 @@ void Mile::Cirno::PushStat(
     Mile::Cirno::PushString(Buffer, Value.LastWriteUserId);
 }
 
+Mile::Cirno::UnixStat Mile::Cirno::PopUnixStat(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::UnixStat Result;
+    Result.Type = Mile::Cirno::PopUInt16(Buffer);
+    Result.Dev = Mile::Cirno::PopUInt32(Buffer);
+    Result.UniqueId = Mile::Cirno::PopQid(Buffer);
+    Result.Mode = Mile::Cirno::PopUInt32(Buffer);
+    Result.LastAccessTime = Mile::Cirno::PopUInt32(Buffer);
+    Result.LastWriteTime = Mile::Cirno::PopUInt32(Buffer);
+    Result.FileSize = Mile::Cirno::PopUInt64(Buffer);
+    Result.FileName = Mile::Cirno::PopString(Buffer);
+    Result.OwnerUserId = Mile::Cirno::PopString(Buffer);
+    Result.GroupId = Mile::Cirno::PopString(Buffer);
+    Result.LastWriteUserId = Mile::Cirno::PopString(Buffer);
+    Result.NumericOwnerUserId = Mile::Cirno::PopUInt32(Buffer);
+    Result.NumericGroupId = Mile::Cirno::PopUInt32(Buffer);
+    Result.NumericLastWriteUserId = Mile::Cirno::PopUInt32(Buffer);
+    return Result;
+}
+
+void Mile::Cirno::PushUnixStat(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::UnixStat const& Value)
+{
+    Mile::Cirno::PushUInt16(Buffer, Value.Type);
+    Mile::Cirno::PushUInt32(Buffer, Value.Dev);
+    Mile::Cirno::PushQid(Buffer, Value.UniqueId);
+    Mile::Cirno::PushUInt32(Buffer, Value.Mode);
+    Mile::Cirno::PushUInt32(Buffer, Value.LastAccessTime);
+    Mile::Cirno::PushUInt32(Buffer, Value.LastWriteTime);
+    Mile::Cirno::PushUInt64(Buffer, Value.FileSize);
+    Mile::Cirno::PushString(Buffer, Value.FileName);
+    Mile::Cirno::PushString(Buffer, Value.OwnerUserId);
+    Mile::Cirno::PushString(Buffer, Value.GroupId);
+    Mile::Cirno::PushString(Buffer, Value.LastWriteUserId);
+    Mile::Cirno::PushUInt32(Buffer, Value.NumericOwnerUserId);
+    Mile::Cirno::PushUInt32(Buffer, Value.NumericGroupId);
+    Mile::Cirno::PushUInt32(Buffer, Value.NumericLastWriteUserId);
+}
+
+Mile::Cirno::WindowsDirectoryEntry Mile::Cirno::PopWindowsDirectoryEntry(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::WindowsDirectoryEntry Result;
+    Result.Entry = Mile::Cirno::PopDirectoryEntry(Buffer);
+    Result.Stat = Mile::Cirno::PopStat(Buffer);
+}
+
+void Mile::Cirno::PushWindowsDirectoryEntry(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::WindowsDirectoryEntry const& Value)
+{
+    Mile::Cirno::PushDirectoryEntry(Buffer, Value.Entry);
+    Mile::Cirno::PushStat(Buffer, Value.Stat);
+}
+
 void Mile::Cirno::PushVersionRequest(
     std::vector<std::uint8_t>& Buffer,
     Mile::Cirno::VersionRequest const& Value)
