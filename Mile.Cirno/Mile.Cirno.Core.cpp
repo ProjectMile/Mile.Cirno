@@ -481,6 +481,84 @@ Mile::Cirno::XattrWalkResponse Mile::Cirno::PopXattrWalkResponse(
     return Result;
 }
 
+void Mile::Cirno::PushXattrCreateRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::XattrCreateRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushString(Buffer, Value.Name);
+    Mile::Cirno::PushUInt64(Buffer, Value.Size);
+    Mile::Cirno::PushUInt32(Buffer, Value.Flags);
+}
+
+void Mile::Cirno::PushReadDirRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::ReadDirRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushUInt64(Buffer, Value.Offset);
+    Mile::Cirno::PushUInt32(Buffer, Value.Count);
+}
+
+// TODO
+Mile::Cirno::ReadDirResponse Mile::Cirno::PopReadDirResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::ReadDirResponse Result;
+    
+}
+
+void Mile::Cirno::PushFsyncRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::FsyncRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+}
+
+void Mile::Cirno::PushLockRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::LockRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushUInt8(Buffer, Value.Type);
+    Mile::Cirno::PushUInt32(Buffer, Value.Flags);
+    Mile::Cirno::PushUInt64(Buffer, Value.Start);
+    Mile::Cirno::PushUInt64(Buffer, Value.Length);
+    Mile::Cirno::PushUInt32(Buffer, Value.ProcessId);
+    Mile::Cirno::PushString(Buffer, Value.ClientId);
+}
+
+Mile::Cirno::LockResponse Mile::Cirno::PopLockResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::LockResponse Result;
+    Result.Status = PopUInt8(Buffer);
+    return Result;
+}
+
+void Mile::Cirno::PushGetLockRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::GetLockRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushUInt8(Buffer, Value.Type);
+    Mile::Cirno::PushUInt64(Buffer, Value.Start);
+    Mile::Cirno::PushUInt64(Buffer, Value.Length);
+    Mile::Cirno::PushUInt32(Buffer, Value.ProcessId);
+    Mile::Cirno::PushString(Buffer, Value.ClientId);
+}
+
+Mile::Cirno::GetLockResponse Mile::Cirno::PopGetLockResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::GetLockResponse Result;
+    Result.Type = Mile::Cirno::PopUInt8(Buffer);
+    Result.Start = Mile::Cirno::PopUInt64(Buffer);
+    Result.Length = Mile::Cirno::PopUInt32(Buffer);
+    Result.ClientId = Mile::Cirno::PopString(Buffer);
+    return Result;
+}
+
 void Mile::Cirno::PushVersionRequest(
     std::vector<std::uint8_t>& Buffer,
     Mile::Cirno::VersionRequest const& Value)
