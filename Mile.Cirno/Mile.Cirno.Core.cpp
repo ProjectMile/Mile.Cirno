@@ -559,6 +559,52 @@ Mile::Cirno::GetLockResponse Mile::Cirno::PopGetLockResponse(
     return Result;
 }
 
+void Mile::Cirno::PushLinkRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::LinkRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.DirectoryFileId);
+    Mile::Cirno::PushUInt32(Buffer, Value.DirectoryFileId);
+    Mile::Cirno::PushString(Buffer, Value.Name);
+}
+
+void Mile::Cirno::PushMkDirRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::MkDirRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.DirectoryFileId);
+    Mile::Cirno::PushString(Buffer, Value.Name);
+    Mile::Cirno::PushUInt32(Buffer, Value.Mode);
+    Mile::Cirno::PushUInt32(Buffer, Value.Gid);
+}
+
+Mile::Cirno::MkDirResponse Mile::Cirno::PopMkDirResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::MkDirResponse Result;
+    Result.UniqueId = Mile::Cirno::PopQid(Buffer);
+    return Result;
+}
+
+void Mile::Cirno::PushRenameAtRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::RenameAtRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.OldDirectoryFileId);
+    Mile::Cirno::PushString(Buffer, Value.OldName);
+    Mile::Cirno::PushUInt32(Buffer, Value.NewDirectoryFileId);
+    Mile::Cirno::PushString(Buffer, Value.NewName);
+}
+
+void Mile::Cirno::  (
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::UnlinkAtRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.DirectoryFileId);
+    Mile::Cirno::PushString(Buffer, Value.Name);
+    Mile::Cirno::PushUInt32(Buffer, Value.Flags);
+}
+
 void Mile::Cirno::PushVersionRequest(
     std::vector<std::uint8_t>& Buffer,
     Mile::Cirno::VersionRequest const& Value)
