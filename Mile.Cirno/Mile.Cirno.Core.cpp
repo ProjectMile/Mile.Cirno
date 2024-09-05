@@ -701,3 +701,62 @@ void Mile::Cirno::PushFlushRequest(
 {
     Mile::Cirno::PushUInt16(Buffer, Value.OldTag);
 }
+
+void Mile::Cirno::PushWalkRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::WalkRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushUInt32(Buffer, Value.NewFileId);
+    for (auto const& Name : Value.Names)
+    {
+        Mile::Cirno::PushString(Buffer, Name);
+    }
+}
+
+void Mile::Cirno::PushOpenRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::OpenRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushUInt8(Buffer, Value.Mode);
+}
+
+Mile::Cirno::OpenResponse Mile::Cirno::PopOpenResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::OpenResponse Result;
+    Result.UniqueId = Mile::Cirno::PopQid(Buffer);
+    Result.IoUnit = Mile::Cirno::PopUInt32(Buffer);
+    return Result;
+}
+
+void Mile::Cirno::PushCreateRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::CreateRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushString(Buffer, Value.Name);
+    Mile::Cirno::PushUInt32(Buffer, Value.Permission);
+    Mile::Cirno::PushUInt32(Buffer, Value.Mode);
+}
+
+void Mile::Cirno::PushUnixCreateRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::UnixCreateRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushString(Buffer, Value.Name);
+    Mile::Cirno::PushUInt32(Buffer, Value.Permission);
+    Mile::Cirno::PushUInt32(Buffer, Value.Mode);
+    Mile::Cirno::PushString(Buffer, Value.UnixExtension);
+}
+
+Mile::Cirno::CreateResponse Mile::Cirno::PopCreateResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::CreateResponse Result;
+    Result.UniqueId = Mile::Cirno::PopQid(Buffer);
+    Result.IoUnit = Mile::Cirno::PopUInt32(Buffer);
+    return Result;
+}
