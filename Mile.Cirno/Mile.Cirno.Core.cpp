@@ -770,11 +770,14 @@ void Mile::Cirno::PushReadRequest(
     Mile::Cirno::PushUInt32(Buffer, Value.Count);
 }
 
-// TODO
 Mile::Cirno::ReadResponse Mile::Cirno::PopReadResponse(
     std::span<std::uint8_t>& Buffer)
 {
-    
+    Mile::Cirno::ReadResponse Result;
+    std::uint32_t Length = Mile::Cirno::PopUInt32(Buffer);
+    auto Swap = Mile::Cirno::PopBytes(Buffer, Length);
+    Result.Data.assign(Swap.begin(), Swap.end());
+    return Result;
 }
 
 void Mile::Cirno::PushWriteRequest(
@@ -816,17 +819,28 @@ void Mile::Cirno::PushStatRequest(
     Mile::Cirno::PushUInt32(Buffer, Value.FileId);
 }
 
-// TODO
 Mile::Cirno::StatResponse Mile::Cirno::PopStatResponse(
     std::span<std::uint8_t>& Buffer)
 {
-    
+    Mile::Cirno::StatResponse Result;
+    std::uint16_t Length = Mile::Cirno::PopUInt16(Buffer);
+    for (std::uint16_t i = 0; i < Length; i++)
+    {
+        Result.Stat.push_back(Mile::Cirno::PopStat(Buffer));
+    }
+    return Result;
 }
 
-// TODO
 void Mile::Cirno::PushWriteStatRequest(
     std::vector<std::uint8_t>& Buffer,
     Mile::Cirno::WriteStatRequest const& Value)
 {
-
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    std::uint16_t Length = static_cast<std::uint16_t>(Value.Stat.size());
+    Mile::Cirno::PushUInt16(Buffer, Length);
+    for (auto const& stat: Value.Stat)
+    {
+        Mile::Cirno::PushStat(Buffer, stat);
+    }
 }
+
