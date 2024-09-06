@@ -500,12 +500,16 @@ void Mile::Cirno::PushReadDirRequest(
     Mile::Cirno::PushUInt32(Buffer, Value.Count);
 }
 
-// TODO
 Mile::Cirno::ReadDirResponse Mile::Cirno::PopReadDirResponse(
     std::span<std::uint8_t>& Buffer)
 {
     Mile::Cirno::ReadDirResponse Result;
-    
+    std::uint32_t Length = Mile::Cirno::PopUInt32(Buffer);
+    for (std::uint32_t i = 0; i < Length; i++)
+    {
+        Result.Data.push_back(Mile::Cirno::PopDirectoryEntry(Buffer));
+    }
+    return Result;
 }
 
 void Mile::Cirno::PushFsyncRequest(
