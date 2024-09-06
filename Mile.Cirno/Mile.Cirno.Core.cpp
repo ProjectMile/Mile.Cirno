@@ -274,6 +274,7 @@ Mile::Cirno::WindowsDirectoryEntry Mile::Cirno::PopWindowsDirectoryEntry(
     Mile::Cirno::WindowsDirectoryEntry Result;
     Result.Entry = Mile::Cirno::PopDirectoryEntry(Buffer);
     Result.Stat = Mile::Cirno::PopStat(Buffer);
+    return Result;
 }
 
 void Mile::Cirno::PushWindowsDirectoryEntry(
@@ -312,6 +313,7 @@ Mile::Cirno::StatFsResponse Mile::Cirno::PopStatFsResponse(
     Result.FreeFileNodes = Mile::Cirno::PopUInt64(Buffer);
     Result.FileSystemId = Mile::Cirno::PopUInt64(Buffer);
     Result.MaximumFileNameLength = Mile::Cirno::PopUInt32(Buffer);
+    return Result;
 }
 
 void Mile::Cirno::PushLinuxOpenRequest(
@@ -695,7 +697,7 @@ Mile::Cirno::UnixErrorResponse Mile::Cirno::PopUnixErrorResponse(
 {
     Mile::Cirno::UnixErrorResponse Result;
     Result.Message = Mile::Cirno::PopString(Buffer);
-    Result.Message = Mile::Cirno::PopUInt32(Buffer);
+    Result.Code = Mile::Cirno::PopUInt32(Buffer);
     return Result;
 }
 
