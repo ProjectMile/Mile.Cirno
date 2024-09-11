@@ -242,6 +242,7 @@ Mile::Cirno::UnixStat Mile::Cirno::PopUnixStat(
     Result.OwnerUserId = Mile::Cirno::PopString(Buffer);
     Result.GroupId = Mile::Cirno::PopString(Buffer);
     Result.LastWriteUserId = Mile::Cirno::PopString(Buffer);
+    Result.UnixExtension = Mile::Cirno::PopString(UnixExtension);
     Result.NumericOwnerUserId = Mile::Cirno::PopUInt32(Buffer);
     Result.NumericGroupId = Mile::Cirno::PopUInt32(Buffer);
     Result.NumericLastWriteUserId = Mile::Cirno::PopUInt32(Buffer);
@@ -263,6 +264,7 @@ void Mile::Cirno::PushUnixStat(
     Mile::Cirno::PushString(Buffer, Value.OwnerUserId);
     Mile::Cirno::PushString(Buffer, Value.GroupId);
     Mile::Cirno::PushString(Buffer, Value.LastWriteUserId);
+    Mile::Cirno::PushString(Buffer, Value.UnixExtension);
     Mile::Cirno::PushUInt32(Buffer, Value.NumericOwnerUserId);
     Mile::Cirno::PushUInt32(Buffer, Value.NumericGroupId);
     Mile::Cirno::PushUInt32(Buffer, Value.NumericLastWriteUserId);
