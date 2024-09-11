@@ -562,7 +562,8 @@ Mile::Cirno::GetLockResponse Mile::Cirno::PopGetLockResponse(
     Mile::Cirno::GetLockResponse Result;
     Result.Type = Mile::Cirno::PopUInt8(Buffer);
     Result.Start = Mile::Cirno::PopUInt64(Buffer);
-    Result.Length = Mile::Cirno::PopUInt32(Buffer);
+    Result.Length = Mile::Cirno::PopUInt64(Buffer);
+    Result.ProcessId = Mile::Cirno::PopUInt32(Buffer);
     Result.ClientId = Mile::Cirno::PopString(Buffer);
     return Result;
 }
@@ -572,7 +573,7 @@ void Mile::Cirno::PushLinkRequest(
     Mile::Cirno::LinkRequest const& Value)
 {
     Mile::Cirno::PushUInt32(Buffer, Value.DirectoryFileId);
-    Mile::Cirno::PushUInt32(Buffer, Value.DirectoryFileId);
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
     Mile::Cirno::PushString(Buffer, Value.Name);
 }
 
@@ -720,6 +721,18 @@ void Mile::Cirno::PushWalkRequest(
     {
         Mile::Cirno::PushString(Buffer, Name);
     }
+}
+
+Mile::Cirno::WalkResponse PopWalkResponse(
+        std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::WalkResponse Result;
+    std::uint16_t Length = Mile::Cirno::PopUInt16(Buffer);
+    for (std::uint16_t i = 0; i < Length; i++)
+    {
+        Result.UniqueIds.emplace_back(Mile::Cirno::PopQid(Buffer));
+    }
+    return Result;
 }
 
 void Mile::Cirno::PushOpenRequest(
