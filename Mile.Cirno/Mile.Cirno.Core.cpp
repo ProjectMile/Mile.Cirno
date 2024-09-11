@@ -308,7 +308,7 @@ Mile::Cirno::StatFsResponse Mile::Cirno::PopStatFsResponse(
     Mile::Cirno::StatFsResponse Result;
     Result.FileSystemType = Mile::Cirno::PopUInt32(Buffer);
     Result.BlockSize = Mile::Cirno::PopUInt32(Buffer);
-    Result.TotalBlocks = Mile::Cirno::PopUInt16(Buffer);
+    Result.TotalBlocks = Mile::Cirno::PopUInt64(Buffer);
     Result.FreeBlocks = Mile::Cirno::PopUInt64(Buffer);
     Result.AvailableBlocks = Mile::Cirno::PopUInt64(Buffer);
     Result.TotalFiles = Mile::Cirno::PopUInt64(Buffer);
