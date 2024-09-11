@@ -242,7 +242,7 @@ Mile::Cirno::UnixStat Mile::Cirno::PopUnixStat(
     Result.OwnerUserId = Mile::Cirno::PopString(Buffer);
     Result.GroupId = Mile::Cirno::PopString(Buffer);
     Result.LastWriteUserId = Mile::Cirno::PopString(Buffer);
-    Result.UnixExtension = Mile::Cirno::PopString(UnixExtension);
+    Result.UnixExtension = Mile::Cirno::PopString(Buffer);
     Result.NumericOwnerUserId = Mile::Cirno::PopUInt32(Buffer);
     Result.NumericGroupId = Mile::Cirno::PopUInt32(Buffer);
     Result.NumericLastWriteUserId = Mile::Cirno::PopUInt32(Buffer);
