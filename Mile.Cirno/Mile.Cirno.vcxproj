@@ -33,6 +33,9 @@
     <PackageReference Include="Mile.Windows.Helpers">
       <Version>1.0.645</Version>
     </PackageReference>
+    <PackageReference Include="Mile.Dokany">
+      <Version>1.0.434</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mile.Cirno.Protocol.h" />
