@@ -16,11 +16,11 @@
     <MileProjectVersion>1.0.$([System.DateTime]::Today.Subtract($([System.DateTime]::Parse('2023-08-03'))).TotalDays).0</MileProjectVersion>
     <MileProjectVersionTag>Preview</MileProjectVersionTag>
   </PropertyGroup>
-  <Import Project="..\Mile.Project.Windows\Mile.Project.Platform.x86.props" />
-  <Import Project="..\Mile.Project.Windows\Mile.Project.Platform.x64.props" />
-  <Import Project="..\Mile.Project.Windows\Mile.Project.Platform.ARM64.props" />
-  <Import Project="..\Mile.Project.Windows\Mile.Project.Cpp.Default.props" />
-  <Import Project="..\Mile.Project.Windows\Mile.Project.Cpp.props" />
+  <Import Sdk="Mile.Project.Configurations" Version="1.0.1426" Project="Mile.Project.Platform.x86.props" />
+  <Import Sdk="Mile.Project.Configurations" Version="1.0.1426" Project="Mile.Project.Platform.x64.props" />
+  <Import Sdk="Mile.Project.Configurations" Version="1.0.1426" Project="Mile.Project.Platform.ARM64.props" />
+  <Import Sdk="Mile.Project.Configurations" Version="1.0.1426" Project="Mile.Project.Cpp.Default.props" />
+  <Import Sdk="Mile.Project.Configurations" Version="1.0.1426" Project="Mile.Project.Cpp.props" />
   <ItemGroup>
     <ClCompile Include="Mile.Cirno.cpp" />
     <ClCompile Include="Mile.Cirno.Core.cpp" />
@@ -40,5 +40,5 @@
     <ClInclude Include="Mile.Cirno.Protocol.h" />
     <ClInclude Include="Mile.Cirno.Core.h" />
   </ItemGroup>
-  <Import Project="..\Mile.Project.Windows\Mile.Project.Cpp.targets" />
+  <Import Sdk="Mile.Project.Configurations" Version="1.0.1426" Project="Mile.Project.Cpp.targets" />
 </Project>
