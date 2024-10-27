@@ -23,7 +23,7 @@
   <Import Sdk="Mile.Project.Configurations" Version="1.0.1426" Project="Mile.Project.Cpp.props" />
   <ItemGroup>
     <ClCompile Include="Mile.Cirno.cpp" />
-    <ClCompile Include="Mile.Cirno.Core.cpp" />
+    <ClCompile Include="Mile.Cirno.Protocol.Parser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="Mile.Cirno.manifest" />
@@ -38,7 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mile.Cirno.Protocol.h" />
-    <ClInclude Include="Mile.Cirno.Core.h" />
+    <ClInclude Include="Mile.Cirno.Protocol.Parser.h" />
   </ItemGroup>
   <Import Sdk="Mile.Project.Configurations" Version="1.0.1426" Project="Mile.Project.Cpp.targets" />
 </Project>

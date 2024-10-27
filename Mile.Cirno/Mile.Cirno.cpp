@@ -30,7 +30,7 @@
 #include <vector>
 #include <string>
 
-#include "Mile.Cirno.Core.h"
+#include "Mile.Cirno.Protocol.Parser.h"
 
 namespace
 {

@@ -1,7 +1,7 @@
 ﻿/*
  * PROJECT:   Mouri Internal Library Essentials
- * FILE:      Mile.Cirno.Core.h
- * PURPOSE:   Definition for Mile.Cirno Core API
+ * FILE:      Mile.Cirno.Protocol.Parser.h
+ * PURPOSE:   Definition for Plan 9 File System Protocol Parser
  *
  * LICENSE:   The MIT License
  *
@@ -9,8 +9,8 @@
  *             per1cycle (pericycle.cc@gmail.com)
  */
 
-#ifndef MILE_CIRNO_CORE
-#define MILE_CIRNO_CORE
+#ifndef MILE_CIRNO_PROTOCOL_PARSER
+#define MILE_CIRNO_PROTOCOL_PARSER
 
 #include "Mile.Cirno.Protocol.h"
 
@@ -316,4 +316,4 @@ namespace Mile::Cirno
         WriteStatRequest const& Value);
 }
 
-#endif // ! MILE_CIRNO_CORE
+#endif // !MILE_CIRNO_PROTOCOL_PARSER

@@ -1,7 +1,7 @@
 ﻿/*
  * PROJECT:   Mouri Internal Library Essentials
- * FILE:      Mile.Cirno.Core.cpp
- * PURPOSE:   Implementation for Mile.Cirno Core API
+ * FILE:      Mile.Cirno.Protocol.Parser.cpp
+ * PURPOSE:   Implementation for Plan 9 File System Protocol Parser
  *
  * LICENSE:   The MIT License
  *
@@ -9,7 +9,7 @@
  *             per1cycle (pericycle.cc@gmail.com)
  */
 
-#include "Mile.Cirno.Core.h"
+#include "Mile.Cirno.Protocol.Parser.h"
 
 std::span<std::uint8_t> Mile::Cirno::PopBytes(
     std::span<std::uint8_t>& Buffer,
