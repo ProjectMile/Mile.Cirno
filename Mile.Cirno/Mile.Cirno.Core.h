@@ -15,7 +15,10 @@
 
 namespace Mile::Cirno
 {
+    std::uint16_t AllocateTag();
 
+    void FreeTag(
+        std::uint16_t const& Tag);
 }
 
 #endif // !MILE_CIRNO_CORE
