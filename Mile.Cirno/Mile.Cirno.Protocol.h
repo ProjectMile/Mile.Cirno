@@ -18,6 +18,9 @@
 // - https://github.com/pfpacket/rust-9p/blob/master/src/fcall.rs
 // - https://github.com/piscisaureus/rust-9p/blob/master/src/fcall.rs
 
+// Use traditional C/C++ language features only because this header file is
+// designed for more universal interoperability scenarios.
+
 #ifndef MILE_CIRNO_PROTOCOL
 #define MILE_CIRNO_PROTOCOL
 
