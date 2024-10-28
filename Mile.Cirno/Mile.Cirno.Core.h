@@ -13,6 +13,9 @@
 
 #include "Mile.Cirno.Protocol.h"
 
+#include <map>
+#include <mutex>
+
 namespace Mile::Cirno
 {
     [[noreturn]] void ThrowException(
@@ -24,18 +27,31 @@ namespace Mile::Cirno
     private:
 
         SOCKET m_Socket = INVALID_SOCKET;
+        std::mutex m_ReceiveWorkerMutex;
+        HANDLE m_ReceiveWorkerThread = nullptr;
+        bool m_ReceiveWorkerStarted = false;
+        std::map<std::uint16_t, std::vector<std::uint8_t>> m_Responses;
 
         Client() = default;
 
     public:
 
-        ~Client() = default;
+        void ReceiveWorkerEntryPoint();
 
-        static Client ConnectWithTcpSocket(
+        ~Client();
+
+        void SendPacket(
+            std::vector<std::uint8_t> const& Content);
+
+        void WaitResponse(
+            std::uint16_t const& Tag,
+            std::vector<std::uint8_t>& Content);
+
+        static Client* ConnectWithTcpSocket(
             std::string const& Host,
             std::string const& Port);
 
-        static Client ConnectWithHyperVSocket(
+        static Client* ConnectWithHyperVSocket(
             std::uint32_t const& Port);
     };
 

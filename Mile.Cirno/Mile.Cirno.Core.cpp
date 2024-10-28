@@ -22,7 +22,6 @@
 
 #include <Mile.Helpers.CppBase.h>
 
-#include <mutex>
 #include <set>
 #include <stdexcept>
 
@@ -36,11 +35,140 @@
         Code));
 }
 
-Mile::Cirno::Client Mile::Cirno::Client::ConnectWithTcpSocket(
+void Mile::Cirno::Client::ReceiveWorkerEntryPoint()
+{
+    this->m_ReceiveWorkerStarted = true;
+
+    while (this->m_ReceiveWorkerStarted)
+    {
+        std::vector<std::uint8_t> Content;
+        
+        {
+            Content.resize(Mile::Cirno::HeaderSize);
+            DWORD NumberOfBytesRecvd = 0;
+            DWORD Flags = 0;
+            if (!::MileSocketRecv(
+                this->m_Socket,
+                &Content[0],
+                Mile::Cirno::HeaderSize,
+                &NumberOfBytesRecvd,
+                &Flags))
+            {
+                Mile::Cirno::ThrowException(
+                    "MileSocketRecv",
+                    ::WSAGetLastError());
+                break;
+            }
+            if (Mile::Cirno::HeaderSize != NumberOfBytesRecvd)
+            {
+                Mile::Cirno::ThrowException(
+                    "Mile::Cirno::HeaderSize != NumberOfBytesRecvd",
+                    ERROR_INVALID_DATA);
+                break;
+            }
+        }
+
+        std::span<std::uint8_t> HeaderSpan = std::span<std::uint8_t>(Content);
+        Mile::Cirno::Header Header = Mile::Cirno::PopHeader(HeaderSpan);
+
+        {
+            Content.resize(Mile::Cirno::HeaderSize + Header.Size);
+            DWORD NumberOfBytesRecvd = 0;
+            DWORD Flags = 0;
+            if (!::MileSocketRecv(
+                this->m_Socket,
+                &Content[Mile::Cirno::HeaderSize],
+                Header.Size,
+                &NumberOfBytesRecvd,
+                &Flags))
+            {
+                Mile::Cirno::ThrowException(
+                    "MileSocketRecv",
+                    ::WSAGetLastError());
+                break;
+            }
+            if (Header.Size != NumberOfBytesRecvd)
+            {
+                Mile::Cirno::ThrowException(
+                    "Header.Size != NumberOfBytesRecvd",
+                    ERROR_INVALID_DATA);
+                break;
+            }
+        }
+
+        {
+            std::lock_guard<std::mutex> Guard(this->m_ReceiveWorkerMutex);
+            this->m_Responses.emplace(Header.Tag, Content);
+        }
+    }
+}
+
+Mile::Cirno::Client::~Client()
+{
+    if (this->m_ReceiveWorkerStarted)
+    {
+        this->m_ReceiveWorkerStarted = false;
+        if (this->m_ReceiveWorkerThread)
+        {
+            ::WaitForSingleObject(this->m_ReceiveWorkerThread, INFINITE);
+            ::CloseHandle(this->m_ReceiveWorkerThread);
+            this->m_ReceiveWorkerThread = nullptr;
+        }
+        if (INVALID_SOCKET != this->m_Socket)
+        {
+            ::closesocket(this->m_Socket);
+            this->m_Socket = INVALID_SOCKET;
+        }
+    }
+}
+
+void Mile::Cirno::Client::SendPacket(
+    std::vector<std::uint8_t> const& Content)
+{
+    DWORD NumberOfBytesSent = 0;
+    if (!::MileSocketSend(
+        this->m_Socket,
+        &Content[0],
+        static_cast<DWORD>(Content.size()),
+        &NumberOfBytesSent,
+        0))
+    {
+        Mile::Cirno::ThrowException(
+            "MileSocketSend",
+            ::WSAGetLastError());
+    }
+}
+
+void Mile::Cirno::Client::WaitResponse(
+    std::uint16_t const& Tag,
+    std::vector<std::uint8_t>& Content)
+{
+    Content.clear();
+
+    if (!this->m_ReceiveWorkerStarted)
+    {
+        return;
+    }
+
+    for (;;)
+    {
+        std::lock_guard<std::mutex> Guard(this->m_ReceiveWorkerMutex);
+        auto Iterator = this->m_Responses.find(Tag);
+        if (this->m_Responses.end() != Iterator)
+        {
+            Content = Iterator->second;
+            this->m_Responses.erase(Iterator);
+            break;
+        }
+        ::Sleep(100);
+    }
+}
+
+Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithTcpSocket(
     std::string const& Host,
     std::string const& Port)
 {
-    Mile::Cirno::Client Object = Mile::Cirno::Client();
+    Mile::Cirno::Client* Object = new Mile::Cirno::Client();
 
     std::string Checkpoint = "getaddrinfo";
     int Error = 0;
@@ -84,7 +212,7 @@ Mile::Cirno::Client Mile::Cirno::Client::ConnectWithTcpSocket(
                 nullptr,
                 nullptr))
             {
-                Object.m_Socket = Socket;
+                Object->m_Socket = Socket;
                 break;
             }
 
@@ -96,18 +224,31 @@ Mile::Cirno::Client Mile::Cirno::Client::ConnectWithTcpSocket(
         ::freeaddrinfo(AddressInfo);
     }
 
-    if (INVALID_SOCKET == Object.m_Socket && 0 != Error)
+    if (INVALID_SOCKET == Object->m_Socket && 0 != Error)
     {
-        Mile::Cirno::ThrowException(Checkpoint, Error);
+        Mile::Cirno::ThrowException(
+            Checkpoint,
+            Error);
+    }
+
+    Object->m_ReceiveWorkerThread = Mile::CreateThread([Object]()
+    {
+        Object->ReceiveWorkerEntryPoint();
+    });
+    if (!Object->m_ReceiveWorkerThread)
+    {
+        Mile::Cirno::ThrowException(
+            "Mile::CreateThread",
+            ::GetLastError());
     }
 
     return Object;
 }
 
-Mile::Cirno::Client Mile::Cirno::Client::ConnectWithHyperVSocket(
+Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithHyperVSocket(
     std::uint32_t const& Port)
 {
-    Mile::Cirno::Client Object = Mile::Cirno::Client();
+    Mile::Cirno::Client* Object = new Mile::Cirno::Client();
 
     SOCKET Socket = ::WSASocketW(
         AF_HYPERV,
@@ -118,7 +259,9 @@ Mile::Cirno::Client Mile::Cirno::Client::ConnectWithHyperVSocket(
         WSA_FLAG_OVERLAPPED);
     if (INVALID_SOCKET == Socket)
     {
-        Mile::Cirno::ThrowException("WSASocketW", ::WSAGetLastError());
+        Mile::Cirno::ThrowException(
+            "WSASocketW",
+            ::WSAGetLastError());
     }
 
     SOCKADDR_HV SocketAddress = { 0 };
@@ -142,10 +285,23 @@ Mile::Cirno::Client Mile::Cirno::Client::ConnectWithHyperVSocket(
         nullptr,
         nullptr))
     {
-        Mile::Cirno::ThrowException("WSAConnect", ::WSAGetLastError());
+        Mile::Cirno::ThrowException(
+            "WSAConnect",
+            ::WSAGetLastError());
     }
 
-    Object.m_Socket = Socket;
+    Object->m_Socket = Socket;
+
+    Object->m_ReceiveWorkerThread = Mile::CreateThread([Object]()
+    {
+        Object->ReceiveWorkerEntryPoint();
+    });
+    if (!Object->m_ReceiveWorkerThread)
+    {
+        Mile::Cirno::ThrowException(
+            "Mile::CreateThread",
+            ::GetLastError());
+    }
 
     return Object;
 }
