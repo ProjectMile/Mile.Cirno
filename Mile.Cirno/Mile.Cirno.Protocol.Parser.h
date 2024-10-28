@@ -250,9 +250,6 @@ namespace Mile::Cirno
     ErrorResponse PopErrorResponse(
         std::span<std::uint8_t>& Buffer);
 
-    UnixErrorResponse PopUnixErrorResponse(
-        std::span<std::uint8_t>& Buffer);
-
     void PushFlushRequest(
         std::vector<std::uint8_t>& Buffer,
         FlushRequest const& Value);

@@ -840,11 +840,6 @@ namespace Mile { namespace Cirno
     struct ErrorResponse
     {
         std::string Message;
-    };
-
-    struct UnixErrorResponse
-    {
-        std::string Message;
         std::uint32_t Code;
     };
 

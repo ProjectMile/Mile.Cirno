@@ -692,15 +692,15 @@ Mile::Cirno::ErrorResponse Mile::Cirno::PopErrorResponse(
 {
     Mile::Cirno::ErrorResponse Result;
     Result.Message = Mile::Cirno::PopString(Buffer);
-    return Result;
-}
-
-Mile::Cirno::UnixErrorResponse Mile::Cirno::PopUnixErrorResponse(
-    std::span<std::uint8_t>& Buffer)
-{
-    Mile::Cirno::UnixErrorResponse Result;
-    Result.Message = Mile::Cirno::PopString(Buffer);
-    Result.Code = Mile::Cirno::PopUInt32(Buffer);
+    if (sizeof(std::uint32_t) == Buffer.size())
+    {
+        Result.Code = Mile::Cirno::PopUInt32(Buffer);
+    }
+    else
+    {
+        // Plan 9 File System Protocol's ERRUNDEF
+        Result.Code = static_cast<std::uint32_t>(-1);
+    }
     return Result;
 }
 

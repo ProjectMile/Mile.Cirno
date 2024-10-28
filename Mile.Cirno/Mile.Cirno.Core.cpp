@@ -245,7 +245,7 @@ Mile::Cirno::VersionResponse Mile::Cirno::Client::Version(
             Mile::Cirno::PopErrorResponse(ResponseContentBufferSpan);
         Mile::Cirno::ThrowException(
             Response.Message.c_str(),
-            ERROR_INVALID_DATA);
+            Response.Code);
     }
     else if (MileCirnoLinuxErrorResponseMessage == ResponseHeader.Type)
     {
