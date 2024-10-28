@@ -19,6 +19,26 @@ namespace Mile::Cirno
         std::string_view Checkpoint,
         std::int32_t const& Code);
 
+    class Client
+    {
+    private:
+
+        SOCKET m_Socket = INVALID_SOCKET;
+
+        Client() = default;
+
+    public:
+
+        ~Client() = default;
+
+        static Client ConnectWithTcpSocket(
+            std::string const& Host,
+            std::string const& Port);
+
+        static Client ConnectWithHyperVSocket(
+            std::uint32_t const& Port);
+    };
+
     std::uint16_t AllocateTag();
 
     void FreeTag(
