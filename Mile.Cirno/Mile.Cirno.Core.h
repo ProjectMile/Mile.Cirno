@@ -56,6 +56,9 @@ namespace Mile::Cirno
             std::uint16_t const& Tag,
             std::vector<std::uint8_t>& Content);
 
+        VersionResponse Version(
+            VersionRequest const& Request);
+
         static Client* ConnectWithTcpSocket(
             std::string const& Host,
             std::string const& Port);

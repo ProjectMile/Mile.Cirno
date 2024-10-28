@@ -58,58 +58,13 @@ void Test()
                 ERROR_INVALID_DATA);
         }
 
-        Mile::Cirno::VersionRequest RequestContent;
-        RequestContent.MaximumMessageSize = 1 << 16;
-        RequestContent.ProtocolVersion = "9P2000.L";
-
-        std::vector<std::uint8_t> RequestContentBuffer;
-        Mile::Cirno::PushVersionRequest(
-            RequestContentBuffer,
-            RequestContent);
-
-        Mile::Cirno::Header RequestHeader;
-        RequestHeader.Size = static_cast<std::uint32_t>(
-            RequestContentBuffer.size());
-        RequestHeader.Type = MileCirnoVersionRequestMessage;
-        RequestHeader.Tag = MILE_CIRNO_NOTAG;
-
-        std::vector<std::uint8_t> RequestHeaderBuffer;
-        Mile::Cirno::PushHeader(RequestHeaderBuffer, RequestHeader);
-
-        Instance->SendPacket(RequestHeaderBuffer);
-        Instance->SendPacket(RequestContentBuffer);
-
-        std::vector<std::uint8_t> ResponseBuffer;
-        Instance->WaitResponse(MILE_CIRNO_NOTAG, ResponseBuffer);
-
-        std::span<std::uint8_t> ResponseBufferSpan =
-            std::span<std::uint8_t>(ResponseBuffer);
-
-        std::span<std::uint8_t> ResponseHeaderBufferSpan =
-            ResponseBufferSpan.subspan(0, Mile::Cirno::HeaderSize);
-        Mile::Cirno::Header ResponseHeader =
-            Mile::Cirno::PopHeader(ResponseHeaderBufferSpan);
-        if (RequestHeader.Tag != ResponseHeader.Tag)
-        {
-            Mile::Cirno::ThrowException(
-                "RequestHeader.Tag != ResponseHeader.Tag",
-                ERROR_INVALID_DATA);
-        }
-        if (MileCirnoVersionResponseMessage != ResponseHeader.Type)
-        {
-            Mile::Cirno::ThrowException(
-                "MileCirnoVersionResponseMessage != ResponseHeader.Type",
-                ERROR_INVALID_DATA);
-        }
-
-        std::span<std::uint8_t> ResponseContentBufferSpan =
-            ResponseBufferSpan.subspan(Mile::Cirno::HeaderSize);
-        Mile::Cirno::VersionResponse ResponseContent =
-            Mile::Cirno::PopVersionResponse(ResponseContentBufferSpan);
-
+        Mile::Cirno::VersionRequest Request;
+        Request.MaximumMessageSize = 1 << 16;
+        Request.ProtocolVersion = "9P2000.L";
+        Mile::Cirno::VersionResponse Response = Instance->Version(Request);
         std::printf(
             "[INFO] Response.ProtocolVersion = %s\n",
-            ResponseContent.ProtocolVersion.c_str());
+            Response.ProtocolVersion.c_str());
     }
     catch (std::exception const& ex)
     {

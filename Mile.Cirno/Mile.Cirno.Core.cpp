@@ -198,6 +198,71 @@ void Mile::Cirno::Client::WaitResponse(
     }
 }
 
+Mile::Cirno::VersionResponse Mile::Cirno::Client::Version(
+    Mile::Cirno::VersionRequest const& Request)
+{
+    std::vector<std::uint8_t> RequestContentBuffer;
+    Mile::Cirno::PushVersionRequest(
+        RequestContentBuffer,
+        Request);
+
+    Mile::Cirno::Header RequestHeader;
+    RequestHeader.Size = static_cast<std::uint32_t>(
+        RequestContentBuffer.size());
+    RequestHeader.Type = MileCirnoVersionRequestMessage;
+    RequestHeader.Tag = MILE_CIRNO_NOTAG;
+
+    std::vector<std::uint8_t> RequestHeaderBuffer;
+    Mile::Cirno::PushHeader(RequestHeaderBuffer, RequestHeader);
+
+    this->SendPacket(RequestHeaderBuffer);
+    this->SendPacket(RequestContentBuffer);
+
+    std::vector<std::uint8_t> ResponseBuffer;
+    this->WaitResponse(RequestHeader.Tag, ResponseBuffer);
+
+    std::span<std::uint8_t> ResponseBufferSpan =
+        std::span<std::uint8_t>(ResponseBuffer);
+
+    std::span<std::uint8_t> ResponseHeaderBufferSpan =
+        ResponseBufferSpan.subspan(0, Mile::Cirno::HeaderSize);
+    Mile::Cirno::Header ResponseHeader =
+        Mile::Cirno::PopHeader(ResponseHeaderBufferSpan);
+    if (MileCirnoVersionResponseMessage == ResponseHeader.Type)
+    {
+        std::span<std::uint8_t> ResponseContentBufferSpan =
+            ResponseBufferSpan.subspan(Mile::Cirno::HeaderSize);
+        Mile::Cirno::VersionResponse Response =
+            Mile::Cirno::PopVersionResponse(ResponseContentBufferSpan);
+        return Response;
+    }
+
+    if (MileCirnoErrorResponseMessage == ResponseHeader.Type)
+    {
+        std::span<std::uint8_t> ResponseContentBufferSpan =
+            ResponseBufferSpan.subspan(Mile::Cirno::HeaderSize);
+        Mile::Cirno::ErrorResponse Response =
+            Mile::Cirno::PopErrorResponse(ResponseContentBufferSpan);
+        Mile::Cirno::ThrowException(
+            Response.Message.c_str(),
+            ERROR_INVALID_DATA);
+    }
+    else if (MileCirnoLinuxErrorResponseMessage == ResponseHeader.Type)
+    {
+        std::span<std::uint8_t> ResponseContentBufferSpan =
+            ResponseBufferSpan.subspan(Mile::Cirno::HeaderSize);
+        Mile::Cirno::LinuxErrorResponse Response =
+            Mile::Cirno::PopLinuxErrorResponse(ResponseContentBufferSpan);
+        Mile::Cirno::ThrowException(
+            "MileCirnoVersionResponseMessage",
+            Response.Code);
+    }
+
+    Mile::Cirno::ThrowException(
+        "MileCirnoVersionResponseMessage != ResponseHeader.Type",
+        ERROR_INVALID_DATA);
+}
+
 Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithTcpSocket(
     std::string const& Host,
     std::string const& Port)
