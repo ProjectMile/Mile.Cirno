@@ -15,6 +15,17 @@
 
 #include <mutex>
 #include <set>
+#include <stdexcept>
+
+[[noreturn]] void Mile::Cirno::ThrowException(
+    std::string_view Checkpoint,
+    std::int32_t const& Code)
+{
+    throw std::runtime_error(Mile::FormatString(
+        "[Mile.Cirno] %s Failed. (Code = %d)",
+        Checkpoint.data(),
+        Code));
+}
 
 namespace
 {

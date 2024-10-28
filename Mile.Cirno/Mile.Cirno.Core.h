@@ -15,6 +15,10 @@
 
 namespace Mile::Cirno
 {
+    [[noreturn]] void ThrowException(
+        std::string_view Checkpoint,
+        std::int32_t const& Code);
+
     std::uint16_t AllocateTag();
 
     void FreeTag(
