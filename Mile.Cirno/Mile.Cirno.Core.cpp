@@ -203,6 +203,12 @@ Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithTcpSocket(
     std::string const& Port)
 {
     Mile::Cirno::Client* Object = new Mile::Cirno::Client();
+    if (!Object)
+    {
+        Mile::Cirno::ThrowException(
+            "new Mile::Cirno::Client",
+            ::GetLastError());
+    }
 
     std::string Checkpoint = "getaddrinfo";
     int Error = 0;
@@ -269,7 +275,11 @@ Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithTcpSocket(
     {
         Object->ReceiveWorkerEntryPoint();
     });
-    if (!Object->m_ReceiveWorkerThread)
+    if (Object->m_ReceiveWorkerThread)
+    {
+        ::Sleep(100);
+    }
+    else
     {
         Mile::Cirno::ThrowException(
             "Mile::CreateThread",
@@ -283,6 +293,12 @@ Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithHyperVSocket(
     std::uint32_t const& Port)
 {
     Mile::Cirno::Client* Object = new Mile::Cirno::Client();
+    if (!Object)
+    {
+        Mile::Cirno::ThrowException(
+            "new Mile::Cirno::Client",
+            ::GetLastError());
+    }
 
     SOCKET Socket = ::WSASocketW(
         AF_HYPERV,
@@ -330,7 +346,11 @@ Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithHyperVSocket(
     {
         Object->ReceiveWorkerEntryPoint();
     });
-    if (!Object->m_ReceiveWorkerThread)
+    if (Object->m_ReceiveWorkerThread)
+    {
+        ::Sleep(100);
+    }
+    else
     {
         Mile::Cirno::ThrowException(
             "Mile::CreateThread",

@@ -45,52 +45,17 @@ void Test()
         }
     }
 
-    SOCKET Socket = INVALID_SOCKET;
+    Mile::Cirno::Client* Instance = nullptr;
 
-    do
+    try
     {
-        Socket = ::WSASocketW(
-            AF_HYPERV,
-            SOCK_STREAM,
-            HV_PROTOCOL_RAW,
-            nullptr,
-            0,
-            WSA_FLAG_OVERLAPPED);
-        if (INVALID_SOCKET == Socket)
-        {
-            std::wprintf(
-                L"[ERROR] WSASocketW failed (%d).\n",
-                ::WSAGetLastError());
-            break;
-        }
-
         const std::uint32_t Plan9SharePort = 50001;
-
-        SOCKADDR_HV SocketAddress = { 0 };
-        SocketAddress.Family = AF_HYPERV;
-        std::memcpy(
-            &SocketAddress.VmId,
-            &HV_GUID_PARENT,
-            sizeof(GUID));
-        std::memcpy(
-            &SocketAddress.ServiceId,
-            &HV_GUID_VSOCK_TEMPLATE,
-            sizeof(GUID));
-        SocketAddress.ServiceId.Data1 = Plan9SharePort;
-
-        if (SOCKET_ERROR == ::WSAConnect(
-            Socket,
-            reinterpret_cast<sockaddr*>(&SocketAddress),
-            sizeof(SocketAddress),
-            nullptr,
-            nullptr,
-            nullptr,
-            nullptr))
+        Instance = Mile::Cirno::Client::ConnectWithHyperVSocket(Plan9SharePort);
+        if (!Instance)
         {
-            std::wprintf(
-                L"[ERROR] WSAConnect failed (%d).\n",
-                ::WSAGetLastError());
-            break;
+            Mile::Cirno::ThrowException(
+                "!Instance",
+                ERROR_INVALID_DATA);
         }
 
         Mile::Cirno::VersionRequest RequestContent;
@@ -98,7 +63,9 @@ void Test()
         RequestContent.ProtocolVersion = "9P2000.L";
 
         std::vector<std::uint8_t> RequestContentBuffer;
-        Mile::Cirno::PushVersionRequest(RequestContentBuffer, RequestContent);
+        Mile::Cirno::PushVersionRequest(
+            RequestContentBuffer,
+            RequestContent);
 
         Mile::Cirno::Header RequestHeader;
         RequestHeader.Size = static_cast<std::uint32_t>(
@@ -109,122 +76,50 @@ void Test()
         std::vector<std::uint8_t> RequestHeaderBuffer;
         Mile::Cirno::PushHeader(RequestHeaderBuffer, RequestHeader);
 
+        Instance->SendPacket(RequestHeaderBuffer);
+        Instance->SendPacket(RequestContentBuffer);
+
+        std::vector<std::uint8_t> ResponseBuffer;
+        Instance->WaitResponse(MILE_CIRNO_NOTAG, ResponseBuffer);
+
+        std::span<std::uint8_t> ResponseBufferSpan =
+            std::span<std::uint8_t>(ResponseBuffer);
+
+        std::span<std::uint8_t> ResponseHeaderBufferSpan =
+            ResponseBufferSpan.subspan(0, Mile::Cirno::HeaderSize);
+        Mile::Cirno::Header ResponseHeader =
+            Mile::Cirno::PopHeader(ResponseHeaderBufferSpan);
+        if (RequestHeader.Tag != ResponseHeader.Tag)
         {
-            DWORD NumberOfBytesSent = 0;
-            if (!::MileSocketSend(
-                Socket,
-                &RequestHeaderBuffer[0],
-                static_cast<DWORD>(RequestHeaderBuffer.size()),
-                &NumberOfBytesSent,
-                0))
-            {
-                std::wprintf(
-                    L"[ERROR] MileSocketSend failed (%d).\n",
-                    ::WSAGetLastError());
-                break;
-            }
+            Mile::Cirno::ThrowException(
+                "RequestHeader.Tag != ResponseHeader.Tag",
+                ERROR_INVALID_DATA);
         }
+        if (MileCirnoVersionResponseMessage != ResponseHeader.Type)
         {
-            DWORD NumberOfBytesSent = 0;
-            if (!::MileSocketSend(
-                Socket,
-                &RequestContentBuffer[0],
-                static_cast<DWORD>(RequestContentBuffer.size()),
-                &NumberOfBytesSent,
-                0))
-            {
-                std::wprintf(
-                    L"[ERROR] MileSocketSend failed (%d).\n",
-                    ::WSAGetLastError());
-                break;
-            }
+            Mile::Cirno::ThrowException(
+                "MileCirnoVersionResponseMessage != ResponseHeader.Type",
+                ERROR_INVALID_DATA);
         }
 
-        {
-            std::vector<std::uint8_t> ResponseHeaderBuffer;
-            ResponseHeaderBuffer.resize(Mile::Cirno::HeaderSize);
-            {
-                DWORD NumberOfBytesRecvd = 0;
-                DWORD Flags = 0;
-                if (!::MileSocketRecv(
-                    Socket,
-                    &ResponseHeaderBuffer[0],
-                    Mile::Cirno::HeaderSize,
-                    &NumberOfBytesRecvd,
-                    &Flags))
-                {
-                    std::wprintf(
-                        L"[ERROR] MileSocketRecv failed (%d).\n",
-                        ::WSAGetLastError());
-                    break;
-                }
-                if (Mile::Cirno::HeaderSize != NumberOfBytesRecvd)
-                {
-                    std::wprintf(
-                        L"[ERROR] Invalid response header size.\n");
-                    break;
-                }
-            }
+        std::span<std::uint8_t> ResponseContentBufferSpan =
+            ResponseBufferSpan.subspan(Mile::Cirno::HeaderSize);
+        Mile::Cirno::VersionResponse ResponseContent =
+            Mile::Cirno::PopVersionResponse(ResponseContentBufferSpan);
 
-            std::span<std::uint8_t> ResponseHeaderBufferSpan =
-                std::span<std::uint8_t>(ResponseHeaderBuffer);
-            Mile::Cirno::Header ResponseHeader =
-                Mile::Cirno::PopHeader(ResponseHeaderBufferSpan);
-            if (RequestHeader.Tag != ResponseHeader.Tag)
-            {
-                std::wprintf(
-                    L"[ERROR] Tag in Header should be equal.\n");
-                break;
-            }
-            if (MileCirnoVersionResponseMessage != ResponseHeader.Type)
-            {
-                std::wprintf(
-                    L"[ERROR] Invalid response type.\n");
-                break;
-            }
-
-            std::vector<std::uint8_t> ResponseContentBuffer;
-            ResponseContentBuffer.resize(ResponseHeader.Size);
-            {
-                DWORD NumberOfBytesRecvd = 0;
-                DWORD Flags = 0;
-                if (!::MileSocketRecv(
-                    Socket,
-                    &ResponseContentBuffer[0],
-                    ResponseHeader.Size,
-                    &NumberOfBytesRecvd,
-                    &Flags))
-                {
-                    std::wprintf(
-                        L"[ERROR] MileSocketRecv failed (%d).\n",
-                        ::WSAGetLastError());
-                    break;
-                }
-                if (ResponseHeader.Size != NumberOfBytesRecvd)
-                {
-                    std::wprintf(
-                        L"[ERROR] Invalid response content header size.\n");
-                    break;
-                }
-            }
-
-            std::span<std::uint8_t> ResponseContentBufferSpan =
-                std::span<std::uint8_t>(ResponseContentBuffer);
-            Mile::Cirno::VersionResponse ResponseContent =
-                Mile::Cirno::PopVersionResponse(ResponseContentBufferSpan);
-
-            std::printf(
-                "[INFO] Response.ProtocolVersion = %s\n",
-                ResponseContent.ProtocolVersion.c_str());
-        }
-
-        break;
-
-    } while (false);
-
-    if (INVALID_SOCKET != Socket)
+        std::printf(
+            "[INFO] Response.ProtocolVersion = %s\n",
+            ResponseContent.ProtocolVersion.c_str());
+    }
+    catch (std::exception const& ex)
     {
-        ::closesocket(Socket);
+        std::printf("%s\n", ex.what());
+    }
+
+    if (Instance)
+    {
+        delete Instance;
+        Instance = nullptr;
     }
 
     ::WSACleanup();
