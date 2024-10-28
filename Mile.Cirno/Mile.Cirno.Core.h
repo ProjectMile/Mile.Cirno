@@ -15,6 +15,7 @@
 
 #include <map>
 #include <mutex>
+#include <set>
 
 namespace Mile::Cirno
 {
@@ -26,6 +27,9 @@ namespace Mile::Cirno
     {
     private:
 
+        std::mutex m_TagAllocationMutex;
+        std::uint16_t m_TagUnallocatedStart = 0;
+        std::set<std::uint16_t> m_ReusableTags;
         SOCKET m_Socket = INVALID_SOCKET;
         std::mutex m_ReceiveWorkerMutex;
         HANDLE m_ReceiveWorkerThread = nullptr;
@@ -39,6 +43,11 @@ namespace Mile::Cirno
         void ReceiveWorkerEntryPoint();
 
         ~Client();
+
+        std::uint16_t AllocateTag();
+
+        void FreeTag(
+            std::uint16_t const& Tag);
 
         void SendPacket(
             std::vector<std::uint8_t> const& Content);
@@ -54,11 +63,6 @@ namespace Mile::Cirno
         static Client* ConnectWithHyperVSocket(
             std::uint32_t const& Port);
     };
-
-    std::uint16_t AllocateTag();
-
-    void FreeTag(
-        std::uint16_t const& Tag);
 }
 
 #endif // !MILE_CIRNO_CORE

@@ -22,7 +22,6 @@
 
 #include <Mile.Helpers.CppBase.h>
 
-#include <set>
 #include <stdexcept>
 
 [[noreturn]] void Mile::Cirno::ThrowException(
@@ -119,6 +118,41 @@ Mile::Cirno::Client::~Client()
             ::closesocket(this->m_Socket);
             this->m_Socket = INVALID_SOCKET;
         }
+    }
+}
+
+std::uint16_t Mile::Cirno::Client::AllocateTag()
+{
+    std::lock_guard<std::mutex> Guard(this->m_TagAllocationMutex);
+
+    if (this->m_ReusableTags.empty())
+    {
+        if (MILE_CIRNO_NOTAG == this->m_TagUnallocatedStart)
+        {
+            return MILE_CIRNO_NOTAG;
+        }
+        else
+        {
+            return this->m_TagUnallocatedStart++;
+        }
+    }
+
+    std::uint16_t Result = *this->m_ReusableTags.begin();
+    this->m_ReusableTags.erase(Result);
+    return Result;
+}
+
+void Mile::Cirno::Client::FreeTag(
+    std::uint16_t const& Tag)
+{
+    std::lock_guard<std::mutex> Guard(this->m_TagAllocationMutex);
+
+    this->m_ReusableTags.insert(Tag);
+
+    while (!this->m_ReusableTags.empty()
+        && *this->m_ReusableTags.rbegin() == this->m_TagUnallocatedStart - 1)
+    {
+        this->m_ReusableTags.erase(--this->m_TagUnallocatedStart);
     }
 }
 
@@ -304,46 +338,4 @@ Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithHyperVSocket(
     }
 
     return Object;
-}
-
-namespace
-{
-    std::mutex g_TagAllocationMutex;
-    std::uint16_t g_UnallocatedTagStart = 0;
-    std::set<std::uint16_t> g_ReusableTags;
-}
-
-std::uint16_t Mile::Cirno::AllocateTag()
-{
-    std::lock_guard<std::mutex> Guard(g_TagAllocationMutex);
-
-    if (g_ReusableTags.empty())
-    {
-        if (MILE_CIRNO_NOTAG == g_UnallocatedTagStart)
-        {
-            return MILE_CIRNO_NOTAG;
-        }
-        else
-        {
-            return g_UnallocatedTagStart++;
-        }
-    }
-
-    std::uint16_t Result = *g_ReusableTags.begin();
-    g_ReusableTags.erase(Result);
-    return Result;
-}
-
-void Mile::Cirno::FreeTag(
-    std::uint16_t const& Tag)
-{
-    std::lock_guard<std::mutex> Guard(g_TagAllocationMutex);
-
-    g_ReusableTags.insert(Tag);
-
-    while (!g_ReusableTags.empty()
-        && *g_ReusableTags.rbegin() == g_UnallocatedTagStart - 1)
-    {
-        g_ReusableTags.erase(--g_UnallocatedTagStart);
-    }
 }
