@@ -236,10 +236,6 @@ namespace Mile::Cirno
         std::vector<std::uint8_t>& Buffer,
         AttachRequest const& Value);
 
-    void PushUnixAttachRequest(
-        std::vector<std::uint8_t>& Buffer,
-        UnixAttachRequest const& Value);
-
     AttachResponse PopAttachResponse(
         std::span<std::uint8_t>& Buffer); 
 

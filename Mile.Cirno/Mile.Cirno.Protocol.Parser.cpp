@@ -658,16 +658,7 @@ void Mile::Cirno::PushAttachRequest(
     Mile::Cirno::PushUInt32(Buffer, Value.AuthenticationFileId);
     Mile::Cirno::PushString(Buffer, Value.UserName);
     Mile::Cirno::PushString(Buffer, Value.AccessName);
-}
-
-void Mile::Cirno::PushUnixAttachRequest(
-    std::vector<std::uint8_t>& Buffer,
-    Mile::Cirno::UnixAttachRequest const& Value)
-{
-    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
-    Mile::Cirno::PushUInt32(Buffer, Value.AuthenticationFileId);
-    Mile::Cirno::PushString(Buffer, Value.UserName);
-    Mile::Cirno::PushString(Buffer, Value.AccessName);
+    // 9P2000.L and 9P2000.W Specific
     Mile::Cirno::PushUInt32(Buffer, Value.NumericUserName);
 }
 

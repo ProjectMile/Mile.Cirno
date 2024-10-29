@@ -814,15 +814,7 @@ namespace Mile { namespace Cirno
         std::uint32_t AuthenticationFileId; // afid
         std::string UserName; // uname
         std::string AccessName; // aname
-    };
-
-    struct UnixAttachRequest
-    {
-        std::uint32_t FileId; // fid
-        std::uint32_t AuthenticationFileId; // afid
-        std::string UserName; // uname
-        std::string AccessName; // aname
-        std::uint32_t NumericUserName; // n_uname
+        std::uint32_t NumericUserName; // n_uname (9P2000.L and 9P2000.W)
     };
 
     struct AttachResponse
