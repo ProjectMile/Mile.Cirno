@@ -880,15 +880,7 @@ namespace Mile { namespace Cirno
         std::string Name;
         std::uint32_t Permission; // perm, MILE_CIRNO_PROTOCOL_PERMISSION_MODE
         std::uint32_t Mode;
-    };
-
-    struct UnixCreateRequest
-    {
-        std::uint32_t FileId; // fid
-        std::string Name;
-        std::uint32_t Permission; // perm, MILE_CIRNO_PROTOCOL_PERMISSION_MODE
-        std::uint32_t Mode;
-        std::string UnixExtension; // extension
+        std::string UnixExtension; // extension (9P2000.u Specific)
     };
 
     struct CreateResponse

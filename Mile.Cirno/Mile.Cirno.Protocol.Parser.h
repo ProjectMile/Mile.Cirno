@@ -272,10 +272,6 @@ namespace Mile::Cirno
         std::vector<std::uint8_t>& Buffer,
         CreateRequest const& Value);
 
-    void PushUnixCreateRequest(
-        std::vector<std::uint8_t>& Buffer,
-        UnixCreateRequest const& Value);
-
     CreateResponse PopCreateResponse(
         std::span<std::uint8_t>& Buffer);
 

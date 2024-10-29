@@ -760,16 +760,7 @@ void Mile::Cirno::PushCreateRequest(
     Mile::Cirno::PushString(Buffer, Value.Name);
     Mile::Cirno::PushUInt32(Buffer, Value.Permission);
     Mile::Cirno::PushUInt32(Buffer, Value.Mode);
-}
-
-void Mile::Cirno::PushUnixCreateRequest(
-    std::vector<std::uint8_t>& Buffer,
-    Mile::Cirno::UnixCreateRequest const& Value)
-{
-    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
-    Mile::Cirno::PushString(Buffer, Value.Name);
-    Mile::Cirno::PushUInt32(Buffer, Value.Permission);
-    Mile::Cirno::PushUInt32(Buffer, Value.Mode);
+    // 9P2000.u Specific
     Mile::Cirno::PushString(Buffer, Value.UnixExtension);
 }
 
