@@ -195,6 +195,9 @@ void Mile::Cirno::PushDirectoryEntry(
 Mile::Cirno::Stat Mile::Cirno::PopStat(
     std::span<std::uint8_t>& Buffer)
 {
+    std::uint16_t Size = Mile::Cirno::PopUInt16(Buffer);
+    std::span<std::uint8_t> Content = Mile::Cirno::PopBytes(Content, Size);
+
     Mile::Cirno::Stat Result;
     Result.Type = Mile::Cirno::PopUInt16(Buffer);
     Result.Dev = Mile::Cirno::PopUInt32(Buffer);
@@ -207,6 +210,14 @@ Mile::Cirno::Stat Mile::Cirno::PopStat(
     Result.OwnerUserId = Mile::Cirno::PopString(Buffer);
     Result.GroupId = Mile::Cirno::PopString(Buffer);
     Result.LastWriteUserId = Mile::Cirno::PopString(Buffer);
+    // 9P2000.u
+    if (!Buffer.empty())
+    {
+        Result.UnixExtension = Mile::Cirno::PopString(Buffer);
+        Result.NumericOwnerUserId = Mile::Cirno::PopUInt32(Buffer);
+        Result.NumericGroupId = Mile::Cirno::PopUInt32(Buffer);
+        Result.NumericLastWriteUserId = Mile::Cirno::PopUInt32(Buffer);
+    }
     return Result;
 }
 
@@ -214,60 +225,30 @@ void Mile::Cirno::PushStat(
     std::vector<std::uint8_t>& Buffer,
     Stat const& Value)
 {
-    Mile::Cirno::PushUInt16(Buffer, Value.Type);
-    Mile::Cirno::PushUInt32(Buffer, Value.Dev);
-    Mile::Cirno::PushQid(Buffer, Value.UniqueId);
-    Mile::Cirno::PushUInt32(Buffer, Value.Mode);
-    Mile::Cirno::PushUInt32(Buffer, Value.LastAccessTime);
-    Mile::Cirno::PushUInt32(Buffer, Value.LastWriteTime);
-    Mile::Cirno::PushUInt64(Buffer, Value.FileSize);
-    Mile::Cirno::PushString(Buffer, Value.FileName);
-    Mile::Cirno::PushString(Buffer, Value.OwnerUserId);
-    Mile::Cirno::PushString(Buffer, Value.GroupId);
-    Mile::Cirno::PushString(Buffer, Value.LastWriteUserId);
-}
+    std::vector<std::uint8_t> Content;
 
-Mile::Cirno::UnixStat Mile::Cirno::PopUnixStat(
-    std::span<std::uint8_t>& Buffer)
-{
-    Mile::Cirno::UnixStat Result;
-    Result.Type = Mile::Cirno::PopUInt16(Buffer);
-    Result.Dev = Mile::Cirno::PopUInt32(Buffer);
-    Result.UniqueId = Mile::Cirno::PopQid(Buffer);
-    Result.Mode = Mile::Cirno::PopUInt32(Buffer);
-    Result.LastAccessTime = Mile::Cirno::PopUInt32(Buffer);
-    Result.LastWriteTime = Mile::Cirno::PopUInt32(Buffer);
-    Result.FileSize = Mile::Cirno::PopUInt64(Buffer);
-    Result.FileName = Mile::Cirno::PopString(Buffer);
-    Result.OwnerUserId = Mile::Cirno::PopString(Buffer);
-    Result.GroupId = Mile::Cirno::PopString(Buffer);
-    Result.LastWriteUserId = Mile::Cirno::PopString(Buffer);
-    Result.UnixExtension = Mile::Cirno::PopString(Buffer);
-    Result.NumericOwnerUserId = Mile::Cirno::PopUInt32(Buffer);
-    Result.NumericGroupId = Mile::Cirno::PopUInt32(Buffer);
-    Result.NumericLastWriteUserId = Mile::Cirno::PopUInt32(Buffer);
-    return Result;
-}
+    Mile::Cirno::PushUInt16(Content, Value.Type);
+    Mile::Cirno::PushUInt32(Content, Value.Dev);
+    Mile::Cirno::PushQid(Content, Value.UniqueId);
+    Mile::Cirno::PushUInt32(Content, Value.Mode);
+    Mile::Cirno::PushUInt32(Content, Value.LastAccessTime);
+    Mile::Cirno::PushUInt32(Content, Value.LastWriteTime);
+    Mile::Cirno::PushUInt64(Content, Value.FileSize);
+    Mile::Cirno::PushString(Content, Value.FileName);
+    Mile::Cirno::PushString(Content, Value.OwnerUserId);
+    Mile::Cirno::PushString(Content, Value.GroupId);
+    Mile::Cirno::PushString(Content, Value.LastWriteUserId);
+    // 9P2000.u
+    Mile::Cirno::PushString(Content, Value.UnixExtension);
+    // 9P2000.u
+    Mile::Cirno::PushUInt32(Content, Value.NumericOwnerUserId);
+    // 9P2000.u
+    Mile::Cirno::PushUInt32(Content, Value.NumericGroupId);
+    // 9P2000.u
+    Mile::Cirno::PushUInt32(Content, Value.NumericLastWriteUserId);
 
-void Mile::Cirno::PushUnixStat(
-    std::vector<std::uint8_t>& Buffer,
-    Mile::Cirno::UnixStat const& Value)
-{
-    Mile::Cirno::PushUInt16(Buffer, Value.Type);
-    Mile::Cirno::PushUInt32(Buffer, Value.Dev);
-    Mile::Cirno::PushQid(Buffer, Value.UniqueId);
-    Mile::Cirno::PushUInt32(Buffer, Value.Mode);
-    Mile::Cirno::PushUInt32(Buffer, Value.LastAccessTime);
-    Mile::Cirno::PushUInt32(Buffer, Value.LastWriteTime);
-    Mile::Cirno::PushUInt64(Buffer, Value.FileSize);
-    Mile::Cirno::PushString(Buffer, Value.FileName);
-    Mile::Cirno::PushString(Buffer, Value.OwnerUserId);
-    Mile::Cirno::PushString(Buffer, Value.GroupId);
-    Mile::Cirno::PushString(Buffer, Value.LastWriteUserId);
-    Mile::Cirno::PushString(Buffer, Value.UnixExtension);
-    Mile::Cirno::PushUInt32(Buffer, Value.NumericOwnerUserId);
-    Mile::Cirno::PushUInt32(Buffer, Value.NumericGroupId);
-    Mile::Cirno::PushUInt32(Buffer, Value.NumericLastWriteUserId);
+    Mile::Cirno::PushUInt16(Buffer, static_cast<std::uint16_t>(Content.size()));
+    Buffer.insert(Buffer.end(), Content.begin(), Content.end());
 }
 
 Mile::Cirno::WindowsDirectoryEntry Mile::Cirno::PopWindowsDirectoryEntry(
@@ -509,7 +490,7 @@ Mile::Cirno::ReadDirResponse Mile::Cirno::PopReadDirResponse(
 {
     Mile::Cirno::ReadDirResponse Result;
     std::uint32_t Length = Mile::Cirno::PopUInt32(Buffer);
-    for (std::uint32_t i = 0; i < Length; i++)
+    for (std::uint32_t i = 0; i < Length; ++i)
     {
         Result.Data.push_back(Mile::Cirno::PopDirectoryEntry(Buffer));
     }
@@ -712,7 +693,7 @@ Mile::Cirno::WalkResponse PopWalkResponse(
 {
     Mile::Cirno::WalkResponse Result;
     std::uint16_t Length = Mile::Cirno::PopUInt16(Buffer);
-    for (std::uint16_t i = 0; i < Length; i++)
+    for (std::uint16_t i = 0; i < Length; ++i)
     {
         Result.UniqueIds.emplace_back(Mile::Cirno::PopQid(Buffer));
     }
@@ -820,7 +801,7 @@ Mile::Cirno::StatResponse Mile::Cirno::PopStatResponse(
 {
     Mile::Cirno::StatResponse Result;
     std::uint16_t Length = Mile::Cirno::PopUInt16(Buffer);
-    for (std::uint16_t i = 0; i < Length; i++)
+    for (std::uint16_t i = 0; i < Length; ++i)
     {
         Result.Stat.push_back(Mile::Cirno::PopStat(Buffer));
     }
@@ -834,9 +815,9 @@ void Mile::Cirno::PushWriteStatRequest(
     Mile::Cirno::PushUInt32(Buffer, Value.FileId);
     std::uint16_t Length = static_cast<std::uint16_t>(Value.Stat.size());
     Mile::Cirno::PushUInt16(Buffer, Length);
-    for (auto const& stat: Value.Stat)
+    for (auto const& Item: Value.Stat)
     {
-        Mile::Cirno::PushStat(Buffer, stat);
+        Mile::Cirno::PushStat(Buffer, Item);
     }
 }
 

@@ -89,13 +89,6 @@ namespace Mile::Cirno
         std::vector<std::uint8_t>& Buffer,
         Stat const& Value);
 
-    UnixStat PopUnixStat(
-        std::span<std::uint8_t>& Buffer);
-
-    void PushUnixStat(
-        std::vector<std::uint8_t>& Buffer,
-        UnixStat const& Value);
-
     WindowsDirectoryEntry PopWindowsDirectoryEntry(
         std::span<std::uint8_t>& Buffer);
 

@@ -496,25 +496,10 @@ namespace Mile { namespace Cirno
         std::string OwnerUserId; // uid
         std::string GroupId; // gid
         std::string LastWriteUserId; // muid
-    };
-
-    struct UnixStat
-    {
-        std::uint16_t Type;
-        std::uint32_t Dev;
-        Qid UniqueId; // qid
-        std::uint32_t Mode;
-        std::uint32_t LastAccessTime; // atime
-        std::uint32_t LastWriteTime; // mtime
-        std::uint64_t FileSize; // length
-        std::string FileName; // name
-        std::string OwnerUserId; // uid
-        std::string GroupId; // gid
-        std::string LastWriteUserId; // muid
-        std::string UnixExtension; // extension
-        std::uint32_t NumericOwnerUserId; // n_uid
-        std::uint32_t NumericGroupId; // n_gid
-        std::uint32_t NumericLastWriteUserId; // n_muid
+        std::string UnixExtension; // extension (9P2000.u)
+        std::uint32_t NumericOwnerUserId; // n_uid (9P2000.u)
+        std::uint32_t NumericGroupId; // n_gid (9P2000.u)
+        std::uint32_t NumericLastWriteUserId; // n_muid (9P2000.u)
     };
 
     struct WindowsDirectoryEntry
