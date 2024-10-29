@@ -800,14 +800,7 @@ namespace Mile { namespace Cirno
         std::uint32_t AuthenticationFileId; // afid
         std::string UserName; // uname
         std::string AccessName; // aname
-    };
-
-    struct UnixAuthRequest
-    {
-        std::uint32_t AuthenticationFileId; // afid
-        std::string UserName; // uname
-        std::string AccessName; // aname
-        std::uint32_t NumericUserName; // n_uname
+        std::uint32_t NumericUserName; // n_uname (9P2000.L Specific)
     };
 
     struct AuthResponse

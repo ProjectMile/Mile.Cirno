@@ -229,10 +229,6 @@ namespace Mile::Cirno
         std::vector<std::uint8_t>& Buffer,
         AuthRequest const& Value);
 
-    void PushUnixAuthRequest(
-        std::vector<std::uint8_t>& Buffer,
-        UnixAuthRequest const& Value);
-
     AuthResponse PopAuthResponse(
         std::span<std::uint8_t>& Buffer);
 
