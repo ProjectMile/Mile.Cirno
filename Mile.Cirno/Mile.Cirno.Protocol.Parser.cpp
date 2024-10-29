@@ -638,7 +638,7 @@ void Mile::Cirno::PushAuthRequest(
     Mile::Cirno::PushUInt32(Buffer, Value.AuthenticationFileId);
     Mile::Cirno::PushString(Buffer, Value.UserName);
     Mile::Cirno::PushString(Buffer, Value.AccessName);
-    // 9P2000.L Specific
+    // 9P2000.L
     Mile::Cirno::PushUInt32(Buffer, Value.NumericUserName);
 }
 
@@ -658,7 +658,7 @@ void Mile::Cirno::PushAttachRequest(
     Mile::Cirno::PushUInt32(Buffer, Value.AuthenticationFileId);
     Mile::Cirno::PushString(Buffer, Value.UserName);
     Mile::Cirno::PushString(Buffer, Value.AccessName);
-    // 9P2000.L and 9P2000.W Specific
+    // 9P2000.L and 9P2000.W
     Mile::Cirno::PushUInt32(Buffer, Value.NumericUserName);
 }
 
@@ -675,6 +675,7 @@ Mile::Cirno::ErrorResponse Mile::Cirno::PopErrorResponse(
 {
     Mile::Cirno::ErrorResponse Result;
     Result.Message = Mile::Cirno::PopString(Buffer);
+    // 9P2000.u
     if (sizeof(std::uint32_t) == Buffer.size())
     {
         Result.Code = Mile::Cirno::PopUInt32(Buffer);
@@ -743,7 +744,7 @@ void Mile::Cirno::PushCreateRequest(
     Mile::Cirno::PushString(Buffer, Value.Name);
     Mile::Cirno::PushUInt32(Buffer, Value.Permission);
     Mile::Cirno::PushUInt32(Buffer, Value.Mode);
-    // 9P2000.u Specific
+    // 9P2000.u
     Mile::Cirno::PushString(Buffer, Value.UnixExtension);
 }
 

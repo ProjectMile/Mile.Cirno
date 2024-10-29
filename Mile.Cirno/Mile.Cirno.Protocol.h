@@ -48,7 +48,7 @@ typedef enum _MILE_CIRNO_MESSAGE_TYPE
     // %Name%<DirectoryEntry>[%Length%]
     //   qid<Qid>[1] offset[8] type[1] name<String>[1]
     // %Name%<Stat>[%Length%]
-    //   9P2000, 9P2000.L and 9P2000.W 
+    //   9P2000, 9P2000.L and 9P2000.W
     //     size[2] type[2] dev[4] qid<Qid>[1] mode[4] atime[4] mtime[4]
     //     length[8] name[String][1] uid[String][1] gid[String][1]
     //     muid[String][1]
@@ -800,7 +800,7 @@ namespace Mile { namespace Cirno
         std::uint32_t AuthenticationFileId; // afid
         std::string UserName; // uname
         std::string AccessName; // aname
-        std::uint32_t NumericUserName; // n_uname (9P2000.L Specific)
+        std::uint32_t NumericUserName; // n_uname (9P2000.L)
     };
 
     struct AuthResponse
@@ -825,7 +825,7 @@ namespace Mile { namespace Cirno
     struct ErrorResponse
     {
         std::string Message;
-        std::uint32_t Code;
+        std::uint32_t Code; // (9P2000.u)
     };
 
     struct FlushRequest
@@ -865,7 +865,7 @@ namespace Mile { namespace Cirno
         std::string Name;
         std::uint32_t Permission; // perm, MILE_CIRNO_PROTOCOL_PERMISSION_MODE
         std::uint32_t Mode;
-        std::string UnixExtension; // extension (9P2000.u Specific)
+        std::string UnixExtension; // extension (9P2000.u)
     };
 
     struct CreateResponse
