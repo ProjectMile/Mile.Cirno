@@ -49,12 +49,12 @@ namespace Mile::Cirno
         void FreeTag(
             std::uint16_t const& Tag);
 
-        void SendPacket(
-            std::vector<std::uint8_t> const& Content);
-
-        void WaitResponse(
+        void Request(
             std::uint16_t const& Tag,
-            std::vector<std::uint8_t>& Content);
+            MILE_CIRNO_MESSAGE_TYPE const& RequestType,
+            std::vector<std::uint8_t> const& RequestContent,
+            MILE_CIRNO_MESSAGE_TYPE const& ResponseType,
+            std::vector<std::uint8_t>& ResponseContent);
 
         VersionResponse Version(
             VersionRequest const& Request);

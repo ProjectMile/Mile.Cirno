@@ -156,33 +156,54 @@ void Mile::Cirno::Client::FreeTag(
     }
 }
 
-void Mile::Cirno::Client::SendPacket(
-    std::vector<std::uint8_t> const& Content)
-{
-    DWORD NumberOfBytesSent = 0;
-    if (!::MileSocketSend(
-        this->m_Socket,
-        &Content[0],
-        static_cast<DWORD>(Content.size()),
-        &NumberOfBytesSent,
-        0))
-    {
-        Mile::Cirno::ThrowException(
-            "MileSocketSend",
-            ::WSAGetLastError());
-    }
-}
-
-void Mile::Cirno::Client::WaitResponse(
+void Mile::Cirno::Client::Request(
     std::uint16_t const& Tag,
-    std::vector<std::uint8_t>& Content)
+    MILE_CIRNO_MESSAGE_TYPE const& RequestType,
+    std::vector<std::uint8_t> const& RequestContent,
+    MILE_CIRNO_MESSAGE_TYPE const& ResponseType,
+    std::vector<std::uint8_t>& ResponseContent)
 {
-    Content.clear();
-
     if (!this->m_ReceiveWorkerStarted)
     {
         return;
     }
+
+    Mile::Cirno::Header RequestHeader;
+    RequestHeader.Size = static_cast<std::uint32_t>(RequestContent.size());
+    RequestHeader.Type = static_cast<std::uint8_t>(RequestType);
+    RequestHeader.Tag = Tag;
+    std::vector<std::uint8_t> RequestHeaderBuffer;
+    Mile::Cirno::PushHeader(RequestHeaderBuffer, RequestHeader);
+    {
+        DWORD NumberOfBytesSent = 0;
+        if (!::MileSocketSend(
+            this->m_Socket,
+            &RequestHeaderBuffer[0],
+            static_cast<DWORD>(RequestHeaderBuffer.size()),
+            &NumberOfBytesSent,
+            0))
+        {
+            Mile::Cirno::ThrowException(
+                "MileSocketSend(RequestHeaderBuffer)",
+                ::WSAGetLastError());
+        }
+    }
+    {
+        DWORD NumberOfBytesSent = 0;
+        if (!::MileSocketSend(
+            this->m_Socket,
+            &RequestContent[0],
+            static_cast<DWORD>(RequestContent.size()),
+            &NumberOfBytesSent,
+            0))
+        {
+            Mile::Cirno::ThrowException(
+                "MileSocketSend(RequestContent)",
+                ::WSAGetLastError());
+        }
+    }
+
+    std::vector<std::uint8_t> Content;
 
     for (;;)
     {
@@ -204,61 +225,54 @@ void Mile::Cirno::Client::WaitResponse(
             ERROR_INVALID_DATA);
     }
 
-    std::span<std::uint8_t> ContentSpan =
+    std::span<std::uint8_t> ResponseSpan =
         std::span<std::uint8_t>(Content);
-    Mile::Cirno::Header ContentHeader =
-        Mile::Cirno::PopHeader(ContentSpan);
-    if (MileCirnoErrorResponseMessage == ContentHeader.Type)
+    Mile::Cirno::Header ResponseContentHeader =
+        Mile::Cirno::PopHeader(ResponseSpan);
+    if (ResponseType == ResponseContentHeader.Type)
+    {
+        ResponseContent.assign(ResponseSpan.begin(), ResponseSpan.end());
+    }
+    else if (MileCirnoErrorResponseMessage == ResponseContentHeader.Type)
     {
         Mile::Cirno::ErrorResponse Response =
-            Mile::Cirno::PopErrorResponse(ContentSpan);
+            Mile::Cirno::PopErrorResponse(ResponseSpan);
         Mile::Cirno::ThrowException(
             Response.Message.c_str(),
             Response.Code);
     }
-    else if (MileCirnoLinuxErrorResponseMessage == ContentHeader.Type)
+    else if (MileCirnoLinuxErrorResponseMessage == ResponseContentHeader.Type)
     {
         Mile::Cirno::LinuxErrorResponse Response =
-            Mile::Cirno::PopLinuxErrorResponse(ContentSpan);
+            Mile::Cirno::PopLinuxErrorResponse(ResponseSpan);
         Mile::Cirno::ThrowException(
             "MileCirnoVersionResponseMessage",
             Response.Code);
+    }
+    else
+    {
+        Mile::Cirno::ThrowException(
+            "ResponseType != ResponseContentHeader.Type",
+            ResponseType);
     }
 }
 
 Mile::Cirno::VersionResponse Mile::Cirno::Client::Version(
     Mile::Cirno::VersionRequest const& Request)
 {
-    std::vector<std::uint8_t> RequestContentBuffer;
+    std::vector<std::uint8_t> RequestBuffer;
     Mile::Cirno::PushVersionRequest(
-        RequestContentBuffer,
+        RequestBuffer,
         Request);
-
-    Mile::Cirno::Header RequestHeader;
-    RequestHeader.Size = static_cast<std::uint32_t>(
-        RequestContentBuffer.size());
-    RequestHeader.Type = MileCirnoVersionRequestMessage;
-    RequestHeader.Tag = MILE_CIRNO_NOTAG;
-
-    std::vector<std::uint8_t> RequestHeaderBuffer;
-    Mile::Cirno::PushHeader(RequestHeaderBuffer, RequestHeader);
-
-    this->SendPacket(RequestHeaderBuffer);
-    this->SendPacket(RequestContentBuffer);
-
     std::vector<std::uint8_t> ResponseBuffer;
-    this->WaitResponse(RequestHeader.Tag, ResponseBuffer);
-
+    this->Request(
+        MILE_CIRNO_NOTAG,
+        MileCirnoVersionRequestMessage,
+        RequestBuffer,
+        MileCirnoVersionResponseMessage,
+        ResponseBuffer);
     std::span<std::uint8_t> ResponseSpan =
         std::span<std::uint8_t>(ResponseBuffer);
-    Mile::Cirno::Header ResponseHeader =
-        Mile::Cirno::PopHeader(ResponseSpan);
-    if (MileCirnoVersionResponseMessage != ResponseHeader.Type)
-    {
-        Mile::Cirno::ThrowException(
-            "MileCirnoVersionResponseMessage != ResponseHeader.Type",
-            ERROR_INVALID_DATA);
-    }
     Mile::Cirno::VersionResponse Response =
         Mile::Cirno::PopVersionResponse(ResponseSpan);
     return Response;
