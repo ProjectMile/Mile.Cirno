@@ -58,13 +58,28 @@ void Test()
                 ERROR_INVALID_DATA);
         }
 
-        Mile::Cirno::VersionRequest Request;
-        Request.MaximumMessageSize = 1 << 16;
-        Request.ProtocolVersion = "9P2000.L";
-        Mile::Cirno::VersionResponse Response = Instance->Version(Request);
-        std::printf(
-            "[INFO] Response.ProtocolVersion = %s\n",
-            Response.ProtocolVersion.c_str());
+        {
+            Mile::Cirno::VersionRequest Request;
+            Request.MaximumMessageSize = 1 << 16;
+            Request.ProtocolVersion = "9P2000.L";
+            Mile::Cirno::VersionResponse Response = Instance->Version(Request);
+            std::printf(
+                "[INFO] Response.ProtocolVersion = %s\n",
+                Response.ProtocolVersion.c_str());
+        }
+
+        {
+            Mile::Cirno::AttachRequest Request;
+            Request.FileId = 0;
+            Request.AuthenticationFileId = MILE_CIRNO_NOFID;
+            Request.UserName = "";
+            Request.AccessName = "HostDriverStore";
+            Request.NumericUserName = MILE_CIRNO_NONUNAME;
+            Mile::Cirno::AttachResponse Response = Instance->Attach(Request);
+            std::printf(
+                "[INFO] Response.UniqueId.Path = 0x%016llX\n",
+                Response.UniqueId.Path);
+        }
     }
     catch (std::exception const& ex)
     {

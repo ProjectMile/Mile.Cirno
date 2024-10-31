@@ -145,6 +145,11 @@ std::uint16_t Mile::Cirno::Client::AllocateTag()
 void Mile::Cirno::Client::FreeTag(
     std::uint16_t const& Tag)
 {
+    if (MILE_CIRNO_NOTAG == Tag)
+    {
+        return;
+    }
+
     std::lock_guard<std::mutex> Guard(this->m_TagAllocationMutex);
 
     this->m_ReusableTags.insert(Tag);
@@ -273,9 +278,41 @@ Mile::Cirno::VersionResponse Mile::Cirno::Client::Version(
         ResponseBuffer);
     std::span<std::uint8_t> ResponseSpan =
         std::span<std::uint8_t>(ResponseBuffer);
-    Mile::Cirno::VersionResponse Response =
-        Mile::Cirno::PopVersionResponse(ResponseSpan);
-    return Response;
+    return Mile::Cirno::PopVersionResponse(ResponseSpan);
+}
+
+Mile::Cirno::AttachResponse Mile::Cirno::Client::Attach(
+    Mile::Cirno::AttachRequest const& Request)
+{
+    std::uint16_t Tag = this->AllocateTag();
+    if (MILE_CIRNO_NOTAG == Tag)
+    {
+        Mile::Cirno::ThrowException(
+            "MILE_CIRNO_NOTAG == Tag",
+            ERROR_INVALID_DATA);
+    }
+    auto ExitHandler = Mile::ScopeExitTaskHandler([&]()
+    {
+        if (MILE_CIRNO_NOTAG != Tag)
+        {
+            this->FreeTag(Tag);
+        }
+    });
+
+    std::vector<std::uint8_t> RequestBuffer;
+    Mile::Cirno::PushAttachRequest(
+        RequestBuffer,
+        Request);
+    std::vector<std::uint8_t> ResponseBuffer;
+    this->Request(
+        Tag,
+        MileCirnoAttachRequestMessage,
+        RequestBuffer,
+        MileCirnoAttachResponseMessage,
+        ResponseBuffer);
+    std::span<std::uint8_t> ResponseSpan =
+        std::span<std::uint8_t>(ResponseBuffer); 
+    return Mile::Cirno::PopAttachResponse(ResponseSpan);
 }
 
 Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithTcpSocket(
