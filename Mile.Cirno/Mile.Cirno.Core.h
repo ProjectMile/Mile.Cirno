@@ -30,6 +30,9 @@ namespace Mile::Cirno
         std::mutex m_TagAllocationMutex;
         std::uint16_t m_TagUnallocatedStart = 0;
         std::set<std::uint16_t> m_ReusableTags;
+        std::mutex m_FileIdAllocationMutex;
+        std::uint32_t m_FileIdUnallocatedStart = 0;
+        std::set<std::uint32_t> m_ReusableFileIds;
         SOCKET m_Socket = INVALID_SOCKET;
         std::mutex m_ReceiveWorkerMutex;
         HANDLE m_ReceiveWorkerThread = nullptr;
@@ -48,6 +51,11 @@ namespace Mile::Cirno
 
         void FreeTag(
             std::uint16_t const& Tag);
+
+        std::uint32_t AllocateFileId();
+
+        void FreeFileId(
+            std::uint32_t const& FileId);
 
         void Request(
             std::uint16_t const& Tag,

@@ -70,7 +70,7 @@ void Test()
 
         {
             Mile::Cirno::AttachRequest Request;
-            Request.FileId = 0;
+            Request.FileId = Instance->AllocateFileId();
             Request.AuthenticationFileId = MILE_CIRNO_NOFID;
             Request.UserName = "";
             Request.AccessName = "HostDriverStore";

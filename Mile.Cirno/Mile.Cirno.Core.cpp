@@ -154,10 +154,50 @@ void Mile::Cirno::Client::FreeTag(
 
     this->m_ReusableTags.insert(Tag);
 
-    while (!this->m_ReusableTags.empty()
-        && *this->m_ReusableTags.rbegin() == this->m_TagUnallocatedStart - 1)
+    while (!this->m_ReusableTags.empty() &&
+        *this->m_ReusableTags.rbegin() == this->m_TagUnallocatedStart - 1)
     {
         this->m_ReusableTags.erase(--this->m_TagUnallocatedStart);
+    }
+}
+
+std::uint32_t Mile::Cirno::Client::AllocateFileId()
+{
+    std::lock_guard<std::mutex> Guard(this->m_FileIdAllocationMutex);
+
+    if (this->m_ReusableFileIds.empty())
+    {
+        if (MILE_CIRNO_NOFID == this->m_FileIdUnallocatedStart)
+        {
+            return MILE_CIRNO_NOFID;
+        }
+        else
+        {
+            return this->m_FileIdUnallocatedStart++;
+        }
+    }
+
+    std::uint16_t Result = *this->m_ReusableFileIds.begin();
+    this->m_ReusableFileIds.erase(Result);
+    return Result;
+}
+
+void Mile::Cirno::Client::FreeFileId(
+    std::uint32_t const& FileId)
+{
+    if (MILE_CIRNO_NOFID == FileId)
+    {
+        return;
+    }
+
+    std::lock_guard<std::mutex> Guard(this->m_FileIdAllocationMutex);
+
+    this->m_ReusableFileIds.insert(FileId);
+
+    while (!this->m_ReusableFileIds.empty() &&
+        *this->m_ReusableFileIds.rbegin() == this->m_FileIdUnallocatedStart - 1)
+    {
+        this->m_ReusableFileIds.erase(--this->m_FileIdUnallocatedStart);
     }
 }
 
