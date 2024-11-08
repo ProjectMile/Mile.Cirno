@@ -64,8 +64,10 @@ void Test()
             Request.ProtocolVersion = "9P2000.L";
             Mile::Cirno::VersionResponse Response = Instance->Version(Request);
             std::printf(
-                "[INFO] Response.ProtocolVersion = %s\n",
-                Response.ProtocolVersion.c_str());
+                "[INFO] Response.ProtocolVersion = %s\n"
+                "[INFO] Response.MaximumMessageSize = %u\n",
+                Response.ProtocolVersion.c_str(),
+                Response.MaximumMessageSize);
         }
 
         std::uint32_t FileId = Instance->AllocateFileId();
