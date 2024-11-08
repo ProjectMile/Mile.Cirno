@@ -68,9 +68,10 @@ void Test()
                 Response.ProtocolVersion.c_str());
         }
 
+        std::uint32_t FileId = Instance->AllocateFileId();
         {
             Mile::Cirno::AttachRequest Request;
-            Request.FileId = Instance->AllocateFileId();
+            Request.FileId = FileId;
             Request.AuthenticationFileId = MILE_CIRNO_NOFID;
             Request.UserName = "";
             Request.AccessName = "HostDriverStore";
@@ -79,6 +80,18 @@ void Test()
             std::printf(
                 "[INFO] Response.UniqueId.Path = 0x%016llX\n",
                 Response.UniqueId.Path);
+        }
+
+        {
+            Mile::Cirno::LinuxOpenRequest Request;
+            Request.FileId = FileId;
+            Request.Flags =
+                MileCirnoLinuxOpenCreateFlagNonBlock |
+                MileCirnoLinuxOpenCreateFlagLargeFile |
+                MileCirnoLinuxOpenCreateFlagDirectory |
+                MileCirnoLinuxOpenCreateFlagCloseOnExecute;
+            Mile::Cirno::LinuxOpenResponse Response = Instance->LinuxOpen(Request);
+            Response = Response;
         }
     }
     catch (std::exception const& ex)

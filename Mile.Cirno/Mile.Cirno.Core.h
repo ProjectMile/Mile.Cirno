@@ -71,6 +71,9 @@ namespace Mile::Cirno
         AttachResponse Attach(
             AttachRequest const& Request);
 
+        LinuxOpenResponse LinuxOpen(
+            LinuxOpenRequest const& Request);
+
         static Client* ConnectWithTcpSocket(
             std::string const& Host,
             std::string const& Port);

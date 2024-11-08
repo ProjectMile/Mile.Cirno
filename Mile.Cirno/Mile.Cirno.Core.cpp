@@ -353,6 +353,40 @@ Mile::Cirno::AttachResponse Mile::Cirno::Client::Attach(
     return Mile::Cirno::PopAttachResponse(ResponseSpan);
 }
 
+Mile::Cirno::LinuxOpenResponse Mile::Cirno::Client::LinuxOpen(
+    Mile::Cirno::LinuxOpenRequest const& Request)
+{
+    std::uint16_t Tag = this->AllocateTag();
+    if (MILE_CIRNO_NOTAG == Tag)
+    {
+        Mile::Cirno::ThrowException(
+            "MILE_CIRNO_NOTAG == Tag",
+            ERROR_INVALID_DATA);
+    }
+    auto ExitHandler = Mile::ScopeExitTaskHandler([&]()
+    {
+        if (MILE_CIRNO_NOTAG != Tag)
+        {
+            this->FreeTag(Tag);
+        }
+    });
+
+    std::vector<std::uint8_t> RequestBuffer;
+    Mile::Cirno::PushLinuxOpenRequest(
+        RequestBuffer,
+        Request);
+    std::vector<std::uint8_t> ResponseBuffer;
+    this->Request(
+        Tag,
+        MileCirnoLinuxOpenRequestMessage,
+        RequestBuffer,
+        MileCirnoLinuxOpenResponseMessage,
+        ResponseBuffer);
+    std::span<std::uint8_t> ResponseSpan =
+        std::span<std::uint8_t>(ResponseBuffer);
+    return Mile::Cirno::PopLinuxOpenResponse(ResponseSpan);
+}
+
 Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithTcpSocket(
     std::string const& Host,
     std::string const& Port)
