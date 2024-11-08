@@ -74,6 +74,9 @@ namespace Mile::Cirno
         LinuxOpenResponse LinuxOpen(
             LinuxOpenRequest const& Request);
 
+        ReadDirResponse ReadDir(
+            ReadDirRequest const& Request);
+
         static Client* ConnectWithTcpSocket(
             std::string const& Host,
             std::string const& Port);

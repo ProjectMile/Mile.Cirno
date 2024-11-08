@@ -93,6 +93,20 @@ void Test()
             Mile::Cirno::LinuxOpenResponse Response = Instance->LinuxOpen(Request);
             Response = Response;
         }
+
+        {
+            Mile::Cirno::ReadDirRequest Request;
+            Request.FileId = FileId;
+            Request.Offset = 0;
+            Request.Count = (1 << 16) - Mile::Cirno::HeaderSize - sizeof(std::uint32_t);
+            Mile::Cirno::ReadDirResponse Response = Instance->ReadDir(Request);
+            for (Mile::Cirno::DirectoryEntry const& Entry : Response.Data)
+            {
+                std::printf(
+                    "[INFO] List Directory: %s\n",
+                    Entry.Name.c_str());
+            }
+        }
     }
     catch (std::exception const& ex)
     {
