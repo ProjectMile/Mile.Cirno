@@ -220,6 +220,7 @@ void Mile::Cirno::Client::Request(
     std::vector<std::uint8_t> RequestHeaderBuffer;
     Mile::Cirno::PushHeader(RequestHeaderBuffer, RequestHeader);
     {
+        std::lock_guard<std::mutex> Guard(this->m_SendOperationMutex);
         DWORD NumberOfBytesSent = 0;
         if (!::MileSocketSend(
             this->m_Socket,
@@ -232,9 +233,6 @@ void Mile::Cirno::Client::Request(
                 "MileSocketSend(RequestHeaderBuffer)",
                 ::WSAGetLastError());
         }
-    }
-    {
-        DWORD NumberOfBytesSent = 0;
         if (!::MileSocketSend(
             this->m_Socket,
             &RequestContent[0],

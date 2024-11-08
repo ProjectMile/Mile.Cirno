@@ -34,6 +34,7 @@ namespace Mile::Cirno
         std::uint32_t m_FileIdUnallocatedStart = 0;
         std::set<std::uint32_t> m_ReusableFileIds;
         SOCKET m_Socket = INVALID_SOCKET;
+        std::mutex m_SendOperationMutex;
         std::mutex m_ReceiveWorkerMutex;
         HANDLE m_ReceiveWorkerThread = nullptr;
         bool m_ReceiveWorkerStarted = false;
