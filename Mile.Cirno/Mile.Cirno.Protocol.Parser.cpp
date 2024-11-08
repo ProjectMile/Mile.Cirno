@@ -489,8 +489,9 @@ Mile::Cirno::ReadDirResponse Mile::Cirno::PopReadDirResponse(
     std::span<std::uint8_t>& Buffer)
 {
     Mile::Cirno::ReadDirResponse Result;
-    std::uint32_t Length = Mile::Cirno::PopUInt32(Buffer);
-    for (std::uint32_t i = 0; i < Length; ++i)
+    // Discard the unused Length field.
+    Mile::Cirno::PopUInt32(Buffer);
+    while (!Buffer.empty())
     {
         Result.Data.push_back(Mile::Cirno::PopDirectoryEntry(Buffer));
     }
