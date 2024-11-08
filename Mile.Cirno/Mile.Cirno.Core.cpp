@@ -177,7 +177,7 @@ std::uint32_t Mile::Cirno::Client::AllocateFileId()
         }
     }
 
-    std::uint16_t Result = *this->m_ReusableFileIds.begin();
+    std::uint32_t Result = *this->m_ReusableFileIds.begin();
     this->m_ReusableFileIds.erase(Result);
     return Result;
 }
