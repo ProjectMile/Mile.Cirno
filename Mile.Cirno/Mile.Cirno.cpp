@@ -24,6 +24,7 @@
 #include <cstdio>
 #include <cwchar>
 
+#include <filesystem>
 #include <span>
 #include <vector>
 #include <string>
@@ -135,25 +136,181 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
     UNREFERENCED_PARAMETER(FillFindData);
     UNREFERENCED_PARAMETER(DokanFileInfo);
 
-    WIN32_FIND_DATAW FindData = { 0 };
-    FindData.dwFileAttributes = FILE_ATTRIBUTE_NORMAL;
-    ::wcscpy_s(FindData.cFileName, L"一起摇摆");
-    FillFindData(&FindData, DokanFileInfo);
+    std::uint32_t CurrentDirectoryFileId = MILE_CIRNO_NOFID;
+    try
+    {
+        Mile::Cirno::WalkRequest Request;
+        Request.FileId = g_RootDirectoryFileId;
+        Request.NewFileId = g_Instance->AllocateFileId();
+        std::filesystem::path RelativePath(&FileName[1]);
+        for (std::filesystem::path const& Element : RelativePath)
+        {
+            Request.Names.push_back(Element.string());
+        }
+        g_Instance->Walk(Request);
+        CurrentDirectoryFileId = Request.NewFileId;
+    }
+    catch (std::exception const& ex)
+    {
+        std::printf("%s\n", ex.what());
+        return STATUS_UNSUCCESSFUL;
+    }
+    auto CleanupHandler = Mile::ScopeExitTaskHandler([&]()
+    {
+        if (MILE_CIRNO_NOFID == CurrentDirectoryFileId)
+        {
+            try
+            {
+                Mile::Cirno::ClunkRequest Request;
+                Request.FileId = CurrentDirectoryFileId;
+                g_Instance->Clunk(Request);
+            }
+            catch (std::exception const& ex)
+            {
+                std::printf("%s\n", ex.what());
+            }
+            g_Instance->FreeFileId(CurrentDirectoryFileId);
+        }
+    });
 
-    FindData.dwFileAttributes = FILE_ATTRIBUTE_DIRECTORY;
-    ::wcscpy_s(FindData.cFileName, L"让我们一起摇摆");
-    FillFindData(&FindData, DokanFileInfo);
+    try
+    {
+        Mile::Cirno::LinuxOpenRequest Request;
+        Request.FileId = CurrentDirectoryFileId;
+        Request.Flags =
+            MileCirnoLinuxOpenCreateFlagNonBlock |
+            MileCirnoLinuxOpenCreateFlagLargeFile |
+            MileCirnoLinuxOpenCreateFlagDirectory |
+            MileCirnoLinuxOpenCreateFlagCloseOnExecute;
+        g_Instance->LinuxOpen(Request);
+    }
+    catch (std::exception const& ex)
+    {
+        std::printf("%s\n", ex.what());
+        return STATUS_UNSUCCESSFUL;
+    }
+
+    try
+    {
+        std::uint64_t LastOffset = 0;
+        do
+        {
+            Mile::Cirno::ReadDirRequest Request;
+            Request.FileId = CurrentDirectoryFileId;
+            Request.Offset = LastOffset;
+            LastOffset = 0;
+            Request.Count =
+                (1 << 16) - Mile::Cirno::HeaderSize - sizeof(std::uint32_t);
+            Mile::Cirno::ReadDirResponse Response =
+                g_Instance->ReadDir(Request);
+            for (Mile::Cirno::DirectoryEntry const& Entry : Response.Data)
+            {
+                LastOffset = Entry.Offset;
+
+                if ("." == Entry.Name || ".." == Entry.Name)
+                {
+                    continue;
+                }
+
+                WIN32_FIND_DATAW FindData = { 0 };
+                FindData.dwFileAttributes = FILE_ATTRIBUTE_NORMAL;
+                ::wcscpy_s(
+                    FindData.cFileName,
+                    Mile::ToWideString(CP_UTF8, Entry.Name).c_str());
+
+                try
+                {
+                    Mile::Cirno::WalkRequest WalkRequest;
+                    WalkRequest.FileId = g_RootDirectoryFileId;
+                    WalkRequest.NewFileId = g_Instance->AllocateFileId();
+                    std::filesystem::path RelativePath(&FileName[1]);
+                    for (std::filesystem::path const& Element : RelativePath)
+                    {
+                        WalkRequest.Names.push_back(Element.string());
+                    }
+                    WalkRequest.Names.push_back(Entry.Name);
+                    g_Instance->Walk(WalkRequest);
+                    auto CurrentCleanupHandler = Mile::ScopeExitTaskHandler([&]()
+                    {
+                        if (MILE_CIRNO_NOFID == WalkRequest.NewFileId)
+                        {
+                            try
+                            {
+                                Mile::Cirno::ClunkRequest ClunkRequest;
+                                ClunkRequest.FileId = WalkRequest.NewFileId;
+                                g_Instance->Clunk(ClunkRequest);
+                            }
+                            catch (std::exception const& ex)
+                            {
+                                std::printf("%s\n", ex.what());
+                            }
+                            g_Instance->FreeFileId(WalkRequest.NewFileId);
+                        }
+                    });
+
+                    Mile::Cirno::LinuxOpenRequest OpenRequest;
+                    OpenRequest.FileId = WalkRequest.NewFileId;
+                    OpenRequest.Flags = 0;
+                    g_Instance->LinuxOpen(OpenRequest);
+
+                    Mile::Cirno::GetAttrRequest InformationRequest;
+                    InformationRequest.FileId = WalkRequest.NewFileId;
+                    InformationRequest.RequestMask = MileCirnoLinuxGetAttrFlagAll;
+                    Mile::Cirno::GetAttrResponse InformationResponse =
+                        g_Instance->GetAttr(InformationRequest);
+
+                    if (S_IFDIR & InformationResponse.Mode)
+                    {
+                        FindData.dwFileAttributes = FILE_ATTRIBUTE_DIRECTORY;
+                    }
+                    
+                    FindData.ftCreationTime;
+                    FindData.ftLastAccessTime;
+                    FindData.ftLastWriteTime;
+
+                    FindData.nFileSizeHigh =
+                        static_cast<DWORD>(InformationResponse.FileSize >> 32);
+                    FindData.nFileSizeLow =
+                        static_cast<DWORD>(InformationResponse.FileSize);
+                }
+                catch (std::exception const& ex)
+                {
+                    std::printf("%s\n", ex.what());
+                }
+
+                FillFindData(&FindData, DokanFileInfo);
+            }
+        } while (LastOffset);
+    }
+    catch (std::exception const& ex)
+    {
+        std::printf("%s\n", ex.what());
+        return STATUS_UNSUCCESSFUL;
+    }
 
     return STATUS_SUCCESS;
 }
 
 int main()
 {
-    ::DokanInit();
-    auto DokanCleanupHandler = Mile::ScopeExitTaskHandler([&]()
+    auto CleanupHandler = Mile::ScopeExitTaskHandler([&]()
     {
+        if (g_Instance)
+        {
+            if (MILE_CIRNO_NOFID == g_RootDirectoryFileId)
+            {
+                g_Instance->FreeFileId(g_RootDirectoryFileId);
+            }
+            delete g_Instance;
+            g_Instance = nullptr;
+        }
+
+        ::WSACleanup();
+
         ::DokanShutdown();
     });
+
+    ::DokanInit();
 
     WSADATA WSAData = { 0 };
     {
@@ -163,77 +320,58 @@ int main()
             std::wprintf(
                 L"[ERROR] WSAStartup failed (%d).\n",
                 WSAError);
-            return WSAError;
+            return -1;
         }
     }
-    auto WSACleanupHandler = Mile::ScopeExitTaskHandler([&]()
-    {
-        ::WSACleanup();
-    });
 
     try
     {
-        const std::uint32_t Plan9SharePort = 50001;
-        g_Instance = Mile::Cirno::Client::ConnectWithHyperVSocket(
-            Plan9SharePort);
-        if (!g_Instance)
         {
-            Mile::Cirno::ThrowException(
-                "!Instance",
-                ERROR_INVALID_DATA);
+            const std::uint32_t Plan9SharePort = 50001;
+            g_Instance = Mile::Cirno::Client::ConnectWithHyperVSocket(
+                Plan9SharePort);
+            if (!g_Instance)
+            {
+                Mile::Cirno::ThrowException(
+                    "!Instance",
+                    ERROR_INVALID_DATA);
+            }
         }
-    }
-    catch (std::exception const& ex)
-    {
-        std::printf("%s\n", ex.what());
-    }
-    auto GlobalInstanceCleanupHandler = Mile::ScopeExitTaskHandler([&]()
-    {
-        if (g_Instance)
+
         {
-            delete g_Instance;
-            g_Instance = nullptr;
+            Mile::Cirno::VersionRequest Request;
+            Request.MaximumMessageSize = 1 << 16;
+            Request.ProtocolVersion = "9P2000.L";
+            Mile::Cirno::VersionResponse Response =
+                g_Instance->Version(Request);
+            std::printf(
+                "[INFO] Response.ProtocolVersion = %s\n"
+                "[INFO] Response.MaximumMessageSize = %u\n",
+                Response.ProtocolVersion.c_str(),
+                Response.MaximumMessageSize);
         }
-    });
 
-    try
-    {
-        Mile::Cirno::VersionRequest Request;
-        Request.MaximumMessageSize = 1 << 16;
-        Request.ProtocolVersion = "9P2000.L";
-        Mile::Cirno::VersionResponse Response =
-            g_Instance->Version(Request);
-        std::printf(
-            "[INFO] Response.ProtocolVersion = %s\n"
-            "[INFO] Response.MaximumMessageSize = %u\n",
-            Response.ProtocolVersion.c_str(),
-            Response.MaximumMessageSize);
+        {
+            Mile::Cirno::AttachRequest Request;
+            Request.FileId = g_Instance->AllocateFileId();
+            Request.AuthenticationFileId = MILE_CIRNO_NOFID;
+            Request.UserName = "";
+            Request.AccessName = "HostDriverStore";
+            Request.NumericUserName = MILE_CIRNO_NONUNAME;
+            Mile::Cirno::AttachResponse Response = g_Instance->Attach(Request);
+            g_RootDirectoryFileId = Request.FileId;
+            std::printf(
+                "[INFO] Response.UniqueId.Path = 0x%016llX\n",
+                Response.UniqueId.Path);
+        }
     }
     catch (std::exception const& ex)
     {
         std::printf("%s\n", ex.what());
+        return -1;
     }
 
-    try
-    {
-        Mile::Cirno::AttachRequest Request;
-        Request.FileId = g_Instance->AllocateFileId();
-        Request.AuthenticationFileId = MILE_CIRNO_NOFID;
-        Request.UserName = "";
-        Request.AccessName = "HostDriverStore";
-        Request.NumericUserName = MILE_CIRNO_NONUNAME;
-        Mile::Cirno::AttachResponse Response = g_Instance->Attach(Request);
-        g_RootDirectoryFileId = Request.FileId;
-        std::printf(
-            "[INFO] Response.UniqueId.Path = 0x%016llX\n",
-            Response.UniqueId.Path);
-    }
-    catch (std::exception const& ex)
-    {
-        std::printf("%s\n", ex.what());
-    }
-
-    ::Test();
+    //::Test();
 
     DOKAN_OPTIONS Options = { 0 };
     Options.Version = DOKAN_VERSION;
