@@ -8,7 +8,8 @@
 
 I think many people who love MAG/ACGN will think 9 -> ⑨ -> Cirno.
 
-Read https://touhou.fandom.com/wiki/Cirno/Fun_Facts for more information.
+Read https://en.wikipedia.org/wiki/List_of_Touhou_Project_characters#Cirno for
+more information.
 
 ## Documents
 
