@@ -14,7 +14,7 @@
 #include <WinSock2.h>
 #include <hvsocket.h>
 
-#include <Mile.Helpers.Base.h>
+#include <Mile.Helpers.CppBase.h>
 
 #include <dokan/dokan.h>
 
@@ -31,46 +31,16 @@
 #include "Mile.Cirno.Core.h"
 #include "Mile.Cirno.Protocol.Parser.h"
 
+namespace
+{
+    Mile::Cirno::Client* g_Instance = nullptr;
+}
+
 void Test()
 {
-    WSADATA WSAData = { 0 };
-    {
-        int WSAError = ::WSAStartup(MAKEWORD(2, 2), &WSAData);
-        if (NO_ERROR != WSAError)
-        {
-            std::wprintf(
-                L"[ERROR] WSAStartup failed (%d).\n",
-                WSAError);
-            return;
-        }
-    }
-
-    Mile::Cirno::Client* Instance = nullptr;
-
     try
     {
-        const std::uint32_t Plan9SharePort = 50001;
-        Instance = Mile::Cirno::Client::ConnectWithHyperVSocket(Plan9SharePort);
-        if (!Instance)
-        {
-            Mile::Cirno::ThrowException(
-                "!Instance",
-                ERROR_INVALID_DATA);
-        }
-
-        {
-            Mile::Cirno::VersionRequest Request;
-            Request.MaximumMessageSize = 1 << 16;
-            Request.ProtocolVersion = "9P2000.L";
-            Mile::Cirno::VersionResponse Response = Instance->Version(Request);
-            std::printf(
-                "[INFO] Response.ProtocolVersion = %s\n"
-                "[INFO] Response.MaximumMessageSize = %u\n",
-                Response.ProtocolVersion.c_str(),
-                Response.MaximumMessageSize);
-        }
-
-        std::uint32_t AttachFileId = Instance->AllocateFileId();
+        std::uint32_t AttachFileId = g_Instance->AllocateFileId();
         {
             Mile::Cirno::AttachRequest Request;
             Request.FileId = AttachFileId;
@@ -78,13 +48,13 @@ void Test()
             Request.UserName = "";
             Request.AccessName = "HostDriverStore";
             Request.NumericUserName = MILE_CIRNO_NONUNAME;
-            Mile::Cirno::AttachResponse Response = Instance->Attach(Request);
+            Mile::Cirno::AttachResponse Response = g_Instance->Attach(Request);
             std::printf(
                 "[INFO] Response.UniqueId.Path = 0x%016llX\n",
                 Response.UniqueId.Path);
         }
 
-        std::uint32_t FileId = Instance->AllocateFileId();
+        std::uint32_t FileId = g_Instance->AllocateFileId();
         {
             Mile::Cirno::WalkRequest Request;
             Request.FileId = AttachFileId;
@@ -92,7 +62,7 @@ void Test()
             Request.Names.push_back("FileRepository");
             Request.Names.push_back("nvmii.inf_amd64_9af988a7aa90f6d3");
             //Request.Names.push_back("amd_dpfc.sys");
-            Mile::Cirno::WalkResponse Response = Instance->Walk(Request);
+            Mile::Cirno::WalkResponse Response = g_Instance->Walk(Request);
             Response = Response;
         }
 
@@ -104,7 +74,7 @@ void Test()
                 MileCirnoLinuxOpenCreateFlagLargeFile |
                 MileCirnoLinuxOpenCreateFlagDirectory |
                 MileCirnoLinuxOpenCreateFlagCloseOnExecute;
-            Mile::Cirno::LinuxOpenResponse Response = Instance->LinuxOpen(Request);
+            Mile::Cirno::LinuxOpenResponse Response = g_Instance->LinuxOpen(Request);
             Response = Response;
         }
 
@@ -116,7 +86,7 @@ void Test()
             Request.Offset = LastOffset;
             LastOffset = 0;
             Request.Count = (1 << 16) - Mile::Cirno::HeaderSize - sizeof(std::uint32_t);
-            Mile::Cirno::ReadDirResponse Response = Instance->ReadDir(Request);
+            Mile::Cirno::ReadDirResponse Response = g_Instance->ReadDir(Request);
             for (Mile::Cirno::DirectoryEntry const& Entry : Response.Data)
             {
                 LastOffset = Entry.Offset;
@@ -130,7 +100,7 @@ void Test()
             Mile::Cirno::GetAttrRequest Request;
             Request.FileId = FileId;
             Request.RequestMask = MileCirnoLinuxGetAttrFlagAll;
-            Mile::Cirno::GetAttrResponse Response = Instance->GetAttr(Request);
+            Mile::Cirno::GetAttrResponse Response = g_Instance->GetAttr(Request);
             Response = Response;
         }
     }
@@ -138,14 +108,6 @@ void Test()
     {
         std::printf("%s\n", ex.what());
     }
-
-    if (Instance)
-    {
-        delete Instance;
-        Instance = nullptr;
-    }
-
-    ::WSACleanup();
 
     std::getchar();
 }
@@ -194,6 +156,66 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
 
 int main()
 {
+    ::DokanInit();
+    auto DokanCleanupHandler = Mile::ScopeExitTaskHandler([&]()
+    {
+        ::DokanShutdown();
+    });
+
+    WSADATA WSAData = { 0 };
+    {
+        int WSAError = ::WSAStartup(MAKEWORD(2, 2), &WSAData);
+        if (NO_ERROR != WSAError)
+        {
+            std::wprintf(
+                L"[ERROR] WSAStartup failed (%d).\n",
+                WSAError);
+            return WSAError;
+        }
+    }
+    auto WSACleanupHandler = Mile::ScopeExitTaskHandler([&]()
+    {
+        ::WSACleanup();
+    });
+
+    try
+    {
+        const std::uint32_t Plan9SharePort = 50001;
+        g_Instance = Mile::Cirno::Client::ConnectWithHyperVSocket(
+            Plan9SharePort);
+        if (!g_Instance)
+        {
+            Mile::Cirno::ThrowException(
+                "!Instance",
+                ERROR_INVALID_DATA);
+        }
+
+        {
+            Mile::Cirno::VersionRequest Request;
+            Request.MaximumMessageSize = 1 << 16;
+            Request.ProtocolVersion = "9P2000.L";
+            Mile::Cirno::VersionResponse Response =
+                g_Instance->Version(Request);
+            std::printf(
+                "[INFO] Response.ProtocolVersion = %s\n"
+                "[INFO] Response.MaximumMessageSize = %u\n",
+                Response.ProtocolVersion.c_str(),
+                Response.MaximumMessageSize);
+        }
+    }
+    catch (std::exception const& ex)
+    {
+        std::printf("%s\n", ex.what());
+    }
+    auto GlobalInstanceCleanupHandler = Mile::ScopeExitTaskHandler([&]()
+    {
+        if (g_Instance)
+        {
+            delete g_Instance;
+            g_Instance = nullptr;
+        }
+    });
+
     ::Test();
 
     DOKAN_OPTIONS Options = { 0 };
@@ -242,12 +264,5 @@ int main()
     Operations.GetFileSecurityW;
     Operations.SetFileSecurityW;
     Operations.FindStreams;
-
-    ::DokanInit();
-
-    int Result = ::DokanMain(&Options, &Operations);
-    
-    ::DokanShutdown();
-
-    return Result;
+    return ::DokanMain(&Options, &Operations);
 }
