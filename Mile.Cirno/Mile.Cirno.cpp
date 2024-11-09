@@ -34,30 +34,17 @@
 namespace
 {
     Mile::Cirno::Client* g_Instance = nullptr;
+    std::uint32_t g_RootDirectoryFileId = MILE_CIRNO_NOFID;
 }
 
 void Test()
 {
     try
     {
-        std::uint32_t AttachFileId = g_Instance->AllocateFileId();
-        {
-            Mile::Cirno::AttachRequest Request;
-            Request.FileId = AttachFileId;
-            Request.AuthenticationFileId = MILE_CIRNO_NOFID;
-            Request.UserName = "";
-            Request.AccessName = "HostDriverStore";
-            Request.NumericUserName = MILE_CIRNO_NONUNAME;
-            Mile::Cirno::AttachResponse Response = g_Instance->Attach(Request);
-            std::printf(
-                "[INFO] Response.UniqueId.Path = 0x%016llX\n",
-                Response.UniqueId.Path);
-        }
-
         std::uint32_t FileId = g_Instance->AllocateFileId();
         {
             Mile::Cirno::WalkRequest Request;
-            Request.FileId = AttachFileId;
+            Request.FileId = g_RootDirectoryFileId;
             Request.NewFileId = FileId;
             Request.Names.push_back("FileRepository");
             Request.Names.push_back("nvmii.inf_amd64_9af988a7aa90f6d3");
@@ -195,19 +182,6 @@ int main()
                 "!Instance",
                 ERROR_INVALID_DATA);
         }
-
-        {
-            Mile::Cirno::VersionRequest Request;
-            Request.MaximumMessageSize = 1 << 16;
-            Request.ProtocolVersion = "9P2000.L";
-            Mile::Cirno::VersionResponse Response =
-                g_Instance->Version(Request);
-            std::printf(
-                "[INFO] Response.ProtocolVersion = %s\n"
-                "[INFO] Response.MaximumMessageSize = %u\n",
-                Response.ProtocolVersion.c_str(),
-                Response.MaximumMessageSize);
-        }
     }
     catch (std::exception const& ex)
     {
@@ -221,6 +195,43 @@ int main()
             g_Instance = nullptr;
         }
     });
+
+    try
+    {
+        Mile::Cirno::VersionRequest Request;
+        Request.MaximumMessageSize = 1 << 16;
+        Request.ProtocolVersion = "9P2000.L";
+        Mile::Cirno::VersionResponse Response =
+            g_Instance->Version(Request);
+        std::printf(
+            "[INFO] Response.ProtocolVersion = %s\n"
+            "[INFO] Response.MaximumMessageSize = %u\n",
+            Response.ProtocolVersion.c_str(),
+            Response.MaximumMessageSize);
+    }
+    catch (std::exception const& ex)
+    {
+        std::printf("%s\n", ex.what());
+    }
+
+    try
+    {
+        Mile::Cirno::AttachRequest Request;
+        Request.FileId = g_Instance->AllocateFileId();
+        Request.AuthenticationFileId = MILE_CIRNO_NOFID;
+        Request.UserName = "";
+        Request.AccessName = "HostDriverStore";
+        Request.NumericUserName = MILE_CIRNO_NONUNAME;
+        Mile::Cirno::AttachResponse Response = g_Instance->Attach(Request);
+        g_RootDirectoryFileId = Request.FileId;
+        std::printf(
+            "[INFO] Response.UniqueId.Path = 0x%016llX\n",
+            Response.UniqueId.Path);
+    }
+    catch (std::exception const& ex)
+    {
+        std::printf("%s\n", ex.what());
+    }
 
     ::Test();
 
