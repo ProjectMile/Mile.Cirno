@@ -376,30 +376,30 @@ typedef enum _MILE_CIRNO_LINUX_OPEN_CREATE_FLAGS
 typedef enum _MILE_CIRNO_LINUX_GETATTR_FLAGS
 {
     MileCirnoLinuxGetAttrFlagMode = 0x00000001,
-    MileCirnoLinuxGetAttrFlagNLink = 0x00000002,
-    MileCirnoLinuxGetAttrFlagUid = 0x00000004,
-    MileCirnoLinuxGetAttrFlagGid = 0x00000008,
-    MileCirnoLinuxGetAttrFlagRawDevice = 0x00000010,
-    MileCirnoLinuxGetAttrFlagAccessTime = 0x00000020,
-    MileCirnoLinuxGetAttrFlagModifiedTime = 0x00000040,
+    MileCirnoLinuxGetAttrFlagNumberOfHardLinks = 0x00000002,
+    MileCirnoLinuxGetAttrFlagOwnerUserId = 0x00000004,
+    MileCirnoLinuxGetAttrFlagGroupId = 0x00000008,
+    MileCirnoLinuxGetAttrFlagDeviceId = 0x00000010,
+    MileCirnoLinuxGetAttrFlagLastAccessTime = 0x00000020,
+    MileCirnoLinuxGetAttrFlagLastWriteTime = 0x00000040,
     MileCirnoLinuxGetAttrFlagChangeTime = 0x00000080,
     MileCirnoLinuxGetAttrFlagInodeNumber = 0x00000100,
     MileCirnoLinuxGetAttrFlagSize = 0x00000200,
-    MileCirnoLinuxGetAttrFlagBlocks = 0x00000400,
+    MileCirnoLinuxGetAttrFlagAllocatedBlocks = 0x00000400,
     // Everything up to and including MileCirnoLinuxGetAttrFlagBlocks is
     // MileCirnoLinuxGetAttrFlagBasic.
     MileCirnoLinuxGetAttrFlagBasic =
         MileCirnoLinuxGetAttrFlagMode |
-        MileCirnoLinuxGetAttrFlagNLink |
-        MileCirnoLinuxGetAttrFlagUid |
-        MileCirnoLinuxGetAttrFlagGid |
-        MileCirnoLinuxGetAttrFlagRawDevice |
-        MileCirnoLinuxGetAttrFlagAccessTime |
-        MileCirnoLinuxGetAttrFlagModifiedTime |
+        MileCirnoLinuxGetAttrFlagNumberOfHardLinks |
+        MileCirnoLinuxGetAttrFlagOwnerUserId |
+        MileCirnoLinuxGetAttrFlagGroupId |
+        MileCirnoLinuxGetAttrFlagDeviceId |
+        MileCirnoLinuxGetAttrFlagLastAccessTime |
+        MileCirnoLinuxGetAttrFlagLastWriteTime |
         MileCirnoLinuxGetAttrFlagChangeTime |
         MileCirnoLinuxGetAttrFlagInodeNumber |
         MileCirnoLinuxGetAttrFlagSize |
-        MileCirnoLinuxGetAttrFlagBlocks,
+        MileCirnoLinuxGetAttrFlagAllocatedBlocks,
     MileCirnoLinuxGetAttrFlagBirthTime = 0x00000800,
     MileCirnoLinuxGetAttrFlagGenration = 0x00001000,
     MileCirnoLinuxGetAttrFlagDataVersion = 0x00002000,
