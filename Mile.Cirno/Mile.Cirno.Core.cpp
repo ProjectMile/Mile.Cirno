@@ -34,6 +34,46 @@
         Code));
 }
 
+std::uint16_t Mile::Cirno::Client::AllocateTag()
+{
+    std::lock_guard<std::mutex> Guard(this->m_TagAllocationMutex);
+
+    if (this->m_ReusableTags.empty())
+    {
+        if (MILE_CIRNO_NOTAG == this->m_TagUnallocatedStart)
+        {
+            return MILE_CIRNO_NOTAG;
+        }
+        else
+        {
+            return this->m_TagUnallocatedStart++;
+        }
+    }
+
+    std::uint16_t Result = *this->m_ReusableTags.begin();
+    this->m_ReusableTags.erase(Result);
+    return Result;
+}
+
+void Mile::Cirno::Client::FreeTag(
+    std::uint16_t const& Tag)
+{
+    if (MILE_CIRNO_NOTAG == Tag)
+    {
+        return;
+    }
+
+    std::lock_guard<std::mutex> Guard(this->m_TagAllocationMutex);
+
+    this->m_ReusableTags.insert(Tag);
+
+    while (!this->m_ReusableTags.empty() &&
+        *this->m_ReusableTags.rbegin() == this->m_TagUnallocatedStart - 1)
+    {
+        this->m_ReusableTags.erase(--this->m_TagUnallocatedStart);
+    }
+}
+
 void Mile::Cirno::Client::ReceiveWorkerEntryPoint()
 {
     this->m_ReceiveWorkerStarted = true;
@@ -122,46 +162,6 @@ Mile::Cirno::Client::~Client()
     }
 }
 
-std::uint16_t Mile::Cirno::Client::AllocateTag()
-{
-    std::lock_guard<std::mutex> Guard(this->m_TagAllocationMutex);
-
-    if (this->m_ReusableTags.empty())
-    {
-        if (MILE_CIRNO_NOTAG == this->m_TagUnallocatedStart)
-        {
-            return MILE_CIRNO_NOTAG;
-        }
-        else
-        {
-            return this->m_TagUnallocatedStart++;
-        }
-    }
-
-    std::uint16_t Result = *this->m_ReusableTags.begin();
-    this->m_ReusableTags.erase(Result);
-    return Result;
-}
-
-void Mile::Cirno::Client::FreeTag(
-    std::uint16_t const& Tag)
-{
-    if (MILE_CIRNO_NOTAG == Tag)
-    {
-        return;
-    }
-
-    std::lock_guard<std::mutex> Guard(this->m_TagAllocationMutex);
-
-    this->m_ReusableTags.insert(Tag);
-
-    while (!this->m_ReusableTags.empty() &&
-        *this->m_ReusableTags.rbegin() == this->m_TagUnallocatedStart - 1)
-    {
-        this->m_ReusableTags.erase(--this->m_TagUnallocatedStart);
-    }
-}
-
 std::uint32_t Mile::Cirno::Client::AllocateFileId()
 {
     std::lock_guard<std::mutex> Guard(this->m_FileIdAllocationMutex);
@@ -203,7 +203,6 @@ void Mile::Cirno::Client::FreeFileId(
 }
 
 void Mile::Cirno::Client::Request(
-    std::uint16_t const& Tag,
     MILE_CIRNO_MESSAGE_TYPE const& RequestType,
     std::vector<std::uint8_t> const& RequestContent,
     MILE_CIRNO_MESSAGE_TYPE const& ResponseType,
@@ -213,6 +212,25 @@ void Mile::Cirno::Client::Request(
     {
         return;
     }
+
+    std::uint16_t Tag = MILE_CIRNO_NOTAG;
+    if (MileCirnoVersionRequestMessage != RequestType)
+    {
+        Tag = this->AllocateTag();
+        if (MILE_CIRNO_NOTAG == Tag)
+        {
+            Mile::Cirno::ThrowException(
+                "MILE_CIRNO_NOTAG == Tag",
+                ERROR_INVALID_DATA);
+        }
+    }
+    auto TagCleanupHandler = Mile::ScopeExitTaskHandler([&]()
+    {
+        if (MILE_CIRNO_NOTAG != Tag)
+        {
+            this->FreeTag(Tag);
+        }
+    });
 
     Mile::Cirno::Header RequestHeader;
     RequestHeader.Size = static_cast<std::uint32_t>(RequestContent.size());
@@ -310,7 +328,6 @@ Mile::Cirno::VersionResponse Mile::Cirno::Client::Version(
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
     this->Request(
-        MILE_CIRNO_NOTAG,
         MileCirnoVersionRequestMessage,
         RequestBuffer,
         MileCirnoVersionResponseMessage,
@@ -323,28 +340,12 @@ Mile::Cirno::VersionResponse Mile::Cirno::Client::Version(
 Mile::Cirno::AttachResponse Mile::Cirno::Client::Attach(
     Mile::Cirno::AttachRequest const& Request)
 {
-    std::uint16_t Tag = this->AllocateTag();
-    if (MILE_CIRNO_NOTAG == Tag)
-    {
-        Mile::Cirno::ThrowException(
-            "MILE_CIRNO_NOTAG == Tag",
-            ERROR_INVALID_DATA);
-    }
-    auto ExitHandler = Mile::ScopeExitTaskHandler([&]()
-    {
-        if (MILE_CIRNO_NOTAG != Tag)
-        {
-            this->FreeTag(Tag);
-        }
-    });
-
     std::vector<std::uint8_t> RequestBuffer;
     Mile::Cirno::PushAttachRequest(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
     this->Request(
-        Tag,
         MileCirnoAttachRequestMessage,
         RequestBuffer,
         MileCirnoAttachResponseMessage,
@@ -357,28 +358,12 @@ Mile::Cirno::AttachResponse Mile::Cirno::Client::Attach(
 Mile::Cirno::WalkResponse Mile::Cirno::Client::Walk(
     Mile::Cirno::WalkRequest const& Request)
 {
-    std::uint16_t Tag = this->AllocateTag();
-    if (MILE_CIRNO_NOTAG == Tag)
-    {
-        Mile::Cirno::ThrowException(
-            "MILE_CIRNO_NOTAG == Tag",
-            ERROR_INVALID_DATA);
-    }
-    auto ExitHandler = Mile::ScopeExitTaskHandler([&]()
-    {
-        if (MILE_CIRNO_NOTAG != Tag)
-        {
-            this->FreeTag(Tag);
-        }
-    });
-
     std::vector<std::uint8_t> RequestBuffer;
     Mile::Cirno::PushWalkRequest(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
     this->Request(
-        Tag,
         MileCirnoWalkRequestMessage,
         RequestBuffer,
         MileCirnoWalkResponseMessage,
@@ -391,28 +376,12 @@ Mile::Cirno::WalkResponse Mile::Cirno::Client::Walk(
 void Mile::Cirno::Client::Clunk(
     Mile::Cirno::ClunkRequest const& Request)
 {
-    std::uint16_t Tag = this->AllocateTag();
-    if (MILE_CIRNO_NOTAG == Tag)
-    {
-        Mile::Cirno::ThrowException(
-            "MILE_CIRNO_NOTAG == Tag",
-            ERROR_INVALID_DATA);
-    }
-    auto ExitHandler = Mile::ScopeExitTaskHandler([&]()
-    {
-        if (MILE_CIRNO_NOTAG != Tag)
-        {
-            this->FreeTag(Tag);
-        }
-    });
-
     std::vector<std::uint8_t> RequestBuffer;
     Mile::Cirno::PushClunkRequest(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
     this->Request(
-        Tag,
         MileCirnoClunkRequestMessage,
         RequestBuffer,
         MileCirnoClunkResponseMessage,
@@ -422,28 +391,12 @@ void Mile::Cirno::Client::Clunk(
 Mile::Cirno::LinuxOpenResponse Mile::Cirno::Client::LinuxOpen(
     Mile::Cirno::LinuxOpenRequest const& Request)
 {
-    std::uint16_t Tag = this->AllocateTag();
-    if (MILE_CIRNO_NOTAG == Tag)
-    {
-        Mile::Cirno::ThrowException(
-            "MILE_CIRNO_NOTAG == Tag",
-            ERROR_INVALID_DATA);
-    }
-    auto ExitHandler = Mile::ScopeExitTaskHandler([&]()
-    {
-        if (MILE_CIRNO_NOTAG != Tag)
-        {
-            this->FreeTag(Tag);
-        }
-    });
-
     std::vector<std::uint8_t> RequestBuffer;
     Mile::Cirno::PushLinuxOpenRequest(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
     this->Request(
-        Tag,
         MileCirnoLinuxOpenRequestMessage,
         RequestBuffer,
         MileCirnoLinuxOpenResponseMessage,
@@ -456,28 +409,12 @@ Mile::Cirno::LinuxOpenResponse Mile::Cirno::Client::LinuxOpen(
 Mile::Cirno::ReadDirResponse Mile::Cirno::Client::ReadDir(
     Mile::Cirno::ReadDirRequest const& Request)
 {
-    std::uint16_t Tag = this->AllocateTag();
-    if (MILE_CIRNO_NOTAG == Tag)
-    {
-        Mile::Cirno::ThrowException(
-            "MILE_CIRNO_NOTAG == Tag",
-            ERROR_INVALID_DATA);
-    }
-    auto ExitHandler = Mile::ScopeExitTaskHandler([&]()
-    {
-        if (MILE_CIRNO_NOTAG != Tag)
-        {
-            this->FreeTag(Tag);
-        }
-    });
-
     std::vector<std::uint8_t> RequestBuffer;
     Mile::Cirno::PushReadDirRequest(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
     this->Request(
-        Tag,
         MileCirnoReadDirRequestMessage,
         RequestBuffer,
         MileCirnoReadDirResponseMessage,
@@ -490,28 +427,12 @@ Mile::Cirno::ReadDirResponse Mile::Cirno::Client::ReadDir(
 Mile::Cirno::GetAttrResponse Mile::Cirno::Client::GetAttr(
     Mile::Cirno::GetAttrRequest const& Request)
 {
-    std::uint16_t Tag = this->AllocateTag();
-    if (MILE_CIRNO_NOTAG == Tag)
-    {
-        Mile::Cirno::ThrowException(
-            "MILE_CIRNO_NOTAG == Tag",
-            ERROR_INVALID_DATA);
-    }
-    auto ExitHandler = Mile::ScopeExitTaskHandler([&]()
-    {
-        if (MILE_CIRNO_NOTAG != Tag)
-        {
-            this->FreeTag(Tag);
-        }
-    });
-
     std::vector<std::uint8_t> RequestBuffer;
     Mile::Cirno::PushGetAttrRequest(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
     this->Request(
-        Tag,
         MileCirnoGetAttrRequestMessage,
         RequestBuffer,
         MileCirnoGetAttrResponseMessage,

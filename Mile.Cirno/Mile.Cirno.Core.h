@@ -42,16 +42,16 @@ namespace Mile::Cirno
 
         Client() = default;
 
-    public:
-
-        void ReceiveWorkerEntryPoint();
-
-        ~Client();
-
         std::uint16_t AllocateTag();
 
         void FreeTag(
             std::uint16_t const& Tag);
+
+        void ReceiveWorkerEntryPoint();
+
+    public:
+
+        ~Client();
 
         std::uint32_t AllocateFileId();
 
@@ -59,7 +59,6 @@ namespace Mile::Cirno
             std::uint32_t const& FileId);
 
         void Request(
-            std::uint16_t const& Tag,
             MILE_CIRNO_MESSAGE_TYPE const& RequestType,
             std::vector<std::uint8_t> const& RequestContent,
             MILE_CIRNO_MESSAGE_TYPE const& ResponseType,
