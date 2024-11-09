@@ -172,7 +172,12 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetFileInformation(
 
         Mile::Cirno::GetAttrRequest InformationRequest;
         InformationRequest.FileId = WalkRequest.NewFileId;
-        InformationRequest.RequestMask = MileCirnoLinuxGetAttrFlagAll;
+        InformationRequest.RequestMask =
+            MileCirnoLinuxGetAttrFlagMode |
+            MileCirnoLinuxGetAttrFlagNumberOfHardLinks |
+            MileCirnoLinuxGetAttrFlagLastAccessTime |
+            MileCirnoLinuxGetAttrFlagLastWriteTime |
+            MileCirnoLinuxGetAttrFlagSize;
         Mile::Cirno::GetAttrResponse InformationResponse =
             g_Instance->GetAttr(InformationRequest);
 
@@ -342,7 +347,12 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
 
                     Mile::Cirno::GetAttrRequest InformationRequest;
                     InformationRequest.FileId = WalkRequest.NewFileId;
-                    InformationRequest.RequestMask = MileCirnoLinuxGetAttrFlagAll;
+                    InformationRequest.RequestMask =
+                        MileCirnoLinuxGetAttrFlagMode |
+                        MileCirnoLinuxGetAttrFlagNumberOfHardLinks |
+                        MileCirnoLinuxGetAttrFlagLastAccessTime |
+                        MileCirnoLinuxGetAttrFlagLastWriteTime |
+                        MileCirnoLinuxGetAttrFlagSize;
                     Mile::Cirno::GetAttrResponse InformationResponse =
                         g_Instance->GetAttr(InformationRequest);
 
