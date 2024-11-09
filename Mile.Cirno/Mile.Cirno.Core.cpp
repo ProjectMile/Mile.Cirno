@@ -70,6 +70,7 @@ void Mile::Cirno::Client::ReceiveWorkerEntryPoint()
         std::span<std::uint8_t> HeaderSpan = std::span<std::uint8_t>(Content);
         Mile::Cirno::Header Header = Mile::Cirno::PopHeader(HeaderSpan);
 
+        if (Header.Size)
         {
             Content.resize(Mile::Cirno::HeaderSize + Header.Size);
             DWORD NumberOfBytesRecvd = 0;
