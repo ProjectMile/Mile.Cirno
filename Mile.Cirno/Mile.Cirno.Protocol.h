@@ -416,14 +416,14 @@ typedef enum _MILE_CIRNO_LINUX_GETATTR_FLAGS
 typedef enum _MILE_CIRNO_LINUX_SETATTR_FLAGS
 {
     MileCirnoLinuxSetAttrFlagMode = 0x00000001,
-    MileCirnoLinuxSetAttrFlagUid = 0x00000002,
-    MileCirnoLinuxSetAttrFlagGid = 0x00000004,
+    MileCirnoLinuxSetAttrFlagOwnerUserId = 0x00000002,
+    MileCirnoLinuxSetAttrFlagGroupId = 0x00000004,
     MileCirnoLinuxSetAttrFlagSize = 0x00000008,
-    MileCirnoLinuxSetAttrFlagAccessTime = 0x00000010,
-    MileCirnoLinuxSetAttrFlagModifiedTime = 0x00000020,
+    MileCirnoLinuxSetAttrFlagLastAccessTime = 0x00000010,
+    MileCirnoLinuxSetAttrFlagLastWriteTime = 0x00000020,
     MileCirnoLinuxSetAttrFlagChangeTime = 0x00000040,
-    MileCirnoLinuxSetAttrFlagAccessTimeSet = 0x00000080,
-    MileCirnoLinuxSetAttrFlagModifiedTimeSet = 0x00000100,
+    MileCirnoLinuxSetAttrFlagLastAccessTimeSet = 0x00000080,
+    MileCirnoLinuxSetAttrFlagLastWriteTimeSet = 0x00000100,
 } MILE_CIRNO_LINUX_SETATTR_FLAGS, *PMILE_CIRNO_LINUX_SETATTR_FLAGS;
 
 typedef enum _MILE_CIRNO_LINUX_LOCK_TYPE
