@@ -45,7 +45,7 @@ void Mile::Cirno::Client::ReceiveWorkerEntryPoint()
         {
             Content.resize(Mile::Cirno::HeaderSize);
             DWORD NumberOfBytesRecvd = 0;
-            DWORD Flags = 0;
+            DWORD Flags = MSG_WAITALL;
             if (!::MileSocketRecv(
                 this->m_Socket,
                 &Content[0],
@@ -73,7 +73,7 @@ void Mile::Cirno::Client::ReceiveWorkerEntryPoint()
         {
             Content.resize(Mile::Cirno::HeaderSize + Header.Size);
             DWORD NumberOfBytesRecvd = 0;
-            DWORD Flags = 0;
+            DWORD Flags = MSG_WAITALL;
             if (!::MileSocketRecv(
                 this->m_Socket,
                 &Content[Mile::Cirno::HeaderSize],
