@@ -683,13 +683,16 @@ void Mile::Cirno::PushWalkRequest(
 {
     Mile::Cirno::PushUInt32(Buffer, Value.FileId);
     Mile::Cirno::PushUInt32(Buffer, Value.NewFileId);
+    Mile::Cirno::PushUInt16(
+        Buffer,
+        static_cast<std::uint16_t>(Value.Names.size()));
     for (auto const& Name : Value.Names)
     {
         Mile::Cirno::PushString(Buffer, Name);
     }
 }
 
-Mile::Cirno::WalkResponse PopWalkResponse(
+Mile::Cirno::WalkResponse Mile::Cirno::PopWalkResponse(
         std::span<std::uint8_t>& Buffer)
 {
     Mile::Cirno::WalkResponse Result;
