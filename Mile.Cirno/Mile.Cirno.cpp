@@ -103,6 +103,12 @@ void Test()
             Mile::Cirno::GetAttrResponse Response = g_Instance->GetAttr(Request);
             Response = Response;
         }
+
+        {
+            Mile::Cirno::ClunkRequest Request;
+            Request.FileId = FileId;
+            g_Instance->Clunk(Request);
+        }
     }
     catch (std::exception const& ex)
     {

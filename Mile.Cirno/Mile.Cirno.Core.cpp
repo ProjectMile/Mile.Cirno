@@ -387,6 +387,37 @@ Mile::Cirno::WalkResponse Mile::Cirno::Client::Walk(
     return Mile::Cirno::PopWalkResponse(ResponseSpan);
 }
 
+void Mile::Cirno::Client::Clunk(
+    Mile::Cirno::ClunkRequest const& Request)
+{
+    std::uint16_t Tag = this->AllocateTag();
+    if (MILE_CIRNO_NOTAG == Tag)
+    {
+        Mile::Cirno::ThrowException(
+            "MILE_CIRNO_NOTAG == Tag",
+            ERROR_INVALID_DATA);
+    }
+    auto ExitHandler = Mile::ScopeExitTaskHandler([&]()
+    {
+        if (MILE_CIRNO_NOTAG != Tag)
+        {
+            this->FreeTag(Tag);
+        }
+    });
+
+    std::vector<std::uint8_t> RequestBuffer;
+    Mile::Cirno::PushClunkRequest(
+        RequestBuffer,
+        Request);
+    std::vector<std::uint8_t> ResponseBuffer;
+    this->Request(
+        Tag,
+        MileCirnoClunkRequestMessage,
+        RequestBuffer,
+        MileCirnoClunkResponseMessage,
+        ResponseBuffer);
+}
+
 Mile::Cirno::LinuxOpenResponse Mile::Cirno::Client::LinuxOpen(
     Mile::Cirno::LinuxOpenRequest const& Request)
 {

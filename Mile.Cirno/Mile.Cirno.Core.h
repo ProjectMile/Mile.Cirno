@@ -74,6 +74,9 @@ namespace Mile::Cirno
         WalkResponse Walk(
             WalkRequest const& Request);
 
+        void Clunk(
+            ClunkRequest const& Request);
+
         LinuxOpenResponse LinuxOpen(
             LinuxOpenRequest const& Request);
 
