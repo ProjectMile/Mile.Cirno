@@ -71,6 +71,9 @@ namespace Mile::Cirno
         AttachResponse Attach(
             AttachRequest const& Request);
 
+        WalkResponse Walk(
+            WalkRequest const& Request);
+
         LinuxOpenResponse LinuxOpen(
             LinuxOpenRequest const& Request);
 

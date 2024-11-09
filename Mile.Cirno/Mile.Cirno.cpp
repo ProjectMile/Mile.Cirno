@@ -70,10 +70,10 @@ void Test()
                 Response.MaximumMessageSize);
         }
 
-        std::uint32_t FileId = Instance->AllocateFileId();
+        std::uint32_t AttachFileId = Instance->AllocateFileId();
         {
             Mile::Cirno::AttachRequest Request;
-            Request.FileId = FileId;
+            Request.FileId = AttachFileId;
             Request.AuthenticationFileId = MILE_CIRNO_NOFID;
             Request.UserName = "";
             Request.AccessName = "HostDriverStore";
@@ -82,6 +82,17 @@ void Test()
             std::printf(
                 "[INFO] Response.UniqueId.Path = 0x%016llX\n",
                 Response.UniqueId.Path);
+        }
+
+        std::uint32_t FileId = Instance->AllocateFileId();
+        {
+            Mile::Cirno::WalkRequest Request;
+            Request.FileId = AttachFileId;
+            Request.NewFileId = FileId;
+            Request.Names.push_back("FileRepository");
+            Request.Names.push_back("nvmii.inf_amd64_9af988a7aa90f6d3");
+            Mile::Cirno::WalkResponse Response = Instance->Walk(Request);
+            Response = Response;
         }
 
         {
@@ -96,19 +107,22 @@ void Test()
             Response = Response;
         }
 
+        std::uint64_t LastOffset = 0;
+        do
         {
             Mile::Cirno::ReadDirRequest Request;
             Request.FileId = FileId;
-            Request.Offset = 0;
+            Request.Offset = LastOffset;
             Request.Count = (1 << 16) - Mile::Cirno::HeaderSize - sizeof(std::uint32_t);
             Mile::Cirno::ReadDirResponse Response = Instance->ReadDir(Request);
             for (Mile::Cirno::DirectoryEntry const& Entry : Response.Data)
             {
+                LastOffset = Entry.Offset;
                 std::printf(
                     "[INFO] List Directory: %s\n",
                     Entry.Name.c_str());
             }
-        }
+        } while (LastOffset);
     }
     catch (std::exception const& ex)
     {
