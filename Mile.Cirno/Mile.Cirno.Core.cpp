@@ -455,6 +455,40 @@ Mile::Cirno::ReadDirResponse Mile::Cirno::Client::ReadDir(
     return Mile::Cirno::PopReadDirResponse(ResponseSpan);
 }
 
+Mile::Cirno::GetAttrResponse Mile::Cirno::Client::GetAttr(
+    Mile::Cirno::GetAttrRequest const& Request)
+{
+    std::uint16_t Tag = this->AllocateTag();
+    if (MILE_CIRNO_NOTAG == Tag)
+    {
+        Mile::Cirno::ThrowException(
+            "MILE_CIRNO_NOTAG == Tag",
+            ERROR_INVALID_DATA);
+    }
+    auto ExitHandler = Mile::ScopeExitTaskHandler([&]()
+    {
+        if (MILE_CIRNO_NOTAG != Tag)
+        {
+            this->FreeTag(Tag);
+        }
+    });
+
+    std::vector<std::uint8_t> RequestBuffer;
+    Mile::Cirno::PushGetAttrRequest(
+        RequestBuffer,
+        Request);
+    std::vector<std::uint8_t> ResponseBuffer;
+    this->Request(
+        Tag,
+        MileCirnoGetAttrRequestMessage,
+        RequestBuffer,
+        MileCirnoGetAttrResponseMessage,
+        ResponseBuffer);
+    std::span<std::uint8_t> ResponseSpan =
+        std::span<std::uint8_t>(ResponseBuffer);
+    return Mile::Cirno::PopGetAttrResponse(ResponseSpan);
+}
+
 Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithTcpSocket(
     std::string const& Host,
     std::string const& Port)

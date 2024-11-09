@@ -80,6 +80,9 @@ namespace Mile::Cirno
         ReadDirResponse ReadDir(
             ReadDirRequest const& Request);
 
+        GetAttrResponse GetAttr(
+            GetAttrRequest const& Request);
+
         static Client* ConnectWithTcpSocket(
             std::string const& Host,
             std::string const& Port);

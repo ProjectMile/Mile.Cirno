@@ -91,6 +91,7 @@ void Test()
             Request.NewFileId = FileId;
             Request.Names.push_back("FileRepository");
             Request.Names.push_back("nvmii.inf_amd64_9af988a7aa90f6d3");
+            //Request.Names.push_back("amd_dpfc.sys");
             Mile::Cirno::WalkResponse Response = Instance->Walk(Request);
             Response = Response;
         }
@@ -113,6 +114,7 @@ void Test()
             Mile::Cirno::ReadDirRequest Request;
             Request.FileId = FileId;
             Request.Offset = LastOffset;
+            LastOffset = 0;
             Request.Count = (1 << 16) - Mile::Cirno::HeaderSize - sizeof(std::uint32_t);
             Mile::Cirno::ReadDirResponse Response = Instance->ReadDir(Request);
             for (Mile::Cirno::DirectoryEntry const& Entry : Response.Data)
@@ -123,6 +125,14 @@ void Test()
                     Entry.Name.c_str());
             }
         } while (LastOffset);
+
+        {
+            Mile::Cirno::GetAttrRequest Request;
+            Request.FileId = FileId;
+            Request.RequestMask = MileCirnoLinuxGetAttrFlagAll;
+            Mile::Cirno::GetAttrResponse Response = Instance->GetAttr(Request);
+            Response = Response;
+        }
     }
     catch (std::exception const& ex)
     {
