@@ -57,74 +57,6 @@ namespace
     std::uint32_t g_RootDirectoryFileId = MILE_CIRNO_NOFID;
 }
 
-void Test()
-{
-    try
-    {
-        std::uint32_t FileId = g_Instance->AllocateFileId();
-        {
-            Mile::Cirno::WalkRequest Request;
-            Request.FileId = g_RootDirectoryFileId;
-            Request.NewFileId = FileId;
-            Request.Names.push_back("FileRepository");
-            Request.Names.push_back("nvmii.inf_amd64_9af988a7aa90f6d3");
-            //Request.Names.push_back("amd_dpfc.sys");
-            Mile::Cirno::WalkResponse Response = g_Instance->Walk(Request);
-            Response = Response;
-        }
-
-        {
-            Mile::Cirno::LinuxOpenRequest Request;
-            Request.FileId = FileId;
-            Request.Flags =
-                MileCirnoLinuxOpenCreateFlagNonBlock |
-                MileCirnoLinuxOpenCreateFlagLargeFile |
-                MileCirnoLinuxOpenCreateFlagDirectory |
-                MileCirnoLinuxOpenCreateFlagCloseOnExecute;
-            Mile::Cirno::LinuxOpenResponse Response = g_Instance->LinuxOpen(Request);
-            Response = Response;
-        }
-
-        std::uint64_t LastOffset = 0;
-        do
-        {
-            Mile::Cirno::ReadDirRequest Request;
-            Request.FileId = FileId;
-            Request.Offset = LastOffset;
-            LastOffset = 0;
-            Request.Count = (1 << 16) - Mile::Cirno::HeaderSize - sizeof(std::uint32_t);
-            Mile::Cirno::ReadDirResponse Response = g_Instance->ReadDir(Request);
-            for (Mile::Cirno::DirectoryEntry const& Entry : Response.Data)
-            {
-                LastOffset = Entry.Offset;
-                std::printf(
-                    "[INFO] List Directory: %s\n",
-                    Entry.Name.c_str());
-            }
-        } while (LastOffset);
-
-        {
-            Mile::Cirno::GetAttrRequest Request;
-            Request.FileId = FileId;
-            Request.RequestMask = MileCirnoLinuxGetAttrFlagAll;
-            Mile::Cirno::GetAttrResponse Response = g_Instance->GetAttr(Request);
-            Response = Response;
-        }
-
-        {
-            Mile::Cirno::ClunkRequest Request;
-            Request.FileId = FileId;
-            g_Instance->Clunk(Request);
-        }
-    }
-    catch (std::exception const& ex)
-    {
-        std::printf("%s\n", ex.what());
-    }
-
-    std::getchar();
-}
-
 NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
     _In_ LPCWSTR FileName,
     _In_ PDOKAN_IO_SECURITY_CONTEXT SecurityContext,
@@ -149,6 +81,10 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
         &ConvertedDesiredAccess,
         &ConvertedFlagsAndAttributes,
         &ConvertedCreationDisposition);
+
+    std::wprintf(
+        L"[INFO] FileName = %s\n",
+        FileName);
 
     try
     {
@@ -626,8 +562,6 @@ int main()
         std::printf("%s\n", ex.what());
         return -1;
     }
-
-    //::Test();
 
     DOKAN_OPTIONS Options = { 0 };
     Options.Version = DOKAN_VERSION;
