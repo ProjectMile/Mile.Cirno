@@ -310,7 +310,7 @@ void Mile::Cirno::Client::Request(
         Mile::Cirno::LinuxErrorResponse Response =
             Mile::Cirno::PopLinuxErrorResponse(ResponseSpan);
         Mile::Cirno::ThrowException(
-            "MileCirnoVersionResponseMessage",
+            "MileCirnoLinuxErrorResponseMessage",
             Response.Code);
     }
     else

@@ -149,7 +149,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetFileInformation(
         g_Instance->Walk(WalkRequest);
         auto CurrentCleanupHandler = Mile::ScopeExitTaskHandler([&]()
         {
-            if (MILE_CIRNO_NOFID == WalkRequest.NewFileId)
+            if (MILE_CIRNO_NOFID != WalkRequest.NewFileId)
             {
                 try
                 {
@@ -243,7 +243,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
     }
     auto CleanupHandler = Mile::ScopeExitTaskHandler([&]()
     {
-        if (MILE_CIRNO_NOFID == CurrentDirectoryFileId)
+        if (MILE_CIRNO_NOFID != CurrentDirectoryFileId)
         {
             try
             {
@@ -324,7 +324,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
                     g_Instance->Walk(WalkRequest);
                     auto CurrentCleanupHandler = Mile::ScopeExitTaskHandler([&]()
                     {
-                        if (MILE_CIRNO_NOFID == WalkRequest.NewFileId)
+                        if (MILE_CIRNO_NOFID != WalkRequest.NewFileId)
                         {
                             try
                             {
@@ -484,7 +484,7 @@ int main()
     Options.GlobalContext;
     Options.MountPoint = L"C:\\Windows\\System32\\HostDriverStore";
     Options.UNCName;
-    Options.Timeout;
+    Options.Timeout = INFINITE;
     Options.AllocationUnitSize;
     Options.SectorSize;
     Options.VolumeSecurityDescriptorLength;
