@@ -269,17 +269,14 @@ void Mile::Cirno::Client::Request(
 
     for (;;)
     {
+        std::lock_guard<std::mutex> Guard(this->m_ReceiveWorkerMutex);
+        auto Iterator = this->m_Responses.find(Tag);
+        if (this->m_Responses.end() != Iterator)
         {
-            std::lock_guard<std::mutex> Guard(this->m_ReceiveWorkerMutex);
-            auto Iterator = this->m_Responses.find(Tag);
-            if (this->m_Responses.end() != Iterator)
-            {
-                Content = Iterator->second;
-                this->m_Responses.erase(Iterator);
-                break;
-            }
+            Content = Iterator->second;
+            this->m_Responses.erase(Iterator);
+            break;
         }
-        ::Sleep(100);
     }
 
     if (Content.size() < Mile::Cirno::HeaderSize)

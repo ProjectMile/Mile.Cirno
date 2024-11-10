@@ -321,9 +321,6 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
                 ::wcscpy_s(
                     FindData.cFileName,
                     Mile::ToWideString(CP_UTF8, Entry.Name).c_str());
-                std::printf(
-                    "[INFO] List Directory: %s\n",
-                    Entry.Name.c_str());
 
                 try
                 {
@@ -482,17 +479,7 @@ int main()
     DOKAN_OPTIONS Options = { 0 };
     Options.Version = DOKAN_VERSION;
     Options.SingleThread;
-    /*Options.Options =
-        DOKAN_OPTION_DEBUG |
-        DOKAN_OPTION_STDERR |
-        DOKAN_OPTION_ALT_STREAM |
-        DOKAN_OPTION_WRITE_PROTECT |
-        DOKAN_OPTION_MOUNT_MANAGER |
-        DOKAN_OPTION_CASE_SENSITIVE |
-        DOKAN_OPTION_DISPATCH_DRIVER_LOGS;*/
     Options.Options =
-        DOKAN_OPTION_DEBUG |
-        DOKAN_OPTION_STDERR |
         DOKAN_OPTION_WRITE_PROTECT |
         DOKAN_OPTION_MOUNT_MANAGER |
         DOKAN_OPTION_CASE_SENSITIVE;
