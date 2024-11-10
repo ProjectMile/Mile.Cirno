@@ -32,6 +32,25 @@
 #include "Mile.Cirno.Core.h"
 #include "Mile.Cirno.Protocol.Parser.h"
 
+ // Win32 time epoch is 00:00:00, January 1 1601.
+ // UNIX time epoch is 00:00:00, January 1 1970.
+ // There are 11644473600 seconds between these two epochs.
+const std::uint64_t SecondsBetweenWin32TimeAndUnixTime = 11644473600ULL;
+
+FILETIME ToFileTime(
+    std::uint64_t UnixTimeSeconds,
+    std::uint64_t UnixTimeNanoseconds)
+{
+    std::uint64_t RawResult = UnixTimeSeconds;
+    RawResult += SecondsBetweenWin32TimeAndUnixTime;
+    RawResult *= 1000 * 1000 * 10;
+    RawResult += UnixTimeNanoseconds / 100;
+    FILETIME Result;
+    Result.dwLowDateTime = static_cast<DWORD>(RawResult);
+    Result.dwHighDateTime = static_cast<DWORD>(RawResult >> 32);      
+    return Result;
+}
+
 namespace
 {
     Mile::Cirno::Client* g_Instance = nullptr;
@@ -182,8 +201,14 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetFileInformation(
         }
 
         Buffer->ftCreationTime;
-        Buffer->ftLastAccessTime;
-        Buffer->ftLastWriteTime;
+
+        Buffer->ftLastAccessTime = ::ToFileTime(
+            InformationResponse.LastAccessTimeSeconds,
+            InformationResponse.LastAccessTimeNanoseconds);
+        Buffer->ftLastWriteTime = ::ToFileTime(
+            InformationResponse.LastWriteTimeSeconds,
+            InformationResponse.LastWriteTimeNanoseconds);
+
         Buffer->dwVolumeSerialNumber;
 
         Buffer->nFileSizeHigh =
@@ -342,9 +367,13 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
                     }
                     
                     FindData.ftCreationTime;
-                    FindData.ftLastAccessTime;
-                    FindData.ftLastWriteTime;
 
+                    FindData.ftLastAccessTime = ::ToFileTime(
+                        InformationResponse.LastAccessTimeSeconds,
+                        InformationResponse.LastAccessTimeNanoseconds);
+                    FindData.ftLastWriteTime = ::ToFileTime(
+                        InformationResponse.LastWriteTimeSeconds,
+                        InformationResponse.LastWriteTimeNanoseconds);
                     FindData.nFileSizeHigh =
                         static_cast<DWORD>(InformationResponse.FileSize >> 32);
                     FindData.nFileSizeLow =
