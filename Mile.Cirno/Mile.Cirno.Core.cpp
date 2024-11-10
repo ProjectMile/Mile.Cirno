@@ -441,6 +441,24 @@ Mile::Cirno::GetAttrResponse Mile::Cirno::Client::GetAttr(
     return Mile::Cirno::PopGetAttrResponse(ResponseSpan);
 }
 
+Mile::Cirno::StatFsResponse Mile::Cirno::Client::StatFs(
+    Mile::Cirno::StatFsRequest const& Request)
+{
+    std::vector<std::uint8_t> RequestBuffer;
+    Mile::Cirno::PushStatFsRequest(
+        RequestBuffer,
+        Request);
+    std::vector<std::uint8_t> ResponseBuffer;
+    this->Request(
+        MileCirnoStatFsRequestMessage,
+        RequestBuffer,
+        MileCirnoStatFsResponseMessage,
+        ResponseBuffer);
+    std::span<std::uint8_t> ResponseSpan =
+        std::span<std::uint8_t>(ResponseBuffer);
+    return Mile::Cirno::PopStatFsResponse(ResponseSpan);
+}
+
 Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithTcpSocket(
     std::string const& Host,
     std::string const& Port)
