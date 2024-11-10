@@ -459,6 +459,24 @@ Mile::Cirno::StatFsResponse Mile::Cirno::Client::StatFs(
     return Mile::Cirno::PopStatFsResponse(ResponseSpan);
 }
 
+Mile::Cirno::ReadResponse Mile::Cirno::Client::Read(
+    Mile::Cirno::ReadRequest const& Request)
+{
+    std::vector<std::uint8_t> RequestBuffer;
+    Mile::Cirno::PushReadRequest(
+        RequestBuffer,
+        Request);
+    std::vector<std::uint8_t> ResponseBuffer;
+    this->Request(
+        MileCirnoReadRequestMessage,
+        RequestBuffer,
+        MileCirnoReadResponseMessage,
+        ResponseBuffer);
+    std::span<std::uint8_t> ResponseSpan =
+        std::span<std::uint8_t>(ResponseBuffer);
+    return Mile::Cirno::PopReadResponse(ResponseSpan);
+}
+
 Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithTcpSocket(
     std::string const& Host,
     std::string const& Port)

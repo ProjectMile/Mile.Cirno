@@ -88,6 +88,9 @@ namespace Mile::Cirno
         StatFsResponse StatFs(
             StatFsRequest const& Request);
 
+        ReadResponse Read(
+            ReadRequest const& Request);
+
         static Client* ConnectWithTcpSocket(
             std::string const& Host,
             std::string const& Port);
