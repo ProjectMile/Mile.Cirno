@@ -172,7 +172,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
         std::uint32_t Flags =
             MileCirnoLinuxOpenCreateFlagLargeFile |
             MileCirnoLinuxOpenCreateFlagCloseOnExecute;
-        if ((GENERIC_READ | GENERIC_WRITE) & ConvertedDesiredAccess)
+        /*if ((GENERIC_READ | GENERIC_WRITE) & ConvertedDesiredAccess)
         {
             Flags |= MileCirnoLinuxOpenCreateFlagReadWrite;
         }
@@ -183,7 +183,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
         else if (GENERIC_WRITE & ConvertedDesiredAccess)
         {
             Flags |= MileCirnoLinuxOpenCreateFlagWriteOnly;
-        }
+        }*/
         if (FILE_FLAG_OVERLAPPED & ConvertedFlagsAndAttributes)
         {
             Flags |= MileCirnoLinuxOpenCreateFlagNonBlock;
@@ -252,15 +252,80 @@ void DOKAN_CALLBACK MileCirnoCloseFile(
 
     try
     {
-        Mile::Cirno::ClunkRequest ClunkRequest;
-        ClunkRequest.FileId = FileId;
-        g_Instance->Clunk(ClunkRequest);
+        Mile::Cirno::ClunkRequest Request;
+        Request.FileId = FileId;
+        g_Instance->Clunk(Request);
         g_Instance->FreeFileId(FileId);
     }
     catch (std::exception const& ex)
     {
         std::printf("%s\n", ex.what());
     }
+}
+
+NTSTATUS DOKAN_CALLBACK MileCirnoReadFile(
+    _In_ LPCWSTR FileName,
+    _Out_opt_ LPVOID Buffer,
+    _In_ DWORD BufferLength,
+    _Out_opt_ LPDWORD ReadLength,
+    _In_ LONGLONG Offset,
+    _Inout_ PDOKAN_FILE_INFO DokanFileInfo)
+{
+    UNREFERENCED_PARAMETER(FileName);
+
+    std::uint32_t FileId = static_cast<std::uint32_t>(
+        DokanFileInfo->Context);
+    if (MILE_CIRNO_NOFID == FileId)
+    {
+        return STATUS_UNSUCCESSFUL;
+    }
+
+    DWORD ProceededSize = 0;
+    DWORD UnproceededSize = BufferLength;
+
+    try
+    {
+        while (UnproceededSize)
+        {
+            Mile::Cirno::ReadRequest Request;
+            Request.FileId = FileId;
+            Request.Offset = Offset + ProceededSize;
+            Request.Count =
+                (1 << 16) - Mile::Cirno::HeaderSize - sizeof(std::uint32_t);
+            if (UnproceededSize < Request.Count)
+            {
+                Request.Count = UnproceededSize;
+            }
+            Mile::Cirno::ReadResponse Response = g_Instance->Read(Request);
+            DWORD CurrentProceededSize =
+                static_cast<DWORD>(Response.Data.size());
+            if (!CurrentProceededSize)
+            {
+                break;
+            }
+            if (Buffer)
+            {
+                std::memcpy(
+                    static_cast<std::uint8_t*>(Buffer) + ProceededSize,
+                    &Response.Data[0],
+                    CurrentProceededSize);
+            }
+            ProceededSize += CurrentProceededSize;
+            UnproceededSize -= CurrentProceededSize;
+        }
+    }
+    catch (std::exception const& ex)
+    {
+        std::printf("%s\n", ex.what());
+        return STATUS_UNSUCCESSFUL;
+    }
+
+    if (ReadLength)
+    {
+        *ReadLength = ProceededSize;
+    }
+
+    return STATUS_SUCCESS;
 }
 
 NTSTATUS DOKAN_CALLBACK MileCirnoGetFileInformation(
@@ -584,7 +649,7 @@ int main()
     Operations.ZwCreateFile = ::MileCirnoZwCreateFile;
     Operations.Cleanup;
     Operations.CloseFile = ::MileCirnoCloseFile;
-    Operations.ReadFile;
+    Operations.ReadFile = ::MileCirnoReadFile;
     Operations.WriteFile;
     Operations.FlushFileBuffers;
     Operations.GetFileInformation = ::MileCirnoGetFileInformation;
