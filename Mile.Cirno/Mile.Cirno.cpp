@@ -165,11 +165,6 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetFileInformation(
             }
         });
 
-        Mile::Cirno::LinuxOpenRequest OpenRequest;
-        OpenRequest.FileId = WalkRequest.NewFileId;
-        OpenRequest.Flags = 0;
-        g_Instance->LinuxOpen(OpenRequest);
-
         Mile::Cirno::GetAttrRequest InformationRequest;
         InformationRequest.FileId = WalkRequest.NewFileId;
         InformationRequest.RequestMask =
@@ -219,8 +214,6 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
     UNREFERENCED_PARAMETER(FileName);
     UNREFERENCED_PARAMETER(FillFindData);
     UNREFERENCED_PARAMETER(DokanFileInfo);
-
-    //bool IsRootFolder = !std::wcscmp(FileName, L"\\");
 
     std::uint32_t CurrentDirectoryFileId = MILE_CIRNO_NOFID;
     try
@@ -293,12 +286,9 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
             {
                 LastOffset = Entry.Offset;
 
-                //if (IsRootFolder)
+                if ("." == Entry.Name || ".." == Entry.Name)
                 {
-                    if ("." == Entry.Name || ".." == Entry.Name)
-                    {
-                        continue;
-                    }
+                    continue;
                 }
 
                 WIN32_FIND_DATAW FindData = { 0 };
@@ -313,13 +303,8 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
                 try
                 {
                     Mile::Cirno::WalkRequest WalkRequest;
-                    WalkRequest.FileId = g_RootDirectoryFileId;
+                    WalkRequest.FileId = CurrentDirectoryFileId;
                     WalkRequest.NewFileId = g_Instance->AllocateFileId();
-                    std::filesystem::path RelativePath(&FileName[1]);
-                    for (std::filesystem::path const& Element : RelativePath)
-                    {
-                        WalkRequest.Names.push_back(Element.string());
-                    }
                     WalkRequest.Names.push_back(Entry.Name);
                     g_Instance->Walk(WalkRequest);
                     auto CurrentCleanupHandler = Mile::ScopeExitTaskHandler([&]()
@@ -339,11 +324,6 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
                             g_Instance->FreeFileId(WalkRequest.NewFileId);
                         }
                     });
-
-                    Mile::Cirno::LinuxOpenRequest OpenRequest;
-                    OpenRequest.FileId = WalkRequest.NewFileId;
-                    OpenRequest.Flags = 0;
-                    g_Instance->LinuxOpen(OpenRequest);
 
                     Mile::Cirno::GetAttrRequest InformationRequest;
                     InformationRequest.FileId = WalkRequest.NewFileId;
@@ -473,14 +453,20 @@ int main()
     DOKAN_OPTIONS Options = { 0 };
     Options.Version = DOKAN_VERSION;
     Options.SingleThread;
-    Options.Options =
+    /*Options.Options =
         DOKAN_OPTION_DEBUG |
         DOKAN_OPTION_STDERR |
         DOKAN_OPTION_ALT_STREAM |
         DOKAN_OPTION_WRITE_PROTECT |
         DOKAN_OPTION_MOUNT_MANAGER |
         DOKAN_OPTION_CASE_SENSITIVE |
-        DOKAN_OPTION_DISPATCH_DRIVER_LOGS;
+        DOKAN_OPTION_DISPATCH_DRIVER_LOGS;*/
+    Options.Options =
+        DOKAN_OPTION_DEBUG |
+        DOKAN_OPTION_STDERR |
+        DOKAN_OPTION_WRITE_PROTECT |
+        DOKAN_OPTION_MOUNT_MANAGER |
+        DOKAN_OPTION_CASE_SENSITIVE;
     Options.GlobalContext;
     Options.MountPoint = L"C:\\Windows\\System32\\HostDriverStore";
     Options.UNCName;
