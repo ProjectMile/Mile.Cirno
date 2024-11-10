@@ -350,9 +350,12 @@ typedef enum _MILE_CIRNO_OPEN_MODE
  */
 typedef enum _MILE_CIRNO_LINUX_OPEN_CREATE_FLAGS
 {
+    MileCirnoLinuxOpenCreateFlagReadOnly = 000000000U,
+    MileCirnoLinuxOpenCreateFlagWriteOnly = 000000001U,
+    MileCirnoLinuxOpenCreateFlagReadWrite = 000000002U,
     MileCirnoLinuxOpenCreateFlagCreate = 000000100U,
-    MileCirnoLinuxOpenCreateFlagExclude = 000000200U,
-    MileCirnoLinuxOpenCreateFlagNoControllingTerminalType = 000000400U,
+    MileCirnoLinuxOpenCreateFlagCreateOnlyWhenNotExist = 000000200U,
+    MileCirnoLinuxOpenCreateFlagNoControllingTerminal = 000000400U,
     MileCirnoLinuxOpenCreateFlagTruncate = 000001000U,
     MileCirnoLinuxOpenCreateFlagAppend = 000002000U,
     MileCirnoLinuxOpenCreateFlagNonBlock = 000004000U,
@@ -361,8 +364,8 @@ typedef enum _MILE_CIRNO_LINUX_OPEN_CREATE_FLAGS
     MileCirnoLinuxOpenCreateFlagDirect = 000040000U,
     MileCirnoLinuxOpenCreateFlagLargeFile = 000100000U,
     MileCirnoLinuxOpenCreateFlagDirectory = 000200000U,
-    MileCirnoLinuxOpenCreateFlagNoFollow = 000400000U,
-    MileCirnoLinuxOpenCreateFlagNoAccessTime = 001000000U,
+    MileCirnoLinuxOpenCreateFlagNoFollowSymbolicLink = 000400000U,
+    MileCirnoLinuxOpenCreateFlagNoLastAccessTime = 001000000U,
     MileCirnoLinuxOpenCreateFlagCloseOnExecute = 002000000U,
     MileCirnoLinuxOpenCreateFlagSynchronize = 004000000U,
     MileCirnoLinuxOpenCreateFlagPath = 010000000U,
