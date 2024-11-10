@@ -447,6 +447,41 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
     return STATUS_SUCCESS;
 }
 
+NTSTATUS DOKAN_CALLBACK MileCirnoGetDiskFreeSpace(
+    _Out_opt_ PULONGLONG FreeBytesAvailable,
+    _Out_opt_ PULONGLONG TotalNumberOfBytes,
+    _Out_opt_ PULONGLONG TotalNumberOfFreeBytes,
+    _Inout_ PDOKAN_FILE_INFO DokanFileInfo)
+{
+    UNREFERENCED_PARAMETER(DokanFileInfo);
+
+    try
+    {
+        Mile::Cirno::StatFsRequest Request;
+        Request.FileId = g_RootDirectoryFileId;
+        Mile::Cirno::StatFsResponse Response = g_Instance->StatFs(Request);
+        if (FreeBytesAvailable)
+        {
+            *FreeBytesAvailable = Response.BlockSize * Response.AvailableBlocks;
+        }
+        if (TotalNumberOfBytes)
+        {
+            *TotalNumberOfBytes = Response.BlockSize * Response.TotalBlocks;
+        }
+        if (TotalNumberOfFreeBytes)
+        {
+            *TotalNumberOfFreeBytes = Response.BlockSize * Response.FreeBlocks;
+        }
+    }
+    catch (std::exception const& ex)
+    {
+        std::printf("%s\n", ex.what());
+        return STATUS_UNSUCCESSFUL;
+    }
+
+    return STATUS_SUCCESS;
+}
+
 int main()
 {
     auto CleanupHandler = Mile::ScopeExitTaskHandler([&]()
@@ -564,7 +599,7 @@ int main()
     Operations.SetAllocationSize;
     Operations.LockFile;
     Operations.UnlockFile;
-    Operations.GetDiskFreeSpaceW;
+    Operations.GetDiskFreeSpaceW = ::MileCirnoGetDiskFreeSpace;
     Operations.GetVolumeInformationW;
     Operations.Mounted;
     Operations.Unmounted;
