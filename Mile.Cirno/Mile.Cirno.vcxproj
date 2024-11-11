@@ -5,7 +5,6 @@
     <RootNamespace>Mile.Cirno</RootNamespace>
     <MileProjectType>ConsoleApplication</MileProjectType>
     <MileProjectManifestFile>Mile.Cirno.manifest</MileProjectManifestFile>
-    <MileProjectEnableVCLTLSupport>true</MileProjectEnableVCLTLSupport>
     <MileProjectUseProjectProperties>true</MileProjectUseProjectProperties>
     <MileProjectCompanyName>Project Mile</MileProjectCompanyName>
     <MileProjectFileDescription>Mile.Cirno</MileProjectFileDescription>
@@ -15,12 +14,19 @@
     <MileProjectProductName>Mile.Cirno</MileProjectProductName>
     <MileProjectVersion>1.0.$([System.DateTime]::Today.Subtract($([System.DateTime]::Parse('2023-08-03'))).TotalDays).0</MileProjectVersion>
     <MileProjectVersionTag>Preview</MileProjectVersionTag>
+    <MileUniCrtDisableRuntimeDebuggingFeature>true</MileUniCrtDisableRuntimeDebuggingFeature>
   </PropertyGroup>
   <Import Sdk="Mile.Project.Configurations" Version="1.0.1426" Project="Mile.Project.Platform.x86.props" />
   <Import Sdk="Mile.Project.Configurations" Version="1.0.1426" Project="Mile.Project.Platform.x64.props" />
   <Import Sdk="Mile.Project.Configurations" Version="1.0.1426" Project="Mile.Project.Platform.ARM64.props" />
   <Import Sdk="Mile.Project.Configurations" Version="1.0.1426" Project="Mile.Project.Cpp.Default.props" />
   <Import Sdk="Mile.Project.Configurations" Version="1.0.1426" Project="Mile.Project.Cpp.props" />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <RuntimeLibrary Condition="'$(Configuration)' == 'Debug'">MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)' == 'Release'">MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Mile.Cirno.Core.cpp" />
     <ClCompile Include="Mile.Cirno.cpp" />
@@ -35,6 +41,9 @@
     </PackageReference>
     <PackageReference Include="Mile.Dokany">
       <Version>1.0.434</Version>
+    </PackageReference>
+    <PackageReference Include="Mile.Windows.UniCrt">
+      <Version>1.0.199</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
