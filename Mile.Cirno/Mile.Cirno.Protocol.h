@@ -690,6 +690,9 @@ namespace Mile
             std::vector<DirectoryEntry> Data;
         };
 
+        const std::uint32_t ReadDirResponseHeaderSize =
+            HeaderSize + sizeof(std::uint32_t);
+
         struct FsyncRequest
         {
             std::uint32_t FileId; // fid
@@ -778,6 +781,10 @@ namespace Mile
             std::uint32_t MaximumMessageSize; // msize
             std::string ProtocolVersion; // version
         };
+
+        const std::uint32_t DefaultMaximumMessageSize = 1 << 16;
+
+        const std::string DefaultProtocolVersion = "9P2000.L";
 
         struct VersionResponse
         {
@@ -875,6 +882,9 @@ namespace Mile
         {
             std::vector<std::uint8_t> Data; // count, data
         };
+
+        const std::uint32_t ReadResponseHeaderSize =
+            HeaderSize + sizeof(std::uint32_t);
 
         struct WriteRequest
         {

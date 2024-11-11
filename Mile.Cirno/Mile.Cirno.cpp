@@ -226,8 +226,8 @@ NTSTATUS DOKAN_CALLBACK MileCirnoReadFile(
             Mile::Cirno::ReadRequest Request;
             Request.FileId = FileId;
             Request.Offset = Offset + ProceededSize;
-            Request.Count =
-                (1 << 16) - Mile::Cirno::HeaderSize - sizeof(std::uint32_t);
+            Request.Count = Mile::Cirno::DefaultMaximumMessageSize;
+            Request.Count -= Mile::Cirno::ReadResponseHeaderSize;
             if (UnproceededSize < Request.Count)
             {
                 Request.Count = UnproceededSize;
@@ -357,8 +357,8 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
             Request.FileId = FileId;
             Request.Offset = LastOffset;
             LastOffset = 0;
-            Request.Count =
-                (1 << 16) - Mile::Cirno::HeaderSize - sizeof(std::uint32_t);
+            Request.Count = Mile::Cirno::DefaultMaximumMessageSize;
+            Request.Count -= Mile::Cirno::ReadDirResponseHeaderSize;
             Mile::Cirno::ReadDirResponse Response =
                 g_Instance->ReadDir(Request);
             for (Mile::Cirno::DirectoryEntry const& Entry : Response.Data)
@@ -532,8 +532,10 @@ int main()
 
         {
             Mile::Cirno::VersionRequest Request;
-            Request.MaximumMessageSize = 1 << 16;
-            Request.ProtocolVersion = "9P2000.L";
+            Request.MaximumMessageSize =
+                Mile::Cirno::DefaultMaximumMessageSize;
+            Request.ProtocolVersion =
+                Mile::Cirno::DefaultProtocolVersion;
             Mile::Cirno::VersionResponse Response =
                 g_Instance->Version(Request);
             std::printf(
