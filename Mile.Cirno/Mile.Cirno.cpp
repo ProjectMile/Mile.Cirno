@@ -167,7 +167,9 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
     catch (std::exception const& ex)
     {
         std::printf("%s\n", ex.what());
-        return STATUS_UNSUCCESSFUL;
+        return DokanFileInfo->IsDirectory
+            ? STATUS_OBJECT_PATH_NOT_FOUND
+            : STATUS_OBJECT_NAME_NOT_FOUND;
     }
 
     return STATUS_SUCCESS;
@@ -213,7 +215,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoReadFile(
         DokanFileInfo->Context);
     if (MILE_CIRNO_NOFID == FileId)
     {
-        return STATUS_UNSUCCESSFUL;
+        return STATUS_NOT_IMPLEMENTED;
     }
 
     DWORD ProceededSize = 0;
@@ -253,7 +255,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoReadFile(
     catch (std::exception const& ex)
     {
         std::printf("%s\n", ex.what());
-        return STATUS_UNSUCCESSFUL;
+        return STATUS_NOT_IMPLEMENTED;
     }
 
     if (ReadLength)
@@ -275,7 +277,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetFileInformation(
         DokanFileInfo->Context);
     if (MILE_CIRNO_NOFID == FileId)
     {
-        return STATUS_UNSUCCESSFUL;
+        return STATUS_NOT_IMPLEMENTED;
     }
 
     std::memset(Buffer, 0, sizeof(BY_HANDLE_FILE_INFORMATION));
@@ -322,7 +324,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetFileInformation(
     catch (std::exception const& ex)
     {
         std::printf("%s\n", ex.what());
-        return STATUS_UNSUCCESSFUL;
+        return STATUS_NOT_IMPLEMENTED;
     }
 
     return STATUS_SUCCESS;
@@ -338,14 +340,14 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
 
     if (!DokanFileInfo->IsDirectory)
     {
-        return STATUS_UNSUCCESSFUL;
+        return STATUS_NOT_IMPLEMENTED;
     }
 
     std::uint32_t FileId = static_cast<std::uint32_t>(
         DokanFileInfo->Context);
     if (MILE_CIRNO_NOFID == FileId)
     {
-        return STATUS_UNSUCCESSFUL;
+        return STATUS_NOT_IMPLEMENTED;
     }
 
     try
@@ -442,7 +444,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
     catch (std::exception const& ex)
     {
         std::printf("%s\n", ex.what());
-        return STATUS_UNSUCCESSFUL;
+        return STATUS_NOT_IMPLEMENTED;
     }
 
     return STATUS_SUCCESS;
@@ -477,7 +479,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetDiskFreeSpace(
     catch (std::exception const& ex)
     {
         std::printf("%s\n", ex.what());
-        return STATUS_UNSUCCESSFUL;
+        return STATUS_NOT_IMPLEMENTED;
     }
 
     return STATUS_SUCCESS;
