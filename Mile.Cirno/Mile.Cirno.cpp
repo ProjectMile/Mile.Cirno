@@ -32,9 +32,9 @@
 #include "Mile.Cirno.Core.h"
 #include "Mile.Cirno.Protocol.Parser.h"
 
- // Win32 time epoch is 00:00:00, January 1 1601.
- // UNIX time epoch is 00:00:00, January 1 1970.
- // There are 11644473600 seconds between these two epochs.
+// Win32 time epoch is 00:00:00, January 1 1601.
+// UNIX time epoch is 00:00:00, January 1 1970.
+// There are 11644473600 seconds between these two epochs.
 const std::uint64_t SecondsBetweenWin32TimeAndUnixTime = 11644473600ULL;
 
 FILETIME ToFileTime(
