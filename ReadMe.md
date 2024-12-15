@@ -27,6 +27,7 @@ more information.
 ## Documents
 
 - [License](License.md)
+- [Release Notes](ReleaseNotes.md)
 - [Versioning](Documents/Versioning.md)
 
 ## Credits
