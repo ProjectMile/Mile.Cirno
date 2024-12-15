@@ -13,7 +13,7 @@
     <MileProjectOriginalFilename>Mile.Cirno.exe</MileProjectOriginalFilename>
     <MileProjectProductName>Mile.Cirno</MileProjectProductName>
     <MileProjectVersion>1.0.$([System.DateTime]::Today.Subtract($([System.DateTime]::Parse('2023-08-03'))).TotalDays).0</MileProjectVersion>
-    <MileProjectVersionTag>Preview</MileProjectVersionTag>
+    <!-- <MileProjectVersionTag>Preview</MileProjectVersionTag> -->
     <MileUniCrtDisableRuntimeDebuggingFeature>true</MileUniCrtDisableRuntimeDebuggingFeature>
   </PropertyGroup>
   <Import Sdk="Mile.Project.Configurations" Version="1.0.1426" Project="Mile.Project.Platform.x86.props" />
