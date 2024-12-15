@@ -14,6 +14,8 @@
 #include <WinSock2.h>
 #include <hvsocket.h>
 
+#include <Mile.Project.Version.h>
+
 #include <Mile.Helpers.CppBase.h>
 
 #include <dokan/dokan.h>
@@ -47,7 +49,7 @@ FILETIME ToFileTime(
     RawResult += UnixTimeNanoseconds / 100;
     FILETIME Result;
     Result.dwLowDateTime = static_cast<DWORD>(RawResult);
-    Result.dwHighDateTime = static_cast<DWORD>(RawResult >> 32);      
+    Result.dwHighDateTime = static_cast<DWORD>(RawResult >> 32);
     return Result;
 }
 
@@ -418,7 +420,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
                     {
                         FindData.dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY;
                     }
-                    
+
                     FindData.ftCreationTime;
 
                     FindData.ftLastAccessTime = ::ToFileTime(
@@ -487,6 +489,107 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetDiskFreeSpace(
 
 int main()
 {
+    ::std::printf(
+        "Mile.Cirno " MILE_PROJECT_VERSION_UTF8_STRING " (Build "
+        MILE_PROJECT_MACRO_TO_UTF8_STRING(MILE_PROJECT_VERSION_BUILD) ")" "\n"
+        "(c) Kenji Mouri. All rights reserved.\n"
+        "\n");
+
+    std::vector<std::string> Arguments = Mile::SplitCommandLineString(
+        Mile::ToString(CP_UTF8, ::GetCommandLineW()));
+
+    bool ParseSuccess = false;
+    bool ShowHelp = false;
+    std::string Host;
+    std::string Port;
+    std::string AccessName;
+    std::string MountPoint;
+
+    if (Arguments.empty() || 1 == Arguments.size())
+    {
+        std::printf(
+            "[INFO] Mile.Cirno will run as the NanaBox EnableHostDriverStore "
+            "integration mode.\n"
+            "[INFO] Use \"Mile.Cirno Help\" for more commands.\n"
+            "\n");
+
+        ParseSuccess = true;
+        Host = "HvSocket";
+        Port = "50001";
+        AccessName = "HostDriverStore";
+
+        wchar_t System32Directory[MAX_PATH] = { 0 };
+        ::GetSystemDirectoryW(
+            System32Directory,
+            sizeof(System32Directory) / sizeof(*System32Directory));
+        MountPoint = Mile::ToString(CP_UTF8, System32Directory);
+        MountPoint += "\\HostDriverStore";
+    }
+    else if (0 == ::_stricmp(Arguments[1].c_str(), "Help"))
+    {
+        ParseSuccess = true;
+        ShowHelp = true;
+    }
+    else if (0 == ::_stricmp(Arguments[1].c_str(), "Mount"))
+    {
+        if (7 == Arguments.size() &&
+            0 == ::_stricmp(Arguments[2].c_str(), "TCP"))
+        {
+            ParseSuccess = true;
+            Host = Arguments[3];
+            Port = Arguments[4];
+            AccessName = Arguments[5];
+            MountPoint = Arguments[6];
+        }
+        else if (6 == Arguments.size() &&
+            0 == ::_stricmp(Arguments[2].c_str(), "HvSocket"))
+        {
+            ParseSuccess = true;
+            Host = "HvSocket";
+            Port = Arguments[3];
+            AccessName = Arguments[4];
+            MountPoint = Arguments[5];
+        }
+    }
+
+    if (!ParseSuccess)
+    {
+        ShowHelp = true;
+        std::printf(
+            "[ERROR] Unrecognized command.\n"
+            "\n");
+    }
+
+    if (ShowHelp)
+    {
+        std::printf(
+            "Format: Mile.Cirno [Command] <Option1> <Option2> ...\n"
+            "\n"
+            "Commands:\n"
+            "\n"
+            "  Help - Show this content.\n"
+            "\n"
+            "  Mount TCP [Host] [Port] [AccessName] [MountPoint]\n"
+            "    - Mount the specific 9p share over TCP.\n"
+            "  Mount HvSocket [Port] [AccessName] [MountPoint]\n"
+            "    - Mount the specific 9p share over Hyper-V Socket.\n"
+            "\n"
+            "Notes:\n"
+            "  - All command options are case-insensitive.\n"
+            "  - Mile.Cirno will run as the NanaBox EnableHostDriverStore\n"
+            "    integration mode if you don't specify another command, which\n"
+            "    is equivalent to the following command:\n"
+            "      Mile.Cirno Mount HvSocket 50001 HostDriverStore "
+            "%%SystemRoot%%\\System32\\HostDriverStore"
+            "\n"
+            "Examples:\n"
+            "\n"
+            "  Mile.Cirno Mount TCP 192.168.1.234 12345 MyShare C:\\MyMount\n"
+            "  Mile.Cirno Mount HvSocket 50001 HostDriverStore Z:\\\n"
+            "\n");
+        return 0;
+    }
+
     auto CleanupHandler = Mile::ScopeExitTaskHandler([&]()
     {
         if (g_Instance)
@@ -521,15 +624,21 @@ int main()
     try
     {
         {
-            const std::uint32_t Plan9SharePort = 50001;
-            g_Instance = Mile::Cirno::Client::ConnectWithHyperVSocket(
-                Plan9SharePort);
-            if (!g_Instance)
+            if (0 == ::_stricmp(Host.c_str(), "HvSocket"))
             {
-                Mile::Cirno::ThrowException(
-                    "!Instance",
-                    ERROR_INVALID_DATA);
+                g_Instance = Mile::Cirno::Client::ConnectWithHyperVSocket(
+                    Mile::ToUInt32(Port));
             }
+            else
+            {
+                g_Instance = Mile::Cirno::Client::ConnectWithTcpSocket(Host, Port);
+            }
+        }
+        if (!g_Instance)
+        {
+            Mile::Cirno::ThrowException(
+                "!Instance",
+                ERROR_INVALID_DATA);
         }
 
         {
@@ -552,7 +661,7 @@ int main()
             Request.FileId = g_Instance->AllocateFileId();
             Request.AuthenticationFileId = MILE_CIRNO_NOFID;
             Request.UserName = "";
-            Request.AccessName = "HostDriverStore";
+            Request.AccessName = AccessName;
             Request.NumericUserName = MILE_CIRNO_NONUNAME;
             Mile::Cirno::AttachResponse Response = g_Instance->Attach(Request);
             g_RootDirectoryFileId = Request.FileId;
@@ -567,6 +676,8 @@ int main()
         return -1;
     }
 
+    std::wstring ConvertedMountPoint = Mile::ToWideString(CP_UTF8, MountPoint);
+
     DOKAN_OPTIONS Options = { 0 };
     Options.Version = DOKAN_VERSION;
     Options.SingleThread;
@@ -575,7 +686,7 @@ int main()
         DOKAN_OPTION_MOUNT_MANAGER |
         DOKAN_OPTION_CASE_SENSITIVE;
     Options.GlobalContext;
-    Options.MountPoint = L"C:\\Windows\\System32\\HostDriverStore";
+    Options.MountPoint = ConvertedMountPoint.c_str();
     Options.UNCName;
     Options.Timeout = INFINITE;
     Options.AllocationUnitSize;
