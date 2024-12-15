@@ -67,11 +67,20 @@ in your Windows guest.
   Windows reload the related device. Also, you need to do this operation before
   you switching to the Enhanced Session mode due to some issues in Terminal 
   Services.
+- You should disable the GPU-PV device(s) you are using before you exit the
+  Mile.Cirno.
 
 ## System Requirements
 
 - Supported OS: Windows 10 Version 2004 (Build 19041) or later
 - Supported Platforms: x86, x86-64(AMD64) and ARM64
+
+## Todo List
+
+- [ ] Provide write support.
+- [ ] Provide 9p2000 and 9p2000.u support.
+- [ ] Support 9p transport over VirtIO.
+- [ ] Simple server implementation.
 
 ## Documents
 
