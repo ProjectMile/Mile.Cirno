@@ -2,7 +2,7 @@
 
 9p for Windows
 
-**Work In Progress**
+![Screenshot](Screenshot.png)
 
 ## Why named Cirno?
 
