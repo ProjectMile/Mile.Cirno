@@ -40,7 +40,7 @@
       <Version>1.0.671</Version>
     </PackageReference>
     <PackageReference Include="Mile.Dokany">
-      <Version>1.0.434</Version>
+      <Version>1.1.662</Version>
     </PackageReference>
     <PackageReference Include="Mile.Windows.UniCrt">
       <Version>1.2.410</Version>
