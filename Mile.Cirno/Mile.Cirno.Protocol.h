@@ -17,6 +17,8 @@
 // - https://github.com/freebsd/freebsd-src/blob/main/contrib/lib9p/fcall.h
 // - https://github.com/pfpacket/rust-9p/blob/master/src/fcall.rs
 // - https://github.com/piscisaureus/rust-9p/blob/master/src/fcall.rs
+// - https://github.com/microsoft/WSL/blob/master/src/linux/plan9/p9defs.h
+// - https://github.com/microsoft/WSL/blob/master/src/linux/plan9/p9data.h
 
 // Use traditional C/C++ language features only because this header file is
 // designed for more universal interoperability scenarios.
@@ -199,7 +201,7 @@ typedef enum _MILE_CIRNO_MESSAGE_TYPE
     //   Not used
     MileCirnoOpenRequestMessage = 112,
     // 9P2000 and 9P2000.u
-    //   header<Header>[1] qid[13] iounit[4]
+    //   header<Header>[1] qid<Qid>[1] iounit[4]
     // 9P2000.L and 9P2000.W
     //   Not used
     MileCirnoOpenResponseMessage,
@@ -212,7 +214,7 @@ typedef enum _MILE_CIRNO_MESSAGE_TYPE
     //   Not used
     MileCirnoCreateRequestMessage = 114,
     // 9P2000 and 9P2000.u
-    //   header<Header>[1] qid[13] iounit[4]
+    //   header<Header>[1] qid<Qid>[1] iounit[4]
     // 9P2000.L and 9P2000.W
     //   Not used
     MileCirnoCreateResponseMessage,
@@ -255,23 +257,22 @@ typedef enum _MILE_CIRNO_MESSAGE_TYPE
 
     /* 9P2000.W */
 
-    // Undocumented
     // header<Header>[1] fid[4] flags[4]
     MileCirnoAccessRequestMessage = 128,
-    // Undocumented
     // header<Header>[1]
     MileCirnoAccessResponseMessage,
-    // Undocumented
     // header<Header>[1] fid[4] offset[8] count[4]
     MileCirnoWindowsReadDirRequestMessage = 130,
-    // Undocumented
     // header<Header>[1] count[4] data<WindowsDirectoryEntry>[count]
     MileCirnoWindowsReadDirResponseMessage,
-    // Undocumented
-    // header<Header>[1] (Unknown)
+    // header<Header>[1] fid[4] newfid[4] flags[4] wflags[4] mode[4] gid[4]
+    // attr_mask[8] nwname[2] wname<String>[nwname]
     MileCirnoWindowsOpenRequestMessage = 132,
-    // Undocumented
-    // header<Header>[1] (Unknown)
+    // header<Header>[1] status[1] walked[2] qid<Qid>[1]
+    // symlink_target<String>[1] iounit[4] mode[4] uid[4] gid[4] nlink[8]
+    // rdev[8] size[8] blksize[8] blocks[8] atime_sec[8] atime_nsec[8]
+    // mtime_sec[8] mtime_nsec[8] ctime_sec[8] ctime_nsec[8] btime_sec[8]
+    // btime_nsec[8] gen[8] data_version[8]
     MileCirnoWindowsOpenResponseMessage,
 } MILE_CIRNO_MESSAGE_TYPE, *PMILE_CIRNO_MESSAGE_TYPE;
 
@@ -292,14 +293,15 @@ typedef enum _MILE_CIRNO_MESSAGE_TYPE
  */
 typedef enum _MILE_CIRNO_QID_TYPE
 {
-    MileCirnoQidTypeDirectory = 0x80,
-    MileCirnoQidTypeAppendOnlyFiles = 0x40,
-    MileCirnoQidTypeExclusiveUseFiles = 0x20,
-    MileCirnoQidTypeMountedChannel = 0x10,
-    MileCirnoQidTypeAuthenticationFile = 0x08,
-    MileCirnoQidTypeTemporaryFile = 0x04,
+    MileCirnoQidTypeFile = 0x00,
+    MileCirnoQidTypeHardLink = 0x01,
     MileCirnoQidTypeSymbolicLink = 0x02,
-    MileCirnoQidTypePlainFile = 0x00,
+    MileCirnoQidTypeTemporary = 0x04,
+    MileCirnoQidTypeAuthentication = 0x08,
+    MileCirnoQidTypeMountPoint = 0x10,
+    MileCirnoQidTypeExclusive = 0x20,
+    MileCirnoQidTypeAppend = 0x40,
+    MileCirnoQidTypeDirectory = 0x80,   
 } MILE_CIRNO_QID_TYPE, *PMILE_CIRNO_QID_TYPE;
 
 /*
@@ -353,6 +355,8 @@ typedef enum _MILE_CIRNO_LINUX_OPEN_CREATE_FLAGS
     MileCirnoLinuxOpenCreateFlagReadOnly = 000000000U,
     MileCirnoLinuxOpenCreateFlagWriteOnly = 000000001U,
     MileCirnoLinuxOpenCreateFlagReadWrite = 000000002U,
+    MileCirnoLinuxOpenCreateFlagNoAccess = 000000003U,
+    MileCirnoLinuxOpenCreateFlagAccessMask = 000000003U,
     MileCirnoLinuxOpenCreateFlagCreate = 000000100U,
     MileCirnoLinuxOpenCreateFlagCreateOnlyWhenNotExist = 000000200U,
     MileCirnoLinuxOpenCreateFlagNoControllingTerminal = 000000400U,
@@ -457,6 +461,46 @@ typedef enum _MILE_CIRNO_LINUX_UNLINKAT_FLAGS
 {
     MileCirnoLinuxUnlinkAtFlagRemoveDirectory = 0x00000200,
 } MILE_CIRNO_LINUX_UNLINKAT_FLAGS, *PMILE_CIRNO_LINUX_UNLINKAT_FLAGS;
+
+/**
+ * @brief The flags used in MileCirnoAccessRequestMessage.
+ */
+typedef enum _MILE_CIRNO_WINDOWS_ACCESS_FLAGS
+{
+    MileCirnoWindowsAccessFlagOk = 0,
+    MileCirnoWindowsAccessFlagExecute = 1,
+    MileCirnoWindowsAccessFlagWrite = 2,
+    MileCirnoWindowsAccessFlagRead = 4,
+    MileCirnoWindowsAccessFlagDelete = 8,
+    MileCirnoWindowsAccessFlagAll =
+        MileCirnoWindowsAccessFlagExecute |
+        MileCirnoWindowsAccessFlagWrite |
+        MileCirnoWindowsAccessFlagRead |
+        MileCirnoWindowsAccessFlagDelete,
+} MILE_CIRNO_WINDOWS_ACCESS_FLAGS, *PMILE_CIRNO_WINDOWS_ACCESS_FLAGS;
+
+/**
+ * @brief The wflags used in MileCirnoWindowsOpenRequestMessage.
+ */
+typedef enum _MILE_CIRNO_WINDOWS_OPEN_FLAGS
+{
+    MileCirnoWindowsOpenFlagNone = 0,
+    MileCirnoWindowsOpenFlagDeleteAccess = 1,
+    MileCirnoWindowsOpenFlagNonDirectoryFile = 2,
+    MileCirnoWindowsOpenFlagOpenSymbolicLink = 4,
+} MILE_CIRNO_WINDOWS_OPEN_FLAGS, *PMILE_CIRNO_WINDOWS_OPEN_FLAGS;
+
+/**
+ * @brief The status used in MileCirnoWindowsOpenResponseMessage.
+ */
+typedef enum _MILE_CIRNO_WINDOWS_OPEN_STATUS
+{
+    MileCirnoWindowsOpenStatusOpened = 0,
+    MileCirnoWindowsOpenStatusCreated = 1,
+    MileCirnoWindowsOpenStatusParentNotFound = 2,
+    MileCirnoWindowsOpenStatusNotFound = 3,
+    MileCirnoWindowsOpenStatusStopped = 4,
+} MILE_CIRNO_WINDOWS_OPEN_STATUS, *PMILE_CIRNO_WINDOWS_OPEN_STATUS;
 
 #ifdef __cplusplus
 namespace Mile
@@ -836,7 +880,7 @@ namespace Mile
         {
             std::uint32_t FileId; // fid
             std::uint32_t NewFileId; // newfid
-            std::vector<std::string> Names;
+            std::vector<std::string> Names; // wname, nwname
         };
 
         struct WalkResponse
@@ -930,17 +974,74 @@ namespace Mile
 
         // WriteStatResponse
 
-        // AccessRequest (Undocumented)
+        // AccessRequest
 
-        // AccessResponse (Undocumented)
+        struct AccessRequest
+        {
+            std::uint32_t FileId; // fid
+            std::uint32_t Flags; // MILE_CIRNO_WINDOWS_ACCESS_FLAGS
+        };
 
-        // WindowsReadDirRequest (Undocumented)
+        // AccessResponse
 
-        // WindowsReadDirResponse (Undocumented)
+        // WindowsReadDirRequest
 
-        // WindowsOpenRequest (Undocumented)
+        struct WindowsReadDirRequest
+        {
+            std::uint32_t FileId; // fid
+            std::uint64_t Offset;
+            std::uint32_t Count;
+        };
 
-        // WindowsOpenResponse (Undocumented)
+        // WindowsReadDirResponse
+
+        struct WindowsReadDirResponse
+        {
+            std::vector<WindowsDirectoryEntry> Data; // count, data
+        };
+
+        // WindowsOpenRequest
+
+        struct WindowsOpenRequest
+        {
+            std::uint32_t FileId; // fid
+            std::uint32_t NewFileId; // newfid
+            std::uint32_t Flags; // MILE_CIRNO_LINUX_OPEN_CREATE_FLAGS
+            std::uint32_t WindowsFlags; // MILE_CIRNO_WINDOWS_OPEN_FLAGS
+            std::uint32_t Mode;
+            std::uint32_t Gid;
+            std::uint64_t AttributeMask; // attr_mask
+            std::vector<std::string> Names; // wname, nwname
+        };
+
+        // WindowsOpenResponse
+
+        struct WindowsOpenResponse
+        {
+            std::uint8_t Status; // MILE_CIRNO_WINDOWS_OPEN_STATUS
+            std::uint16_t Walked; // walked
+            Qid UniqueId; // qid
+            std::string SymlinkTarget; // symlink_target
+            std::uint32_t IoUnit;
+            std::uint32_t Mode;
+            std::uint32_t UserId; // uid
+            std::uint32_t GroupId; // gid
+            std::uint64_t NumberOfHardLinks; // nlink
+            std::uint64_t DeviceId; // rdev
+            std::uint64_t FileSize; // size
+            std::uint64_t BlockSize; // blksize
+            std::uint64_t Blocks; // blocks
+            std::uint64_t LastAccessTimeSeconds; // atime_sec
+            std::uint64_t LastAccessTimeNanoseconds; // atime_nsec
+            std::uint64_t LastWriteTimeSeconds; // mtime_sec
+            std::uint64_t LastWriteTimeNanoseconds; // mtime_nsec
+            std::uint64_t ChangeTimeSeconds; // ctime_sec
+            std::uint64_t ChangeTimeNanoseconds; // ctime_nsec
+            std::uint64_t BirthTimeSeconds; // btime_sec
+            std::uint64_t BirthTimeNanoseconds; // btime_nsec
+            std::uint64_t Generation; // gen
+            std::uint64_t DataVersion; // data_version
+        };
     }
 }
 #endif // __cplusplus
