@@ -1009,8 +1009,8 @@ namespace Mile
             std::uint32_t Flags; // MILE_CIRNO_LINUX_OPEN_CREATE_FLAGS
             std::uint32_t WindowsFlags; // MILE_CIRNO_WINDOWS_OPEN_FLAGS
             std::uint32_t Mode;
-            std::uint32_t Gid;
-            std::uint64_t AttributeMask; // attr_mask
+            std::uint32_t GroupId; // gid
+            std::uint64_t AttributesMask; // attr_mask
             std::vector<std::string> Names; // wname, nwname
         };
 
@@ -1019,18 +1019,18 @@ namespace Mile
         struct WindowsOpenResponse
         {
             std::uint8_t Status; // MILE_CIRNO_WINDOWS_OPEN_STATUS
-            std::uint16_t Walked; // walked
+            std::uint16_t Walked;
             Qid UniqueId; // qid
-            std::string SymlinkTarget; // symlink_target
+            std::string SymboliclinkTarget; // symlink_target
             std::uint32_t IoUnit;
             std::uint32_t Mode;
-            std::uint32_t UserId; // uid
+            std::uint32_t OwnerUserId; // uid
             std::uint32_t GroupId; // gid
             std::uint64_t NumberOfHardLinks; // nlink
             std::uint64_t DeviceId; // rdev
             std::uint64_t FileSize; // size
             std::uint64_t BlockSize; // blksize
-            std::uint64_t Blocks; // blocks
+            std::uint64_t AllocatedBlocks; // blocks
             std::uint64_t LastAccessTimeSeconds; // atime_sec
             std::uint64_t LastAccessTimeNanoseconds; // atime_nsec
             std::uint64_t LastWriteTimeSeconds; // mtime_sec
