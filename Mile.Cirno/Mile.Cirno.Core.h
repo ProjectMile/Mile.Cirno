@@ -1,9 +1,9 @@
 ﻿/*
- * PROJECT:   Mouri Internal Library Essentials
- * FILE:      Mile.Cirno.Core.h
- * PURPOSE:   Definition for Mile.Cirno Core Infrastructures
+ * PROJECT:    Mouri Internal Library Essentials
+ * FILE:       Mile.Cirno.Core.h
+ * PURPOSE:    Definition for Mile.Cirno Core Infrastructures
  *
- * LICENSE:   The MIT License
+ * LICENSE:    The MIT License
  *
  * MAINTAINER: MouriNaruto (Kenji.Mouri@outlook.com)
  *             per1cycle (pericycle.cc@gmail.com)

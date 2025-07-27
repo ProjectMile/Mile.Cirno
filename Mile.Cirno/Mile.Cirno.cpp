@@ -1,9 +1,9 @@
 ﻿/*
- * PROJECT:   Mile.Cirno
- * FILE:      Mile.Cirno.cpp
- * PURPOSE:   Implementation for Mile.Cirno
+ * PROJECT:    Mile.Cirno
+ * FILE:       Mile.Cirno.cpp
+ * PURPOSE:    Implementation for Mile.Cirno
  *
- * LICENSE:   The MIT License
+ * LICENSE:    The MIT License
  *
  * MAINTAINER: MouriNaruto (Kenji.Mouri@outlook.com)
  */

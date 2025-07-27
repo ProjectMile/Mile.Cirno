@@ -1,9 +1,9 @@
 ﻿/*
- * PROJECT:   Mouri Internal Library Essentials
- * FILE:      Mile.Cirno.Protocol.Parser.cpp
- * PURPOSE:   Implementation for Plan 9 File System Protocol Parser
+ * PROJECT:    Mouri Internal Library Essentials
+ * FILE:       Mile.Cirno.Protocol.Parser.cpp
+ * PURPOSE:    Implementation for Plan 9 File System Protocol Parser
  *
- * LICENSE:   The MIT License
+ * LICENSE:    The MIT License
  *
  * MAINTAINER: MouriNaruto (Kenji.Mouri@outlook.com)
  *             per1cycle (pericycle.cc@gmail.com)

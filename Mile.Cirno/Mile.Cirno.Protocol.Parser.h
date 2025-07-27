@@ -1,9 +1,9 @@
 ﻿/*
- * PROJECT:   Mouri Internal Library Essentials
- * FILE:      Mile.Cirno.Protocol.Parser.h
- * PURPOSE:   Definition for Plan 9 File System Protocol Parser
+ * PROJECT:    Mouri Internal Library Essentials
+ * FILE:       Mile.Cirno.Protocol.Parser.h
+ * PURPOSE:    Definition for Plan 9 File System Protocol Parser
  *
- * LICENSE:   The MIT License
+ * LICENSE:    The MIT License
  *
  * MAINTAINER: MouriNaruto (Kenji.Mouri@outlook.com)
  *             per1cycle (pericycle.cc@gmail.com)
@@ -206,11 +206,11 @@ namespace Mile::Cirno
     void PushRenameAtRequest(
         std::vector<std::uint8_t>& Buffer,
         RenameAtRequest const& Value);
-    
+
     void PushUnlinkAtRequest(
         std::vector<std::uint8_t>& Buffer,
         UnlinkAtRequest const& Value);
-    
+
     void PushVersionRequest(
         std::vector<std::uint8_t>& Buffer,
         VersionRequest const& Value);
@@ -230,7 +230,7 @@ namespace Mile::Cirno
         AttachRequest const& Value);
 
     AttachResponse PopAttachResponse(
-        std::span<std::uint8_t>& Buffer); 
+        std::span<std::uint8_t>& Buffer);
 
     ErrorResponse PopErrorResponse(
         std::span<std::uint8_t>& Buffer);
@@ -251,7 +251,7 @@ namespace Mile::Cirno
         OpenRequest const& Value);
 
     OpenResponse PopOpenResponse(
-        std::span<std::uint8_t>& Buffer); 
+        std::span<std::uint8_t>& Buffer);
 
     void PushCreateRequest(
         std::vector<std::uint8_t>& Buffer,

@@ -1,9 +1,9 @@
 ﻿/*
- * PROJECT:   Mouri Internal Library Essentials
- * FILE:      Mile.Cirno.Protocol.h
- * PURPOSE:   Definition for Plan 9 File System Protocol
+ * PROJECT:    Mouri Internal Library Essentials
+ * FILE:       Mile.Cirno.Protocol.h
+ * PURPOSE:    Definition for Plan 9 File System Protocol
  *
- * LICENSE:   The MIT License
+ * LICENSE:    The MIT License
  *
  * MAINTAINER: MouriNaruto (Kenji.Mouri@outlook.com)
  *             per1cycle (pericycle.cc@gmail.com)
@@ -301,7 +301,7 @@ typedef enum _MILE_CIRNO_QID_TYPE
     MileCirnoQidTypeMountPoint = 0x10,
     MileCirnoQidTypeExclusive = 0x20,
     MileCirnoQidTypeAppend = 0x40,
-    MileCirnoQidTypeDirectory = 0x80,   
+    MileCirnoQidTypeDirectory = 0x80,
 } MILE_CIRNO_QID_TYPE, *PMILE_CIRNO_QID_TYPE;
 
 /*

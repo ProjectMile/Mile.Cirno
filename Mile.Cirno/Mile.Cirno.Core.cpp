@@ -1,9 +1,9 @@
 ﻿/*
- * PROJECT:   Mouri Internal Library Essentials
- * FILE:      Mile.Cirno.Core.cpp
- * PURPOSE:   Implementation for Mile.Cirno Core Infrastructures
+ * PROJECT:    Mouri Internal Library Essentials
+ * FILE:       Mile.Cirno.Core.cpp
+ * PURPOSE:    Implementation for Mile.Cirno Core Infrastructures
  *
- * LICENSE:   The MIT License
+ * LICENSE:    The MIT License
  *
  * MAINTAINER: MouriNaruto (Kenji.Mouri@outlook.com)
  *             per1cycle (pericycle.cc@gmail.com)
@@ -81,7 +81,7 @@ void Mile::Cirno::Client::ReceiveWorkerEntryPoint()
     while (this->m_ReceiveWorkerStarted)
     {
         std::vector<std::uint8_t> Content;
-        
+
         {
             Content.resize(Mile::Cirno::HeaderSize);
             DWORD NumberOfBytesRecvd = 0;
@@ -350,7 +350,7 @@ Mile::Cirno::AttachResponse Mile::Cirno::Client::Attach(
         MileCirnoAttachResponseMessage,
         ResponseBuffer);
     std::span<std::uint8_t> ResponseSpan =
-        std::span<std::uint8_t>(ResponseBuffer); 
+        std::span<std::uint8_t>(ResponseBuffer);
     return Mile::Cirno::PopAttachResponse(ResponseSpan);
 }
 
