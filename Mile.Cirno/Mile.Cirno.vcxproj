@@ -48,6 +48,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Aptx.Linux.Error.h" />
     <ClInclude Include="Mile.Cirno.Core.h" />
     <ClInclude Include="Mile.Cirno.Protocol.h" />
     <ClInclude Include="Mile.Cirno.Protocol.Parser.h" />
