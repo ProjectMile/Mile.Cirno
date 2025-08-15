@@ -792,7 +792,154 @@
 // Windows Specific Error Codes
 //
 
+// This file is generated from the following source:
+// https://www.nuget.org/packages/Microsoft.Windows.SDK.CRTSource/10.0.22621.3
+
 // Resource temporarily unavailable
 #define APTX_WINDOWS_EAGAIN 11
+
+// Resource deadlock avoided
+#define APTX_WINDOWS_EDEADLK 36
+
+// Resource deadlock avoided
+#define APTX_WINDOWS_EDEADLOCK APTX_WINDOWS_EDEADLK
+
+// Filename too long
+#define APTX_WINDOWS_ENAMETOOLONG 38
+
+// No locks available
+#define APTX_WINDOWS_ENOLCK 39
+
+// Function not implemented
+#define APTX_WINDOWS_ENOSYS 40
+
+// Directory not empty
+#define APTX_WINDOWS_ENOTEMPTY 41
+
+// Illegal byte sequence
+#define APTX_WINDOWS_EILSEQ 42
+
+// address in use
+#define APTX_WINDOWS_EADDRINUSE 100
+
+// address not available
+#define APTX_WINDOWS_EADDRNOTAVAIL 101
+
+// address family not supported
+#define APTX_WINDOWS_EAFNOSUPPORT 102
+
+// connection already in progress
+#define APTX_WINDOWS_EALREADY 103
+
+// bad message
+#define APTX_WINDOWS_EBADMSG 104
+
+// operation canceled
+#define APTX_WINDOWS_ECANCELED 105
+
+// connection aborted
+#define APTX_WINDOWS_ECONNABORTED 106
+
+// connection refused
+#define APTX_WINDOWS_ECONNREFUSED 107
+
+// connection reset
+#define APTX_WINDOWS_ECONNRESET 108
+
+// destination address required
+#define APTX_WINDOWS_EDESTADDRREQ 109
+
+// host unreachable
+#define APTX_WINDOWS_EHOSTUNREACH 110
+
+// identifier removed
+#define APTX_WINDOWS_EIDRM 111
+
+// operation in progress
+#define APTX_WINDOWS_EINPROGRESS 112
+
+// already connected
+#define APTX_WINDOWS_EISCONN 113
+
+// too many symbolic link levels
+#define APTX_WINDOWS_ELOOP 114
+
+// message size
+#define APTX_WINDOWS_EMSGSIZE 115
+
+// network down
+#define APTX_WINDOWS_ENETDOWN 116
+
+// network reset
+#define APTX_WINDOWS_ENETRESET 117
+
+// network unreachable
+#define APTX_WINDOWS_ENETUNREACH 118
+
+// no buffer space
+#define APTX_WINDOWS_ENOBUFS 119
+
+// no message available
+#define APTX_WINDOWS_ENODATA 120
+
+// no link
+#define APTX_WINDOWS_ENOLINK 121
+
+// no message
+#define APTX_WINDOWS_ENOMSG 122
+
+// no protocol option
+#define APTX_WINDOWS_ENOPROTOOPT 123
+
+// no stream resources
+#define APTX_WINDOWS_ENOSR 124
+
+// not a stream
+#define APTX_WINDOWS_ENOSTR 125
+
+// not connected
+#define APTX_WINDOWS_ENOTCONN 126
+
+// state not recoverable
+#define APTX_WINDOWS_ENOTRECOVERABLE 127
+
+// not a socket
+#define APTX_WINDOWS_ENOTSOCK 128
+
+// not supported
+#define APTX_WINDOWS_ENOTSUP 129
+
+// operation not supported
+#define APTX_WINDOWS_EOPNOTSUPP 130
+
+// Unknown error
+#define APTX_WINDOWS_EOTHER 131
+
+// value too large
+#define APTX_WINDOWS_EOVERFLOW 132
+
+// owner dead
+#define APTX_WINDOWS_EOWNERDEAD 133
+
+// protocol error
+#define APTX_WINDOWS_EPROTO 134
+
+// protocol not supported
+#define APTX_WINDOWS_EPROTONOSUPPORT 135
+
+// wrong protocol type
+#define APTX_WINDOWS_EPROTOTYPE 136
+
+// stream timeout
+#define APTX_WINDOWS_ETIME 137
+
+// timed out
+#define APTX_WINDOWS_ETIMEDOUT 138
+
+// text file busy
+#define APTX_WINDOWS_ETXTBSY 139
+
+// operation would block
+#define APTX_WINDOWS_EWOULDBLOCK 140
 
 #endif // !APTX_POSIX_ERROR
