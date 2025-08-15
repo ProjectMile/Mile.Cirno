@@ -34,7 +34,7 @@
 #include "Mile.Cirno.Core.h"
 #include "Mile.Cirno.Protocol.Parser.h"
 
-#include "Aptx.Linux.Error.h"
+#include "Aptx.Posix.Error.h"
 
 NTSTATUS ToNtStatus(
     std::uint32_t ErrorCode)
@@ -43,65 +43,65 @@ NTSTATUS ToNtStatus(
     {
     case 0:
         return STATUS_SUCCESS;
-    case LX_EPERM:
+    case APTX_EPERM:
         return STATUS_NOT_SUPPORTED;
-    case LX_ENOENT:
+    case APTX_ENOENT:
         return STATUS_OBJECT_NAME_NOT_FOUND;
-    case LX_ESRCH:
+    case APTX_ESRCH:
         return STATUS_OBJECTID_NOT_FOUND;
-    case LX_EINTR: // fallthrough
-    case LX_ERESTARTSYS: // fallthrough
-    case LX_ERESTARTNOINTR: // fallthrough
-    case LX_ERESTARTNOHAND: // fallthrough
-    case LX_ERESTART_RESTARTBLOCK:
+    case APTX_EINTR: // fallthrough
+    case APTX_LINUX_ERESTARTSYS: // fallthrough
+    case APTX_LINUX_ERESTARTNOINTR: // fallthrough
+    case APTX_LINUX_ERESTARTNOHAND: // fallthrough
+    case APTX_LINUX_ERESTART_RESTARTBLOCK:
         return STATUS_CANCELLED;
-    case LX_EIO:
+    case APTX_EIO:
         return STATUS_IO_DEVICE_ERROR;
-    case LX_ENXIO:
+    case APTX_ENXIO:
         return STATUS_NO_SUCH_DEVICE;
-    case LX_EBADF:
+    case APTX_EBADF:
         return STATUS_INVALID_HANDLE;
-    case LX_EAGAIN:
+    case APTX_LINUX_EAGAIN:
         return STATUS_RETRY;
-    case LX_ENOMEM: // fallthrough
-    case LX_ENFILE: // fallthrough
-    case LX_EMFILE:
+    case APTX_ENOMEM: // fallthrough
+    case APTX_ENFILE: // fallthrough
+    case APTX_EMFILE:
         return STATUS_INSUFFICIENT_RESOURCES;
-    case LX_EACCES:
+    case APTX_EACCES:
         return STATUS_ACCESS_DENIED;
-    case LX_EFAULT:
+    case APTX_EFAULT:
         return STATUS_ACCESS_VIOLATION;
-    case LX_EEXIST:
+    case APTX_EEXIST:
         return STATUS_OBJECT_NAME_COLLISION;
-    case LX_ENODEV:
+    case APTX_ENODEV:
         return STATUS_DEVICE_NOT_CONNECTED;
-    case LX_ENOTDIR:
+    case APTX_ENOTDIR:
         return STATUS_NOT_A_DIRECTORY;
-    case LX_EISDIR:
+    case APTX_EISDIR:
         return STATUS_FILE_IS_A_DIRECTORY;
-    case LX_EINVAL:
+    case APTX_EINVAL:
         return STATUS_INVALID_PARAMETER;
-    case LX_EFBIG: // fallthrough
-    case LX_ENOSPC:
+    case APTX_EFBIG: // fallthrough
+    case APTX_ENOSPC:
         return STATUS_DISK_FULL;
-    case LX_EROFS:
+    case APTX_EROFS:
         return STATUS_MEDIA_WRITE_PROTECTED;
-    case LX_EMLINK: // fallthrough
-    case LX_ELOOP:
+    case APTX_EMLINK: // fallthrough
+    case APTX_LINUX_ELOOP:
         return STATUS_REPARSE_POINT_NOT_RESOLVED;
-    case LX_EPIPE:
+    case APTX_EPIPE:
         return STATUS_CONNECTION_DISCONNECTED;
-    case LX_ERANGE:
+    case APTX_ERANGE:
         return STATUS_INTEGER_OVERFLOW;
-    case LX_ENAMETOOLONG:
+    case APTX_LINUX_ENAMETOOLONG:
         return STATUS_OBJECT_NAME_INVALID;
-    case LX_ENOTEMPTY:
+    case APTX_LINUX_ENOTEMPTY:
         return STATUS_DIRECTORY_NOT_EMPTY;
-    case LX_EOVERFLOW:
+    case APTX_LINUX_EOVERFLOW:
         return STATUS_BUFFER_TOO_SMALL;
-    case LX_ENOMEDIUM:
+    case APTX_LINUX_ENOMEDIUM:
         return STATUS_NO_MEDIA_IN_DEVICE;
-    case LX_EMEDIUMTYPE:
+    case APTX_LINUX_EMEDIUMTYPE:
         return STATUS_UNRECOGNIZED_MEDIA;
     default:
         break;
