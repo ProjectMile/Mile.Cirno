@@ -280,146 +280,63 @@
 // Need authenticator
 #define APTX_BSD_ENEEDAUTH 81
 
+// *****************************************************************************
+// FreeBSD Specific Error Codes
+//
+
+// This file is generated from the following sources via regex replacement:
+// https://github.com/freebsd/freebsd-src/blob/release/14.3.0/lib/libc/nls/C.msg
+// Use Visual Studio Code with the regex replacement:
+// - Find: ^\$ (.+)\n(\d+) (.+)$
+// - Replace: \n// $3\n#define BSD_$1 $2
+
 // Identifier removed
 #define APTX_FREEBSD_EIDRM 82
-
-// Identifier removed
-#define APTX_NETBSD_EIDRM 82
-
-// IPsec processing failure
-#define APTX_OPENBSD_EIPSEC 82
 
 // No message of desired type
 #define APTX_FREEBSD_ENOMSG 83
 
-// No message of desired type
-#define APTX_NETBSD_ENOMSG 83
-
-// Attribute not found
-#define APTX_OPENBSD_ENOATTR 83
-
 // Value too large to be stored in data type
 #define APTX_FREEBSD_EOVERFLOW 84
-
-// Value too large to be stored in data type
-#define APTX_NETBSD_EOVERFLOW 84
-
-// Illegal byte sequence
-#define APTX_OPENBSD_EILSEQ 84
 
 // Operation canceled
 #define APTX_FREEBSD_ECANCELED 85
 
 // Illegal byte sequence
-#define APTX_NETBSD_EILSEQ 85
-
-// No medium found
-#define APTX_OPENBSD_ENOMEDIUM 85
-
-// Illegal byte sequence
 #define APTX_FREEBSD_EILSEQ 86
-
-// Not supported
-#define APTX_NETBSD_ENOTSUP 86
-
-// Wrong medium type
-#define APTX_OPENBSD_EMEDIUMTYPE 86
 
 // Attribute not found
 #define APTX_FREEBSD_ENOATTR 87
 
-// Operation canceled
-#define APTX_NETBSD_ECANCELED 87
-
-// Value too large to be stored in data type
-#define APTX_OPENBSD_EEOVERFLOW 87
-
 // Programming error
 #define APTX_FREEBSD_EDOOFUS 88
-
-// Bad or Corrupt message
-#define APTX_NETBSD_EBADMSG 88
-
-// Operation canceled
-#define APTX_OPENBSD_ECANCELED 88
 
 // Bad message
 #define APTX_FREEBSD_EBADMSG 89
 
-// No message available
-#define APTX_NETBSD_ENODATA 89
-
-// Identifier removed
-#define APTX_OPENBSD_EIDRM 89
-
 // Multihop attempted
 #define APTX_FREEBSD_EMULTIHOP 90
-
-// No STREAM resources
-#define APTX_NETBSD_ENOSR 90
-
-// No message of desired type
-#define APTX_OPENBSD_ENOMSG 90
 
 // Link has been severed
 #define APTX_FREEBSD_ENOLINK 91
 
-// Not a STREAM
-#define APTX_NETBSD_ENOSTR 91
-
-// Not supported
-#define APTX_OPENBSD_ENOTSUP 91
-
 // Protocol error
 #define APTX_FREEBSD_EPROTO 92
-
-// STREAM ioctl timeout
-#define APTX_NETBSD_ETIME 92
-
-// Bad message
-#define APTX_OPENBSD_EBADMSG 92
 
 // Capabilities insufficient
 #define APTX_FREEBSD_ENOTCAPABLE 93
 
-// Attribute not found
-#define APTX_NETBSD_ENOATTR 93
-
-// State not recoverable
-#define APTX_OPENBSD_ENOTRECOVERABLE 93
-
 // Not permitted in capability mode
 #define APTX_FREEBSD_ECAPMODE 94
-
-// Multihop attempted
-#define APTX_NETBSD_EMULTIHOP 94
-
-// Previous owner died
-#define APTX_OPENBSD_EOWNERDEAD 94
 
 // State not recoverable
 #define APTX_FREEBSD_ENOTRECOVERABLE 95
 
-// Link has been severed
-#define APTX_NETBSD_ENOLINK 95
-
-// Protocol error
-#define APTX_OPENBSD_EPROTO 95
-
 // Previous owner died
 #define APTX_FREEBSD_EOWNERDEAD 96
 
-// Protocol error
-#define APTX_NETBSD_EPROTO 96
-
 // Integrity check failed
 #define APTX_FREEBSD_EINTEGRITY 97
-
-// Previous owner died
-#define APTX_NETBSD_EOWNERDEAD 97
-
-// State not recoverable
-#define APTX_NETBSD_ENOTRECOVERABLE 98
 
 // *****************************************************************************
 // Linux Specific Error Codes
@@ -787,6 +704,119 @@
 
 // NFS file lock reclaim refused
 #define APTX_LINUX_ENOGRACE 531
+
+// *****************************************************************************
+// NetBSD Specific Error Codes
+//
+
+// This file is generated from the following sources via regex replacement:
+// https://github.com/NetBSD/src/blob/netbsd-10/lib/libc/nls/C.msg
+// Use Visual Studio Code with the regex replacement:
+// - Find: ^\$ (.+)\n(\d+) (.+)$
+// - Replace: \n// $3\n#define BSD_$1 $2
+
+// Identifier removed
+#define APTX_NETBSD_EIDRM 82
+
+// No message of desired type
+#define APTX_NETBSD_ENOMSG 83
+
+// Value too large to be stored in data type
+#define APTX_NETBSD_EOVERFLOW 84
+
+// Illegal byte sequence
+#define APTX_NETBSD_EILSEQ 85
+
+// Not supported
+#define APTX_NETBSD_ENOTSUP 86
+
+// Operation canceled
+#define APTX_NETBSD_ECANCELED 87
+
+// Bad or Corrupt message
+#define APTX_NETBSD_EBADMSG 88
+
+// No message available
+#define APTX_NETBSD_ENODATA 89
+
+// No STREAM resources
+#define APTX_NETBSD_ENOSR 90
+
+// Not a STREAM
+#define APTX_NETBSD_ENOSTR 91
+
+// STREAM ioctl timeout
+#define APTX_NETBSD_ETIME 92
+
+// Attribute not found
+#define APTX_NETBSD_ENOATTR 93
+
+// Multihop attempted
+#define APTX_NETBSD_EMULTIHOP 94
+
+// Link has been severed
+#define APTX_NETBSD_ENOLINK 95
+
+// Protocol error
+#define APTX_NETBSD_EPROTO 96
+
+// Previous owner died
+#define APTX_NETBSD_EOWNERDEAD 97
+
+// State not recoverable
+#define APTX_NETBSD_ENOTRECOVERABLE 98
+
+// *****************************************************************************
+// OpenBSD Specific Error Codes
+//
+
+// This file is generated from the following sources via regex replacement:
+// https://github.com/openbsd/src/blob/master/lib/libc/gen/errlist.c
+// Use Visual Studio Code with the regex replacement:
+// - Find: ^\t"(.+)",(\t+)/\*(\s+)(\d+) - (.+) \*/$
+// - Replace: \n// $1\n#define BSD_$5 $4
+
+// IPsec processing failure
+#define APTX_OPENBSD_EIPSEC 82
+
+// Attribute not found
+#define APTX_OPENBSD_ENOATTR 83
+
+// Illegal byte sequence
+#define APTX_OPENBSD_EILSEQ 84
+
+// No medium found
+#define APTX_OPENBSD_ENOMEDIUM 85
+
+// Wrong medium type
+#define APTX_OPENBSD_EMEDIUMTYPE 86
+
+// Value too large to be stored in data type
+#define APTX_OPENBSD_EEOVERFLOW 87
+
+// Operation canceled
+#define APTX_OPENBSD_ECANCELED 88
+
+// Identifier removed
+#define APTX_OPENBSD_EIDRM 89
+
+// No message of desired type
+#define APTX_OPENBSD_ENOMSG 90
+
+// Not supported
+#define APTX_OPENBSD_ENOTSUP 91
+
+// Bad message
+#define APTX_OPENBSD_EBADMSG 92
+
+// State not recoverable
+#define APTX_OPENBSD_ENOTRECOVERABLE 93
+
+// Previous owner died
+#define APTX_OPENBSD_EOWNERDEAD 94
+
+// Protocol error
+#define APTX_OPENBSD_EPROTO 95
 
 // *****************************************************************************
 // Windows Specific Error Codes
