@@ -110,6 +110,54 @@ NTSTATUS ToNtStatus(
     return STATUS_UNSUCCESSFUL;
 }
 
+NTSTATUS GetNtStatusAndLogToConsole(
+    std::string const& CheckPoint) noexcept
+{
+    try
+    {
+        throw;
+    }
+    catch (Mile::Cirno::LinuxErrorResponse const& ex)
+    {
+        std::printf(
+            "[Mile.Cirno] %s Failed. (Linux Error Code = %d)\n",
+            CheckPoint.c_str(),
+            ex.Code);
+        return ::ToNtStatus(ex.Code);
+    }
+    catch (Mile::Cirno::ErrorResponse const& ex)
+    {
+        std::printf(
+            "[Mile.Cirno] %s Failed. (Error Code = %d)\n",
+            CheckPoint.c_str(),
+            ex.Code);
+        if (ex.Code > APTX_ERANGE || 11 == ex.Code)
+        {
+            // Because there is no convention implementation for non-Linux
+            // environment, returns STATUS_UNSUCCESSFUL if the error code is not
+            // contained in Version 7 Unix Error Codes which are supported by
+            // all major POSIX-compliant environments.
+            return STATUS_UNSUCCESSFUL;
+        }
+        return ::ToNtStatus(ex.Code);
+    }
+    catch (std::exception const& ex)
+    {
+        std::printf(
+            "[Mile.Cirno] %s Failed. (Exception: %s)\n",
+            CheckPoint.c_str(),
+            ex.what());
+    }
+    catch (...)
+    {
+        std::printf(
+            "[Mile.Cirno] %s Failed. (Unknown Exception)\n",
+            CheckPoint.c_str());
+    }
+
+    return STATUS_UNSUCCESSFUL;
+}
+
 // Win32 time epoch is 00:00:00, January 1 1601.
 // UNIX time epoch is 00:00:00, January 1 1970.
 // There are 11644473600 seconds between these two epochs.
@@ -242,12 +290,9 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
             DokanFileInfo->IsDirectory = TRUE;
         }
     }
-    catch (std::exception const& ex)
+    catch (...)
     {
-        std::printf("%s\n", ex.what());
-        return DokanFileInfo->IsDirectory
-            ? STATUS_OBJECT_PATH_NOT_FOUND
-            : STATUS_OBJECT_NAME_NOT_FOUND;
+        return ::GetNtStatusAndLogToConsole("ZwCreateFile");
     }
 
     return STATUS_SUCCESS;
@@ -273,9 +318,9 @@ void DOKAN_CALLBACK MileCirnoCloseFile(
         g_Instance->Clunk(Request);
         g_Instance->FreeFileId(FileId);
     }
-    catch (std::exception const& ex)
+    catch (...)
     {
-        std::printf("%s\n", ex.what());
+        ::GetNtStatusAndLogToConsole("CloseFile");
     }
 }
 
@@ -330,10 +375,9 @@ NTSTATUS DOKAN_CALLBACK MileCirnoReadFile(
             UnproceededSize -= CurrentProceededSize;
         }
     }
-    catch (std::exception const& ex)
+    catch (...)
     {
-        std::printf("%s\n", ex.what());
-        return STATUS_NOT_IMPLEMENTED;
+        return ::GetNtStatusAndLogToConsole("ReadFile");
     }
 
     if (ReadLength)
@@ -399,10 +443,9 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetFileInformation(
         Buffer->nFileIndexHigh;
         Buffer->nFileIndexLow;
     }
-    catch (std::exception const& ex)
+    catch (...)
     {
-        std::printf("%s\n", ex.what());
-        return STATUS_NOT_IMPLEMENTED;
+        return ::GetNtStatusAndLogToConsole("GetFileInformation");
     }
 
     return STATUS_SUCCESS;
@@ -473,9 +516,9 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
                                 ClunkRequest.FileId = WalkRequest.NewFileId;
                                 g_Instance->Clunk(ClunkRequest);
                             }
-                            catch (std::exception const& ex)
+                            catch (...)
                             {
-                                std::printf("%s\n", ex.what());
+                                ::GetNtStatusAndLogToConsole("FindFiles.Clunk");
                             }
                             g_Instance->FreeFileId(WalkRequest.NewFileId);
                         }
@@ -510,19 +553,18 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
                     FindData.nFileSizeLow =
                         static_cast<DWORD>(InformationResponse.FileSize);
                 }
-                catch (std::exception const& ex)
+                catch (...)
                 {
-                    std::printf("%s\n", ex.what());
+                    ::GetNtStatusAndLogToConsole("FindFiles.Walk");
                 }
 
                 FillFindData(&FindData, DokanFileInfo);
             }
         } while (LastOffset);
     }
-    catch (std::exception const& ex)
+    catch (...)
     {
-        std::printf("%s\n", ex.what());
-        return STATUS_NOT_IMPLEMENTED;
+        return ::GetNtStatusAndLogToConsole("FindFiles");
     }
 
     return STATUS_SUCCESS;
@@ -554,10 +596,9 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetDiskFreeSpace(
             *TotalNumberOfFreeBytes = Response.BlockSize * Response.FreeBlocks;
         }
     }
-    catch (std::exception const& ex)
+    catch (...)
     {
-        std::printf("%s\n", ex.what());
-        return STATUS_NOT_IMPLEMENTED;
+        return ::GetNtStatusAndLogToConsole("GetDiskFreeSpace");
     }
 
     return STATUS_SUCCESS;
@@ -746,9 +787,9 @@ int main()
                 Response.UniqueId.Path);
         }
     }
-    catch (std::exception const& ex)
+    catch (...)
     {
-        std::printf("%s\n", ex.what());
+        ::GetNtStatusAndLogToConsole("Initialize");
         return -1;
     }
 

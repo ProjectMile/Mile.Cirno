@@ -296,19 +296,11 @@ void Mile::Cirno::Client::Request(
     }
     else if (MileCirnoErrorResponseMessage == ResponseContentHeader.Type)
     {
-        Mile::Cirno::ErrorResponse Response =
-            Mile::Cirno::PopErrorResponse(ResponseSpan);
-        Mile::Cirno::ThrowException(
-            Response.Message.c_str(),
-            Response.Code);
+        throw Mile::Cirno::PopErrorResponse(ResponseSpan);
     }
     else if (MileCirnoLinuxErrorResponseMessage == ResponseContentHeader.Type)
     {
-        Mile::Cirno::LinuxErrorResponse Response =
-            Mile::Cirno::PopLinuxErrorResponse(ResponseSpan);
-        Mile::Cirno::ThrowException(
-            "MileCirnoLinuxErrorResponseMessage",
-            Response.Code);
+        throw Mile::Cirno::PopLinuxErrorResponse(ResponseSpan);
     }
     else
     {
