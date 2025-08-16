@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Aptx.Posix.Error.h" />
+    <ClInclude Include="Aptx.Posix.FileMode.h" />
     <ClInclude Include="Mile.Cirno.Core.h" />
     <ClInclude Include="Mile.Cirno.Protocol.h" />
     <ClInclude Include="Mile.Cirno.Protocol.Parser.h" />
