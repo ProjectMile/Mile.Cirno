@@ -517,7 +517,9 @@ namespace Mile
         };
 
         const std::uint32_t HeaderSize =
-            sizeof(std::uint32_t) + sizeof(std::uint8_t) + sizeof(std::uint16_t);
+            sizeof(std::uint32_t) // size
+            + sizeof(std::uint8_t) // type
+            + sizeof(std::uint16_t); // tag
 
         struct Qid
         {
@@ -749,11 +751,12 @@ namespace Mile
 
         struct ReadDirResponse
         {
-            std::vector<DirectoryEntry> Data;
+            std::vector<DirectoryEntry> Data; // count, data
         };
 
         const std::uint32_t ReadDirResponseHeaderSize =
-            HeaderSize + sizeof(std::uint32_t);
+            HeaderSize
+            + sizeof(std::uint32_t); // count
 
         struct FsyncRequest
         {
@@ -946,7 +949,8 @@ namespace Mile
         };
 
         const std::uint32_t ReadResponseHeaderSize =
-            HeaderSize + sizeof(std::uint32_t);
+            HeaderSize
+            + sizeof(std::uint32_t); // count
 
         struct WriteRequest
         {
@@ -954,6 +958,12 @@ namespace Mile
             std::uint64_t Offset;
             std::vector<std::uint8_t> Data; // count, data
         };
+
+        const std::uint32_t WriteRequestHeaderSize =
+            HeaderSize
+            + sizeof(std::uint32_t) // fid
+            + sizeof(std::uint64_t) // offset
+            + sizeof(std::uint32_t); // count
 
         struct WriteResponse
         {
