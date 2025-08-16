@@ -539,7 +539,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
                     continue;
                 }
 
-                WIN32_FIND_DATAW FindData = { 0 };
+                WIN32_FIND_DATAW FindData = {};
                 FindData.dwFileAttributes = FILE_ATTRIBUTE_NORMAL;
                 ::wcscpy_s(
                     FindData.cFileName,
@@ -726,7 +726,7 @@ int main()
         Port = "50001";
         AccessName = "HostDriverStore";
 
-        wchar_t System32Directory[MAX_PATH] = { 0 };
+        wchar_t System32Directory[MAX_PATH] = {};
         ::GetSystemDirectoryW(
             System32Directory,
             sizeof(System32Directory) / sizeof(*System32Directory));
@@ -817,7 +817,7 @@ int main()
 
     ::DokanInit();
 
-    WSADATA WSAData = { 0 };
+    WSADATA WSAData = {};
     {
         int WSAError = ::WSAStartup(MAKEWORD(2, 2), &WSAData);
         if (NO_ERROR != WSAError)
@@ -882,7 +882,7 @@ int main()
 
     std::wstring ConvertedMountPoint = Mile::ToWideString(CP_UTF8, MountPoint);
 
-    DOKAN_OPTIONS Options = { 0 };
+    DOKAN_OPTIONS Options = {};
     Options.Version = DOKAN_VERSION;
     Options.SingleThread;
     Options.Options =
@@ -898,7 +898,7 @@ int main()
     Options.VolumeSecurityDescriptorLength;
     Options.VolumeSecurityDescriptor;
 
-    DOKAN_OPERATIONS Operations = { 0 };
+    DOKAN_OPERATIONS Operations = {};
     Operations.ZwCreateFile = ::MileCirnoZwCreateFile; //
     Operations.Cleanup = ::MileCirnoCleanup;
     Operations.CloseFile = ::MileCirnoCloseFile;

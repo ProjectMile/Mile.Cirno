@@ -532,7 +532,7 @@ Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithTcpSocket(
     std::string Checkpoint = "getaddrinfo";
     int Error = 0;
 
-    addrinfo AddressHints = { 0 };
+    addrinfo AddressHints = {};
     AddressHints.ai_family = AF_INET;
     AddressHints.ai_socktype = SOCK_STREAM;
     AddressHints.ai_protocol = IPPROTO_TCP;
@@ -620,7 +620,7 @@ Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithHyperVSocket(
             ::WSAGetLastError());
     }
 
-    SOCKADDR_HV SocketAddress = { 0 };
+    SOCKADDR_HV SocketAddress = {};
     SocketAddress.Family = AF_HYPERV;
     std::memcpy(
         &SocketAddress.VmId,
