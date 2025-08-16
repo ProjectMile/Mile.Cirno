@@ -91,6 +91,12 @@ namespace Mile::Cirno
         ReadResponse Read(
             ReadRequest const& Request);
 
+    private:
+
+        void Initialize();
+
+    public:
+
         static Client* ConnectWithTcpSocket(
             std::string const& Host,
             std::string const& Port);

@@ -469,6 +469,24 @@ Mile::Cirno::ReadResponse Mile::Cirno::Client::Read(
     return Mile::Cirno::PopReadResponse(ResponseSpan);
 }
 
+void Mile::Cirno::Client::Initialize()
+{
+    this->m_ReceiveWorkerThread = Mile::CreateThread([this]()
+    {
+        this->ReceiveWorkerEntryPoint();
+    });
+    if (this->m_ReceiveWorkerThread)
+    {
+        ::Sleep(100);
+    }
+    else
+    {
+        Mile::Cirno::ThrowException(
+            "Mile::CreateThread",
+            ::GetLastError());
+    }
+}
+
 Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithTcpSocket(
     std::string const& Host,
     std::string const& Port)
@@ -542,20 +560,7 @@ Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithTcpSocket(
             Error);
     }
 
-    Object->m_ReceiveWorkerThread = Mile::CreateThread([Object]()
-    {
-        Object->ReceiveWorkerEntryPoint();
-    });
-    if (Object->m_ReceiveWorkerThread)
-    {
-        ::Sleep(100);
-    }
-    else
-    {
-        Mile::Cirno::ThrowException(
-            "Mile::CreateThread",
-            ::GetLastError());
-    }
+    Object->Initialize();
 
     return Object;
 }
@@ -613,20 +618,7 @@ Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithHyperVSocket(
 
     Object->m_Socket = Socket;
 
-    Object->m_ReceiveWorkerThread = Mile::CreateThread([Object]()
-    {
-        Object->ReceiveWorkerEntryPoint();
-    });
-    if (Object->m_ReceiveWorkerThread)
-    {
-        ::Sleep(100);
-    }
-    else
-    {
-        Mile::Cirno::ThrowException(
-            "Mile::CreateThread",
-            ::GetLastError());
-    }
+    Object->Initialize();
 
     return Object;
 }
