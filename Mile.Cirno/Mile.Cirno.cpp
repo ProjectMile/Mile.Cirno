@@ -181,6 +181,7 @@ namespace
 {
     Mile::Cirno::Client* g_Instance = nullptr;
     std::uint32_t g_RootDirectoryFileId = MILE_CIRNO_NOFID;
+    std::uint32_t g_MaximumMessageSize = Mile::Cirno::DefaultMaximumMessageSize;
 }
 
 NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
@@ -351,7 +352,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoReadFile(
             Mile::Cirno::ReadRequest Request;
             Request.FileId = FileId;
             Request.Offset = Offset + ProceededSize;
-            Request.Count = Mile::Cirno::DefaultMaximumMessageSize;
+            Request.Count = g_MaximumMessageSize;
             Request.Count -= Mile::Cirno::ReadResponseHeaderSize;
             if (UnproceededSize < Request.Count)
             {
@@ -480,7 +481,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
             Request.FileId = FileId;
             Request.Offset = LastOffset;
             LastOffset = 0;
-            Request.Count = Mile::Cirno::DefaultMaximumMessageSize;
+            Request.Count = g_MaximumMessageSize;
             Request.Count -= Mile::Cirno::ReadDirResponseHeaderSize;
             Mile::Cirno::ReadDirResponse Response =
                 g_Instance->ReadDir(Request);
@@ -740,37 +741,33 @@ int main()
 
     try
     {
+        if (0 == ::_stricmp(Host.c_str(), "HvSocket"))
         {
-            if (0 == ::_stricmp(Host.c_str(), "HvSocket"))
-            {
-                g_Instance = Mile::Cirno::Client::ConnectWithHyperVSocket(
-                    Mile::ToUInt32(Port));
-            }
-            else
-            {
-                g_Instance = Mile::Cirno::Client::ConnectWithTcpSocket(Host, Port);
-            }
+            g_Instance = Mile::Cirno::Client::ConnectWithHyperVSocket(
+                Mile::ToUInt32(Port));
         }
-        if (!g_Instance)
+        else
         {
-            Mile::Cirno::ThrowException(
-                "!Instance",
-                ERROR_INVALID_DATA);
+            g_Instance = Mile::Cirno::Client::ConnectWithTcpSocket(Host, Port);
         }
 
         {
             Mile::Cirno::VersionRequest Request;
-            Request.MaximumMessageSize =
-                Mile::Cirno::DefaultMaximumMessageSize;
-            Request.ProtocolVersion =
-                Mile::Cirno::DefaultProtocolVersion;
+            Request.MaximumMessageSize = g_MaximumMessageSize;
+            Request.ProtocolVersion = Mile::Cirno::DefaultProtocolVersion;
             Mile::Cirno::VersionResponse Response =
                 g_Instance->Version(Request);
             std::printf(
-                "[INFO] Response.ProtocolVersion = %s\n"
-                "[INFO] Response.MaximumMessageSize = %u\n",
+                "[INFO] VersionResponse.ProtocolVersion = %s\n"
+                "[INFO] VersionResponse.MaximumMessageSize = %u\n",
                 Response.ProtocolVersion.c_str(),
                 Response.MaximumMessageSize);
+            if (Mile::Cirno::DefaultProtocolVersion != Response.ProtocolVersion)
+            {
+                std::printf("[ERROR] The protocol version is not supported.\n");
+                return -1;
+            }
+            g_MaximumMessageSize = Response.MaximumMessageSize;
         }
 
         {
