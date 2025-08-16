@@ -35,6 +35,7 @@
 #include "Mile.Cirno.Protocol.Parser.h"
 
 #include "Aptx.Posix.Error.h"
+#include "Aptx.Posix.FileMode.h"
 
 NTSTATUS ToNtStatus(
     std::uint32_t ErrorCode)
@@ -461,7 +462,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetFileInformation(
             MileCirnoLinuxGetAttrFlagSize;
         Mile::Cirno::GetAttrResponse Response = g_Instance->GetAttr(Request);
 
-        if (S_IFDIR & Response.Mode)
+        if (APTX_IFDIR & Response.Mode)
         {
             Buffer->dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY;
         }
@@ -580,7 +581,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
                     Mile::Cirno::GetAttrResponse InformationResponse =
                         g_Instance->GetAttr(InformationRequest);
 
-                    if (S_IFDIR & InformationResponse.Mode)
+                    if (APTX_IFDIR & InformationResponse.Mode)
                     {
                         FindData.dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY;
                     }
