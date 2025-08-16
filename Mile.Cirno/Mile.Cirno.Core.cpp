@@ -469,6 +469,21 @@ Mile::Cirno::ReadResponse Mile::Cirno::Client::Read(
     return Mile::Cirno::PopReadResponse(ResponseSpan);
 }
 
+void Mile::Cirno::Client::Remove(
+    Mile::Cirno::RemoveRequest const& Request)
+{
+    std::vector<std::uint8_t> RequestBuffer;
+    Mile::Cirno::PushRemoveRequest(
+        RequestBuffer,
+        Request);
+    std::vector<std::uint8_t> ResponseBuffer;
+    this->Request(
+        MileCirnoRemoveRequestMessage,
+        RequestBuffer,
+        MileCirnoRemoveResponseMessage,
+        ResponseBuffer);
+}
+
 void Mile::Cirno::Client::Initialize()
 {
     this->m_ReceiveWorkerThread = Mile::CreateThread([this]()

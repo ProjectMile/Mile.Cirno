@@ -91,6 +91,9 @@ namespace Mile::Cirno
         ReadResponse Read(
             ReadRequest const& Request);
 
+        void Remove(
+            RemoveRequest const& Request);
+
     private:
 
         void Initialize();
