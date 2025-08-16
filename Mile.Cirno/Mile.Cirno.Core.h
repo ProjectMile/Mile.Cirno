@@ -94,6 +94,9 @@ namespace Mile::Cirno
         void Remove(
             RemoveRequest const& Request);
 
+        void SetAttr(
+            SetAttrRequest const& Request);
+
     private:
 
         void Initialize();

@@ -484,6 +484,21 @@ void Mile::Cirno::Client::Remove(
         ResponseBuffer);
 }
 
+void Mile::Cirno::Client::SetAttr(
+    Mile::Cirno::SetAttrRequest const& Request)
+{
+    std::vector<std::uint8_t> RequestBuffer;
+    Mile::Cirno::PushSetAttrRequest(
+        RequestBuffer,
+        Request);
+    std::vector<std::uint8_t> ResponseBuffer;
+    this->Request(
+        MileCirnoSetAttrRequestMessage,
+        RequestBuffer,
+        MileCirnoSetAttrResponseMessage,
+        ResponseBuffer);
+}
+
 void Mile::Cirno::Client::Initialize()
 {
     this->m_ReceiveWorkerThread = Mile::CreateThread([this]()
