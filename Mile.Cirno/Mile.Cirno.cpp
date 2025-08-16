@@ -307,7 +307,7 @@ void DOKAN_CALLBACK MileCirnoCloseFile(
 
     std::uint32_t FileId = static_cast<std::uint32_t>(
         DokanFileInfo->Context);
-    if (MILE_CIRNO_NOFID != FileId)
+    if (MILE_CIRNO_NOFID == FileId)
     {
         return;
     }
@@ -339,7 +339,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoReadFile(
         DokanFileInfo->Context);
     if (MILE_CIRNO_NOFID == FileId)
     {
-        return STATUS_NOT_IMPLEMENTED;
+        return STATUS_INVALID_HANDLE;
     }
 
     DWORD ProceededSize = 0;
@@ -400,7 +400,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetFileInformation(
         DokanFileInfo->Context);
     if (MILE_CIRNO_NOFID == FileId)
     {
-        return STATUS_NOT_IMPLEMENTED;
+        return STATUS_INVALID_HANDLE;
     }
 
     std::memset(Buffer, 0, sizeof(BY_HANDLE_FILE_INFORMATION));
@@ -462,14 +462,14 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
 
     if (!DokanFileInfo->IsDirectory)
     {
-        return STATUS_NOT_IMPLEMENTED;
+        return STATUS_NOT_A_DIRECTORY;
     }
 
     std::uint32_t FileId = static_cast<std::uint32_t>(
         DokanFileInfo->Context);
     if (MILE_CIRNO_NOFID == FileId)
     {
-        return STATUS_NOT_IMPLEMENTED;
+        return STATUS_INVALID_HANDLE;
     }
 
     try
