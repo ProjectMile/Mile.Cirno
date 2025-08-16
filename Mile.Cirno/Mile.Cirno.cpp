@@ -299,6 +299,34 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
     return STATUS_SUCCESS;
 }
 
+void DOKAN_CALLBACK MileCirnoCleanup(
+    _In_ LPCWSTR FileName,
+    _Inout_ PDOKAN_FILE_INFO DokanFileInfo)
+{
+    UNREFERENCED_PARAMETER(FileName);
+
+    std::uint32_t FileId = static_cast<std::uint32_t>(
+        DokanFileInfo->Context);
+    if (MILE_CIRNO_NOFID == FileId)
+    {
+        return;
+    }
+
+    if (DokanFileInfo->DeletePending)
+    {
+        try
+        {
+            Mile::Cirno::RemoveRequest Request;
+            Request.FileId = FileId;
+            g_Instance->Remove(Request);
+        }
+        catch (...)
+        {
+            ::GetNtStatusAndLogToConsole("Cleanup");
+        }
+    }
+}
+
 void DOKAN_CALLBACK MileCirnoCloseFile(
     _In_ LPCWSTR FileName,
     _Inout_ PDOKAN_FILE_INFO DokanFileInfo)
@@ -571,6 +599,51 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
     return STATUS_SUCCESS;
 }
 
+NTSTATUS DOKAN_CALLBACK MileCirnoDeleteFile(
+    _In_ LPCWSTR FileName,
+    _Inout_ PDOKAN_FILE_INFO DokanFileInfo)
+{
+    UNREFERENCED_PARAMETER(FileName);
+    UNREFERENCED_PARAMETER(DokanFileInfo);
+
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS DOKAN_CALLBACK MileCirnoDeleteDirectory(
+    _In_ LPCWSTR FileName,
+    _Inout_ PDOKAN_FILE_INFO DokanFileInfo)
+{
+    UNREFERENCED_PARAMETER(FileName);
+
+    std::uint32_t FileId = static_cast<std::uint32_t>(
+        DokanFileInfo->Context);
+    if (MILE_CIRNO_NOFID == FileId)
+    {
+        return STATUS_INVALID_HANDLE;
+    }
+
+    try
+    {
+        Mile::Cirno::ReadDirRequest Request;
+        Request.FileId = FileId;
+        Request.Offset = 0;
+        Request.Count = g_MaximumMessageSize;
+        Request.Count -= Mile::Cirno::ReadDirResponseHeaderSize;
+        Mile::Cirno::ReadDirResponse Response =
+            g_Instance->ReadDir(Request);
+        if (Response.Data.size() > 2)
+        {
+            return STATUS_DIRECTORY_NOT_EMPTY;
+        }
+    }
+    catch (...)
+    {
+        return ::GetNtStatusAndLogToConsole("DeleteDirectory");
+    }
+
+    return STATUS_SUCCESS;
+}
+
 NTSTATUS DOKAN_CALLBACK MileCirnoGetDiskFreeSpace(
     _Out_opt_ PULONGLONG FreeBytesAvailable,
     _Out_opt_ PULONGLONG TotalNumberOfBytes,
@@ -810,7 +883,7 @@ int main()
 
     DOKAN_OPERATIONS Operations = { 0 };
     Operations.ZwCreateFile = ::MileCirnoZwCreateFile;
-    Operations.Cleanup;
+    Operations.Cleanup = ::MileCirnoCleanup;
     Operations.CloseFile = ::MileCirnoCloseFile;
     Operations.ReadFile = ::MileCirnoReadFile;
     Operations.WriteFile;
@@ -820,8 +893,8 @@ int main()
     Operations.FindFilesWithPattern = nullptr;
     Operations.SetFileAttributesW;
     Operations.SetFileTime;
-    Operations.DeleteFileW;
-    Operations.DeleteDirectory;
+    Operations.DeleteFileW = ::MileCirnoDeleteFile;
+    Operations.DeleteDirectory = ::MileCirnoDeleteDirectory;
     Operations.MoveFileW;
     Operations.SetEndOfFile;
     Operations.SetAllocationSize;
