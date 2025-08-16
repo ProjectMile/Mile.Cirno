@@ -163,18 +163,34 @@ NTSTATUS GetNtStatusAndLogToConsole(
 // There are 11644473600 seconds between these two epochs.
 const std::uint64_t SecondsBetweenWin32TimeAndUnixTime = 11644473600ULL;
 
+// Win32 time is in 100-nanosecond intervals.
+const std::uint64_t Win32TimeFrequency = 1000 * 1000 * 10;
+
 FILETIME ToFileTime(
     std::uint64_t UnixTimeSeconds,
     std::uint64_t UnixTimeNanoseconds)
 {
     std::uint64_t RawResult = UnixTimeSeconds;
     RawResult += SecondsBetweenWin32TimeAndUnixTime;
-    RawResult *= 1000 * 1000 * 10;
+    RawResult *= Win32TimeFrequency;
     RawResult += UnixTimeNanoseconds / 100;
     FILETIME Result;
     Result.dwLowDateTime = static_cast<DWORD>(RawResult);
     Result.dwHighDateTime = static_cast<DWORD>(RawResult >> 32);
     return Result;
+}
+
+void FromFileTime(
+    FILETIME const& FileTime,
+    std::uint64_t& UnixTimeSeconds,
+    std::uint64_t& UnixTimeNanoseconds)
+{
+    ULARGE_INTEGER RawValue;
+    RawValue.LowPart = FileTime.dwLowDateTime;
+    RawValue.HighPart = FileTime.dwHighDateTime;
+    UnixTimeSeconds = RawValue.QuadPart / Win32TimeFrequency;
+    UnixTimeSeconds -= SecondsBetweenWin32TimeAndUnixTime;
+    UnixTimeNanoseconds = (RawValue.QuadPart % Win32TimeFrequency) * 100;
 }
 
 namespace
@@ -882,11 +898,11 @@ int main()
     Options.VolumeSecurityDescriptor;
 
     DOKAN_OPERATIONS Operations = { 0 };
-    Operations.ZwCreateFile = ::MileCirnoZwCreateFile;
+    Operations.ZwCreateFile = ::MileCirnoZwCreateFile; //
     Operations.Cleanup = ::MileCirnoCleanup;
     Operations.CloseFile = ::MileCirnoCloseFile;
     Operations.ReadFile = ::MileCirnoReadFile;
-    Operations.WriteFile;
+    Operations.WriteFile; //
     Operations.FlushFileBuffers;
     Operations.GetFileInformation = ::MileCirnoGetFileInformation;
     Operations.FindFiles = ::MileCirnoFindFiles;
@@ -895,8 +911,8 @@ int main()
     Operations.SetFileTime;
     Operations.DeleteFileW = ::MileCirnoDeleteFile;
     Operations.DeleteDirectory = ::MileCirnoDeleteDirectory;
-    Operations.MoveFileW;
-    Operations.SetEndOfFile;
+    Operations.MoveFileW; //
+    Operations.SetEndOfFile; //
     Operations.SetAllocationSize;
     Operations.LockFile;
     Operations.UnlockFile;
