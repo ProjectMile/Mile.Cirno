@@ -59,7 +59,9 @@ typedef enum _MILE_CIRNO_MESSAGE_TYPE
     //     length[8] name[String][1] uid[String][1] gid[String][1]
     //     muid[String][1] extension[String][1] n_uid[4] n_gid[4] n_muid[4]
     // %Name%<WindowsDirectoryEntry>[%Length%]
-    //   entry<DirectoryEntry>[1] stat<Stat>[1]
+    //   entry<DirectoryEntry>[1] mode[4] uid[4] gid[4] nlink[8] rdev[8] size[8]
+    //   blksize[8] blocks[8] atime_sec[8] atime_nsec[8] mtime_sec[8]
+    //   mtime_nsec[8] ctime_sec[8] ctime_nsec[8]
 
     /* 9P2000.L */
 
@@ -553,8 +555,24 @@ namespace Mile
 
         struct WindowsDirectoryEntry
         {
-            DirectoryEntry Entry;
-            Stat Stat;
+            Qid UniqueId; // qid
+            std::uint64_t Offset;
+            std::uint8_t Type;
+            std::string Name;
+            std::uint32_t Mode;
+            std::uint32_t OwnerUserId; // uid
+            std::uint32_t GroupId; // gid
+            std::uint64_t NumberOfHardLinks; // nlink
+            std::uint64_t DeviceId; // rdev
+            std::uint64_t FileSize; // size
+            std::uint64_t BlockSize; // blksize
+            std::uint64_t AllocatedBlocks; // blocks
+            std::uint64_t LastAccessTimeSeconds; // atime_sec
+            std::uint64_t LastAccessTimeNanoseconds; // atime_nsec
+            std::uint64_t LastWriteTimeSeconds; // mtime_sec
+            std::uint64_t LastWriteTimeNanoseconds; // mtime_nsec
+            std::uint64_t ChangeTimeSeconds; // ctime_sec
+            std::uint64_t ChangeTimeNanoseconds; // ctime_nsec
         };
 
         struct LinuxErrorResponse
@@ -974,8 +992,6 @@ namespace Mile
 
         // WriteStatResponse
 
-        // AccessRequest
-
         struct AccessRequest
         {
             std::uint32_t FileId; // fid
@@ -984,8 +1000,6 @@ namespace Mile
 
         // AccessResponse
 
-        // WindowsReadDirRequest
-
         struct WindowsReadDirRequest
         {
             std::uint32_t FileId; // fid
@@ -993,14 +1007,10 @@ namespace Mile
             std::uint32_t Count;
         };
 
-        // WindowsReadDirResponse
-
         struct WindowsReadDirResponse
         {
             std::vector<WindowsDirectoryEntry> Data; // count, data
         };
-
-        // WindowsOpenRequest
 
         struct WindowsOpenRequest
         {
@@ -1013,8 +1023,6 @@ namespace Mile
             std::uint64_t AttributesMask; // attr_mask
             std::vector<std::string> Names; // wname, nwname
         };
-
-        // WindowsOpenResponse
 
         struct WindowsOpenResponse
         {

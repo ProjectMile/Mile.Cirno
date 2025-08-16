@@ -255,8 +255,24 @@ Mile::Cirno::WindowsDirectoryEntry Mile::Cirno::PopWindowsDirectoryEntry(
     std::span<std::uint8_t>& Buffer)
 {
     Mile::Cirno::WindowsDirectoryEntry Result;
-    Result.Entry = Mile::Cirno::PopDirectoryEntry(Buffer);
-    Result.Stat = Mile::Cirno::PopStat(Buffer);
+    Result.UniqueId = Mile::Cirno::PopQid(Buffer);
+    Result.Offset = Mile::Cirno::PopUInt64(Buffer);
+    Result.Type = Mile::Cirno::PopUInt8(Buffer);
+    Result.Name = Mile::Cirno::PopString(Buffer);
+    Result.Mode = Mile::Cirno::PopUInt32(Buffer);
+    Result.OwnerUserId = Mile::Cirno::PopUInt32(Buffer);
+    Result.GroupId = Mile::Cirno::PopUInt32(Buffer);
+    Result.NumberOfHardLinks = Mile::Cirno::PopUInt64(Buffer);
+    Result.DeviceId = Mile::Cirno::PopUInt64(Buffer);
+    Result.FileSize = Mile::Cirno::PopUInt64(Buffer);
+    Result.BlockSize = Mile::Cirno::PopUInt64(Buffer);
+    Result.AllocatedBlocks = Mile::Cirno::PopUInt64(Buffer);
+    Result.LastAccessTimeSeconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.LastAccessTimeNanoseconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.LastWriteTimeSeconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.LastWriteTimeNanoseconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.ChangeTimeSeconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.ChangeTimeNanoseconds = Mile::Cirno::PopUInt64(Buffer);
     return Result;
 }
 
@@ -264,8 +280,24 @@ void Mile::Cirno::PushWindowsDirectoryEntry(
     std::vector<std::uint8_t>& Buffer,
     Mile::Cirno::WindowsDirectoryEntry const& Value)
 {
-    Mile::Cirno::PushDirectoryEntry(Buffer, Value.Entry);
-    Mile::Cirno::PushStat(Buffer, Value.Stat);
+    Mile::Cirno::PushQid(Buffer, Value.UniqueId);
+    Mile::Cirno::PushUInt64(Buffer, Value.Offset);
+    Mile::Cirno::PushUInt8(Buffer, Value.Type);
+    Mile::Cirno::PushString(Buffer, Value.Name);
+    Mile::Cirno::PushUInt32(Buffer, Value.Mode);
+    Mile::Cirno::PushUInt32(Buffer, Value.OwnerUserId);
+    Mile::Cirno::PushUInt32(Buffer, Value.GroupId);
+    Mile::Cirno::PushUInt64(Buffer, Value.NumberOfHardLinks);
+    Mile::Cirno::PushUInt64(Buffer, Value.DeviceId);
+    Mile::Cirno::PushUInt64(Buffer, Value.FileSize);
+    Mile::Cirno::PushUInt64(Buffer, Value.BlockSize);
+    Mile::Cirno::PushUInt64(Buffer, Value.AllocatedBlocks);
+    Mile::Cirno::PushUInt64(Buffer, Value.LastAccessTimeSeconds);
+    Mile::Cirno::PushUInt64(Buffer, Value.LastAccessTimeNanoseconds);
+    Mile::Cirno::PushUInt64(Buffer, Value.LastWriteTimeSeconds);
+    Mile::Cirno::PushUInt64(Buffer, Value.LastWriteTimeNanoseconds);
+    Mile::Cirno::PushUInt64(Buffer, Value.ChangeTimeSeconds);
+    Mile::Cirno::PushUInt64(Buffer, Value.ChangeTimeNanoseconds);
 }
 
 Mile::Cirno::LinuxErrorResponse Mile::Cirno::PopLinuxErrorResponse(
