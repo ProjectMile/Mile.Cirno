@@ -292,6 +292,24 @@ namespace Mile::Cirno
     void PushWriteStatRequest(
         std::vector<std::uint8_t>& Buffer,
         WriteStatRequest const& Value);
+
+    void PushAccessRequest(
+        std::vector<std::uint8_t>& Buffer,
+        AccessRequest const& Value);
+
+    void PushWindowsReadDirRequest(
+        std::vector<std::uint8_t>& Buffer,
+        WindowsReadDirRequest const& Value);
+
+    WindowsReadDirResponse PopWindowsReadDirResponse(
+        std::span<std::uint8_t>& Buffer);
+
+    void PushWindowsOpenRequest(
+        std::vector<std::uint8_t>& Buffer,
+        WindowsOpenRequest const& Value);
+
+    WindowsOpenResponse PopWindowsOpenResponse(
+        std::span<std::uint8_t>& Buffer);
 }
 
 #endif // !MILE_CIRNO_PROTOCOL_PARSER

@@ -857,3 +857,82 @@ void Mile::Cirno::PushWriteStatRequest(
     }
 }
 
+void Mile::Cirno::PushAccessRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::AccessRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushUInt32(Buffer, Value.Flags);
+}
+
+void Mile::Cirno::PushWindowsReadDirRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::WindowsReadDirRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushUInt64(Buffer, Value.Offset);
+    Mile::Cirno::PushUInt32(Buffer, Value.Count);
+}
+
+Mile::Cirno::WindowsReadDirResponse Mile::Cirno::PopWindowsReadDirResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::WindowsReadDirResponse Result;
+    // Discard the unused Length field.
+    Mile::Cirno::PopUInt32(Buffer);
+    while (!Buffer.empty())
+    {
+        Result.Data.push_back(Mile::Cirno::PopWindowsDirectoryEntry(Buffer));
+    }
+    return Result;
+}
+
+void Mile::Cirno::PushWindowsOpenRequest(
+    std::vector<std::uint8_t>& Buffer,
+    Mile::Cirno::WindowsOpenRequest const& Value)
+{
+    Mile::Cirno::PushUInt32(Buffer, Value.FileId);
+    Mile::Cirno::PushUInt32(Buffer, Value.NewFileId);
+    Mile::Cirno::PushUInt32(Buffer, Value.Flags);
+    Mile::Cirno::PushUInt32(Buffer, Value.WindowsFlags);
+    Mile::Cirno::PushUInt32(Buffer, Value.Mode);
+    Mile::Cirno::PushUInt32(Buffer, Value.GroupId);
+    Mile::Cirno::PushUInt64(Buffer, Value.AttributesMask);
+    Mile::Cirno::PushUInt16(
+        Buffer,
+        static_cast<std::uint16_t>(Value.Names.size()));
+    for (auto const& Name : Value.Names)
+    {
+        Mile::Cirno::PushString(Buffer, Name);
+    }
+}
+
+Mile::Cirno::WindowsOpenResponse Mile::Cirno::PopWindowsOpenResponse(
+    std::span<std::uint8_t>& Buffer)
+{
+    Mile::Cirno::WindowsOpenResponse Result;
+    Result.Status = Mile::Cirno::PopUInt8(Buffer);
+    Result.Walked = Mile::Cirno::PopUInt16(Buffer);
+    Result.UniqueId = Mile::Cirno::PopQid(Buffer);
+    Result.SymboliclinkTarget = Mile::Cirno::PopString(Buffer);
+    Result.IoUnit = Mile::Cirno::PopUInt32(Buffer);
+    Result.Mode = Mile::Cirno::PopUInt32(Buffer);
+    Result.OwnerUserId = Mile::Cirno::PopUInt32(Buffer);
+    Result.GroupId = Mile::Cirno::PopUInt32(Buffer);
+    Result.NumberOfHardLinks = Mile::Cirno::PopUInt64(Buffer);
+    Result.DeviceId = Mile::Cirno::PopUInt64(Buffer);
+    Result.FileSize = Mile::Cirno::PopUInt64(Buffer);
+    Result.BlockSize = Mile::Cirno::PopUInt64(Buffer);
+    Result.AllocatedBlocks = Mile::Cirno::PopUInt64(Buffer);
+    Result.LastAccessTimeSeconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.LastAccessTimeNanoseconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.LastWriteTimeSeconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.LastWriteTimeNanoseconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.ChangeTimeSeconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.ChangeTimeNanoseconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.BirthTimeSeconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.BirthTimeNanoseconds = Mile::Cirno::PopUInt64(Buffer);
+    Result.Generation = Mile::Cirno::PopUInt64(Buffer);
+    Result.DataVersion = Mile::Cirno::PopUInt64(Buffer);
+    return Result;
+}
