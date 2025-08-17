@@ -356,7 +356,7 @@ void Mile::Cirno::PushLinuxCreateRequest(
     Mile::Cirno::PushString(Buffer, Value.Name);
     Mile::Cirno::PushUInt32(Buffer, Value.Flags);
     Mile::Cirno::PushUInt32(Buffer, Value.Mode);
-    Mile::Cirno::PushUInt32(Buffer, Value.Gid);
+    Mile::Cirno::PushUInt32(Buffer, Value.GroupId);
 }
 
 Mile::Cirno::LinuxCreateResponse Mile::Cirno::PopLinuxCreateResponse(
@@ -375,7 +375,7 @@ void Mile::Cirno::PushMakeSymbolicLinkRequest(
     Mile::Cirno::PushUInt32(Buffer, Value.FileId);
     Mile::Cirno::PushString(Buffer, Value.Name);
     Mile::Cirno::PushString(Buffer, Value.Target);
-    Mile::Cirno::PushUInt32(Buffer, Value.Gid);
+    Mile::Cirno::PushUInt32(Buffer, Value.GroupId);
 }
 
 Mile::Cirno::MakeSymbolicLinkResponse Mile::Cirno::PopMakeSymbolicLinkResponse(
@@ -395,7 +395,7 @@ void Mile::Cirno::PushMakeDeviceNodeRequest(
     Mile::Cirno::PushUInt32(Buffer, Value.Mode);
     Mile::Cirno::PushUInt32(Buffer, Value.Major);
     Mile::Cirno::PushUInt32(Buffer, Value.Minor);
-    Mile::Cirno::PushUInt32(Buffer, Value.Gid);
+    Mile::Cirno::PushUInt32(Buffer, Value.GroupId);
 }
 
 Mile::Cirno::MakeDeviceNodeResponse Mile::Cirno::PopMakeDeviceNodeResponse(
@@ -598,7 +598,7 @@ void Mile::Cirno::PushMakeDirectoryRequest(
     Mile::Cirno::PushUInt32(Buffer, Value.DirectoryFileId);
     Mile::Cirno::PushString(Buffer, Value.Name);
     Mile::Cirno::PushUInt32(Buffer, Value.Mode);
-    Mile::Cirno::PushUInt32(Buffer, Value.Gid);
+    Mile::Cirno::PushUInt32(Buffer, Value.GroupId);
 }
 
 Mile::Cirno::MakeDirectoryResponse Mile::Cirno::PopMakeDirectoryResponse(
