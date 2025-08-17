@@ -156,16 +156,16 @@ namespace Mile::Cirno
         std::vector<std::uint8_t>& Buffer,
         SetAttributesRequest const& Value);
 
-    void PushExtendedAttributesWalkRequest(
+    void PushWalkExtendedAttributesRequest(
         std::vector<std::uint8_t>& Buffer,
-        ExtendedAttributesWalkRequest const& Value);
+        WalkExtendedAttributesRequest const& Value);
 
-    ExtendedAttributesWalkResponse PopExtendedAttributesWalkResponse(
+    WalkExtendedAttributesResponse PopWalkExtendedAttributesResponse(
         std::span<std::uint8_t>& Buffer);
 
-    void PushExtendedAttributesCreateRequest(
+    void PushCreateExtendedAttributesRequest(
         std::vector<std::uint8_t>& Buffer,
-        ExtendedAttributesCreateRequest const& Value);
+        CreateExtendedAttributesRequest const& Value);
 
     void PushReadDirectoryRequest(
         std::vector<std::uint8_t>& Buffer,

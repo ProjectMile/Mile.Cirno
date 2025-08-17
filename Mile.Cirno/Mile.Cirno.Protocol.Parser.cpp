@@ -481,26 +481,26 @@ void Mile::Cirno::PushSetAttributesRequest(
     Mile::Cirno::PushUInt64(Buffer, Value.LastWriteTimeNanoseconds);
 }
 
-void Mile::Cirno::PushExtendedAttributesWalkRequest(
+void Mile::Cirno::PushWalkExtendedAttributesRequest(
     std::vector<std::uint8_t>& Buffer,
-    Mile::Cirno::ExtendedAttributesWalkRequest const& Value)
+    Mile::Cirno::WalkExtendedAttributesRequest const& Value)
 {
     Mile::Cirno::PushUInt32(Buffer, Value.FileId);
     Mile::Cirno::PushUInt32(Buffer, Value.NewFileId);
     Mile::Cirno::PushString(Buffer, Value.Name);
 }
 
-Mile::Cirno::ExtendedAttributesWalkResponse Mile::Cirno::PopExtendedAttributesWalkResponse(
+Mile::Cirno::WalkExtendedAttributesResponse Mile::Cirno::PopWalkExtendedAttributesResponse(
     std::span<std::uint8_t>& Buffer)
 {
-    Mile::Cirno::ExtendedAttributesWalkResponse Result;
+    Mile::Cirno::WalkExtendedAttributesResponse Result;
     Result.Size = PopUInt64(Buffer);
     return Result;
 }
 
-void Mile::Cirno::PushExtendedAttributesCreateRequest(
+void Mile::Cirno::PushCreateExtendedAttributesRequest(
     std::vector<std::uint8_t>& Buffer,
-    Mile::Cirno::ExtendedAttributesCreateRequest const& Value)
+    Mile::Cirno::CreateExtendedAttributesRequest const& Value)
 {
     Mile::Cirno::PushUInt32(Buffer, Value.FileId);
     Mile::Cirno::PushString(Buffer, Value.Name);

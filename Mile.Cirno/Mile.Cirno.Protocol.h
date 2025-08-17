@@ -112,13 +112,13 @@ typedef enum _MILE_CIRNO_MESSAGE_TYPE
     // header<Header>[1]
     MileCirnoSetAttributesResponseMessage,
     // header<Header>[1] fid[4] newfid[4] name<String>[1]
-    MileCirnoExtendedAttributesWalkRequestMessage = 30,
+    MileCirnoWalkExtendedAttributesRequestMessage = 30,
     // header<Header>[1] size[8]
-    MileCirnoExtendedAttributesWalkResponseMessage,
+    MileCirnoWalkExtendedAttributesResponseMessage,
     // header<Header>[1] fid[4] name<String>[1] attr_size[8] flags[4]
-    MileCirnoExtendedAttributesCreateRequestMessage = 32,
+    MileCirnoCreateExtendedAttributesRequestMessage = 32,
     // header<Header>[1]
-    MileCirnoExtendedAttributesCreateResponseMessage,
+    MileCirnoCreateExtendedAttributesResponseMessage,
     // header<Header>[1] fid[4] offset[8] count[4]
     MileCirnoReadDirectoryRequestMessage = 40,
     // header<Header>[1] count[4] data<DirectoryEntry>[count]
@@ -721,19 +721,19 @@ namespace Mile
 
         // SetAttributesResponse
 
-        struct ExtendedAttributesWalkRequest
+        struct WalkExtendedAttributesRequest
         {
             std::uint32_t FileId; // fid
             std::uint32_t NewFileId; // newfid
             std::string Name;
         };
 
-        struct ExtendedAttributesWalkResponse
+        struct WalkExtendedAttributesResponse
         {
             std::uint64_t Size;
         };
 
-        struct ExtendedAttributesCreateRequest
+        struct CreateExtendedAttributesRequest
         {
             std::uint32_t FileId; // fid
             std::string Name;
@@ -741,7 +741,7 @@ namespace Mile
             std::uint32_t Flags;
         };
 
-        // ExtendedAttributesCreateResponse
+        // CreateExtendedAttributesResponse
 
         struct ReadDirectoryRequest
         {
