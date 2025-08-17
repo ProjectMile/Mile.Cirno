@@ -103,6 +103,9 @@ namespace Mile::Cirno
         void RenameAt(
             RenameAtRequest const& Request);
 
+        WriteResponse Write(
+            WriteRequest const& Request);
+
     private:
 
         void Initialize();

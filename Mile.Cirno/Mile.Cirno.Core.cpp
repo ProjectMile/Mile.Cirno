@@ -529,6 +529,24 @@ void Mile::Cirno::Client::RenameAt(
         ResponseBuffer);
 }
 
+Mile::Cirno::WriteResponse Mile::Cirno::Client::Write(
+    Mile::Cirno::WriteRequest const& Request)
+{
+    std::vector<std::uint8_t> RequestBuffer;
+    Mile::Cirno::PushWriteRequest(
+        RequestBuffer,
+        Request);
+    std::vector<std::uint8_t> ResponseBuffer;
+    this->Request(
+        MileCirnoWriteRequestMessage,
+        RequestBuffer,
+        MileCirnoWriteResponseMessage,
+        ResponseBuffer);
+    std::span<std::uint8_t> ResponseSpan =
+        std::span<std::uint8_t>(ResponseBuffer);
+    return Mile::Cirno::PopWriteResponse(ResponseSpan);
+}
+
 void Mile::Cirno::Client::Initialize()
 {
     this->m_ReceiveWorkerThread = Mile::CreateThread([this]()
