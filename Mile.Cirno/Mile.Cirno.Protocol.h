@@ -327,8 +327,8 @@ typedef enum _MILE_CIRNO_PERMISSION_MODE
     MileCirnoPermissionModeDevice = 0x00800000,
     MileCirnoPermissionModeNamedPipe = 0x00200000,
     MileCirnoPermissionModeSocket = 0x00100000,
-    MileCirnoPermissionModeSetUid = 0x00080000,
-    MileCirnoPermissionModeSetGid = 0x00040000,
+    MileCirnoPermissionModeSetOwnerUserId = 0x00080000,
+    MileCirnoPermissionModeSetGroupId = 0x00040000,
 } MILE_CIRNO_PERMISSION_MODE, *PMILE_CIRNO_PERMISSION_MODE;
 
 /**
@@ -619,7 +619,7 @@ namespace Mile
             std::string Name;
             std::uint32_t Flags; // MILE_CIRNO_LINUX_OPEN_CREATE_FLAGS
             std::uint32_t Mode;
-            std::uint32_t Gid;
+            std::uint32_t GroupId; // gid
         };
 
         struct LinuxCreateResponse
@@ -633,7 +633,7 @@ namespace Mile
             std::uint32_t FileId; // fid
             std::string Name;
             std::string Target;
-            std::uint32_t Gid;
+            std::uint32_t GroupId; // gid
         };
 
         struct MakeSymbolicLinkResponse
@@ -648,7 +648,7 @@ namespace Mile
             std::uint32_t Mode;
             std::uint32_t Major;
             std::uint32_t Minor;
-            std::uint32_t Gid;
+            std::uint32_t GroupId; // gid
         };
 
         struct MakeDeviceNodeResponse
@@ -815,7 +815,7 @@ namespace Mile
             std::uint32_t DirectoryFileId; // dfid
             std::string Name;
             std::uint32_t Mode;
-            std::uint32_t Gid;
+            std::uint32_t GroupId; // gid
         };
 
         struct MakeDirectoryResponse
