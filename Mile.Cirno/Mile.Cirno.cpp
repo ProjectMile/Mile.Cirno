@@ -298,8 +298,14 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
     }
     switch (ConvertedCreationDisposition)
     {
-    case CREATE_NEW: // fallthrough
+    case CREATE_NEW:
+        MaybeRequestLinuxCreate = true;
+        if (DokanFileInfo->IsDirectory)
+        {
+            MaybeRequestCreateDirectory = true;
+        }
         Flags |= MileCirnoLinuxOpenCreateFlagCreateOnlyWhenNotExist;
+        break;
     case CREATE_ALWAYS: // fallthrough
     case OPEN_ALWAYS:
         MaybeRequestLinuxCreate = true;
@@ -323,15 +329,27 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
         break;
     }
 
+    std::uint32_t RootDirectoryFileId = MILE_CIRNO_NOFID;
+    auto RootDirectoryFileIdCleanupHandler = Mile::ScopeExitTaskHandler([&]()
+    {
+        try
+        {
+            if (MILE_CIRNO_NOFID != RootDirectoryFileId)
+            {
+                ::SimpleClunk(RootDirectoryFileId);
+            }
+        }
+        catch (...)
+        {
+            ::GetNtStatusAndLogToConsole("ZwCreateFile");
+        }
+    });
+
     try
     {
         std::filesystem::path FilePath(&FileName[1]);
-        if (FilePath.empty() || FilePath.is_absolute())
-        {
-            return STATUS_OBJECT_NAME_NOT_FOUND;
-        }
 
-        std::uint32_t RootDirectoryFileId = ::SimpleWalk(
+        RootDirectoryFileId = ::SimpleWalk(
             g_RootDirectoryFileId,
             FilePath.parent_path());
 
@@ -368,6 +386,10 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
                 g_Instance->MakeDirectory(Request);
                 FileId = ::SimpleWalk(RootDirectoryFileId, FilePath.filename());
                 DokanFileInfo->Context = FileId;
+                std::printf(
+                    "[Mile.Cirno] Directory %s created with FileId = %u\n",
+                    FilePath.string().c_str(),
+                    FileId);
                 return STATUS_SUCCESS;
             }
 
@@ -379,8 +401,14 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
                 Request.Flags = Flags;
                 Request.Mode = FileMode;
                 Request.GroupId = RootDirectoryGroupId;
-                FileId = ::SimpleWalk(RootDirectoryFileId, FilePath.filename());
+                g_Instance->LinuxCreate(Request);
+                // Must be the full path to walk.
+                FileId = ::SimpleWalk(g_RootDirectoryFileId, FilePath);
                 DokanFileInfo->Context = FileId;
+                std::printf(
+                    "[Mile.Cirno] File %s created with FileId = %u\n",
+                    FilePath.string().c_str(),
+                    FileId);
                 return STATUS_SUCCESS;
             }
 
@@ -403,7 +431,16 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
         Mile::Cirno::LinuxOpenRequest Request;
         Request.FileId = FileId;
         Request.Flags = Flags;
-        g_Instance->LinuxOpen(Request);
+        try
+        {
+            g_Instance->LinuxOpen(Request);
+        }
+        catch (...)
+        {
+            Request.Flags &= ~MileCirnoLinuxOpenCreateFlagReadWrite;
+            Request.Flags &= ~MileCirnoLinuxOpenCreateFlagWriteOnly;
+            g_Instance->LinuxOpen(Request);
+        }
         DokanFileInfo->Context = FileId;
     }
     catch (...)
@@ -1251,7 +1288,6 @@ int main()
     Options.Version = DOKAN_VERSION;
     Options.SingleThread;
     Options.Options =
-        DOKAN_OPTION_WRITE_PROTECT |
         DOKAN_OPTION_MOUNT_MANAGER |
         DOKAN_OPTION_CASE_SENSITIVE;
     Options.GlobalContext;
@@ -1264,7 +1300,7 @@ int main()
     Options.VolumeSecurityDescriptor;
 
     DOKAN_OPERATIONS Operations = {};
-    Operations.ZwCreateFile = ::MileCirnoZwCreateFile; //
+    Operations.ZwCreateFile = ::MileCirnoZwCreateFile;
     Operations.Cleanup = ::MileCirnoCleanup;
     Operations.CloseFile = ::MileCirnoCloseFile;
     Operations.ReadFile = ::MileCirnoReadFile;
