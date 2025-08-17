@@ -514,6 +514,21 @@ void Mile::Cirno::Client::Fsync(
         ResponseBuffer);
 }
 
+void Mile::Cirno::Client::RenameAt(
+    Mile::Cirno::RenameAtRequest const& Request)
+{
+    std::vector<std::uint8_t> RequestBuffer;
+    Mile::Cirno::PushRenameAtRequest(
+        RequestBuffer,
+        Request);
+    std::vector<std::uint8_t> ResponseBuffer;
+    this->Request(
+        MileCirnoRenameAtRequestMessage,
+        RequestBuffer,
+        MileCirnoRenameAtResponseMessage,
+        ResponseBuffer);
+}
+
 void Mile::Cirno::Client::Initialize()
 {
     this->m_ReceiveWorkerThread = Mile::CreateThread([this]()

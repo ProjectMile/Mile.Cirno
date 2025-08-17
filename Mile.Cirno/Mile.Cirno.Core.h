@@ -100,6 +100,9 @@ namespace Mile::Cirno
         void Fsync(
             FsyncRequest const& Request);
 
+        void RenameAt(
+            RenameAtRequest const& Request);
+
     private:
 
         void Initialize();
