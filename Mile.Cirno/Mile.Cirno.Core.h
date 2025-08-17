@@ -109,6 +109,9 @@ namespace Mile::Cirno
         MkDirResponse MkDir(
             MkDirRequest const& Request);
 
+        LinuxCreateResponse LinuxCreate(
+            LinuxCreateRequest const& Request);
+
     private:
 
         void Initialize();
