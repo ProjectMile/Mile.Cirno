@@ -434,6 +434,33 @@ NTSTATUS DOKAN_CALLBACK MileCirnoReadFile(
     return STATUS_SUCCESS;
 }
 
+NTSTATUS DOKAN_CALLBACK MileCirnoFlushFileBuffers(
+    _In_ LPCWSTR FileName,
+    _Inout_ PDOKAN_FILE_INFO DokanFileInfo)
+{
+    UNREFERENCED_PARAMETER(FileName);
+
+    std::uint32_t FileId = static_cast<std::uint32_t>(
+        DokanFileInfo->Context);
+    if (MILE_CIRNO_NOFID == FileId)
+    {
+        return STATUS_INVALID_HANDLE;
+    }
+
+    try
+    {
+        Mile::Cirno::FsyncRequest Request = {};
+        Request.FileId = FileId;
+        g_Instance->Fsync(Request);
+    }
+    catch (...)
+    {
+        return ::GetNtStatusAndLogToConsole("FlushFileBuffers");
+    }
+
+    return STATUS_SUCCESS;
+}
+
 NTSTATUS DOKAN_CALLBACK MileCirnoGetFileInformation(
     _In_ LPCWSTR FileName,
     _Out_ LPBY_HANDLE_FILE_INFORMATION Buffer,
@@ -1027,7 +1054,7 @@ int main()
     Operations.CloseFile = ::MileCirnoCloseFile;
     Operations.ReadFile = ::MileCirnoReadFile;
     Operations.WriteFile; //
-    Operations.FlushFileBuffers;
+    Operations.FlushFileBuffers = ::MileCirnoFlushFileBuffers;
     Operations.GetFileInformation = ::MileCirnoGetFileInformation;
     Operations.FindFiles = ::MileCirnoFindFiles;
     Operations.FindFilesWithPattern = nullptr;
