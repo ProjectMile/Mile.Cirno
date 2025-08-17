@@ -82,12 +82,12 @@ namespace Mile::Cirno
         std::vector<std::uint8_t>& Buffer,
         DirectoryEntry const& Value);
 
-    Stat PopStat(
+    Status PopStatus(
         std::span<std::uint8_t>& Buffer);
 
-    void PushStat(
+    void PushStatus(
         std::vector<std::uint8_t>& Buffer,
-        Stat const& Value);
+        Status const& Value);
 
     WindowsDirectoryEntry PopWindowsDirectoryEntry(
         std::span<std::uint8_t>& Buffer);
@@ -99,11 +99,11 @@ namespace Mile::Cirno
     LinuxErrorResponse PopLinuxErrorResponse(
         std::span<std::uint8_t>& Buffer);
 
-    void PushStatFsRequest(
+    void PushFileSystemStatusRequest(
         std::vector<std::uint8_t>& Buffer,
-        StatFsRequest const& Value);
+        FileSystemStatusRequest const& Value);
 
-    StatFsResponse PopStatFsResponse(
+    FileSystemStatusResponse PopFileSystemStatusResponse(
         std::span<std::uint8_t>& Buffer);
 
     void PushLinuxOpenRequest(
@@ -120,18 +120,18 @@ namespace Mile::Cirno
     LinuxCreateResponse PopLinuxCreateResponse(
         std::span<std::uint8_t>& Buffer);
 
-    void PushSymLinkRequest(
+    void PushMakeSymbolicLinkRequest(
         std::vector<std::uint8_t>& Buffer,
-        SymLinkRequest const& Value);
+        MakeSymbolicLinkRequest const& Value);
 
-    SymLinkResponse PopSymLinkResponse(
+    MakeSymbolicLinkResponse PopMakeSymbolicLinkResponse(
         std::span<std::uint8_t>& Buffer);
 
-    void PushMkNodRequest(
+    void PushMakeDeviceNodeRequest(
         std::vector<std::uint8_t>& Buffer,
-        MkNodRequest const& Value);
+        MakeDeviceNodeRequest const& Value);
 
-    MkNodResponse PopMkNodResponse(
+    MakeDeviceNodeResponse PopMakeDeviceNodeResponse(
         std::span<std::uint8_t>& Buffer);
 
     void PushRenameRequest(
@@ -145,38 +145,38 @@ namespace Mile::Cirno
     ReadLinkResponse PopReadLinkResponse(
         std::span<std::uint8_t>& Buffer);
 
-    void PushGetAttrRequest(
+    void PushGetAttributesRequest(
         std::vector<std::uint8_t>& Buffer,
-        GetAttrRequest const& Value);
+        GetAttributesRequest const& Value);
 
-    GetAttrResponse PopGetAttrResponse(
+    GetAttributesResponse PopGetAttributesResponse(
         std::span<std::uint8_t>& Buffer);
 
-    void PushSetAttrRequest(
+    void PushSetAttributesRequest(
         std::vector<std::uint8_t>& Buffer,
-        SetAttrRequest const& Value);
+        SetAttributesRequest const& Value);
 
-    void PushXattrWalkRequest(
+    void PushExtendedAttributesWalkRequest(
         std::vector<std::uint8_t>& Buffer,
-        XattrWalkRequest const& Value);
+        ExtendedAttributesWalkRequest const& Value);
 
-    XattrWalkResponse PopXattrWalkResponse(
+    ExtendedAttributesWalkResponse PopExtendedAttributesWalkResponse(
         std::span<std::uint8_t>& Buffer);
 
-    void PushXattrCreateRequest(
+    void PushExtendedAttributesCreateRequest(
         std::vector<std::uint8_t>& Buffer,
-        XattrCreateRequest const& Value);
+        ExtendedAttributesCreateRequest const& Value);
 
-    void PushReadDirRequest(
+    void PushReadDirectoryRequest(
         std::vector<std::uint8_t>& Buffer,
-        ReadDirRequest const& Value);
+        ReadDirectoryRequest const& Value);
 
-    ReadDirResponse PopReadDirResponse(
+    ReadDirectoryResponse PopReadDirectoryResponse(
         std::span<std::uint8_t>& Buffer);
 
-    void PushFsyncRequest(
+    void PushFlushFileRequest(
         std::vector<std::uint8_t>& Buffer,
-        FsyncRequest const& Value);
+        FlushFileRequest const& Value);
 
     void PushLockRequest(
         std::vector<std::uint8_t>& Buffer,
@@ -196,11 +196,11 @@ namespace Mile::Cirno
         std::vector<std::uint8_t>& Buffer,
         LinkRequest const& Value);
 
-    void PushMkDirRequest(
+    void PushMakeDirectoryRequest(
         std::vector<std::uint8_t>& Buffer,
-        MkDirRequest const& Value);
+        MakeDirectoryRequest const& Value);
 
-    MkDirResponse PopMkDirResponse(
+    MakeDirectoryResponse PopMakeDirectoryResponse(
         std::span<std::uint8_t>& Buffer);
 
     void PushRenameAtRequest(
@@ -218,11 +218,11 @@ namespace Mile::Cirno
     VersionResponse PopVersionResponse(
         std::span<std::uint8_t>& Buffer);
 
-    void PushAuthRequest(
+    void PushAuthenticationRequest(
         std::vector<std::uint8_t>& Buffer,
-        AuthRequest const& Value);
+        AuthenticationRequest const& Value);
 
-    AuthResponse PopAuthResponse(
+    AuthenticationResponse PopAuthenticationResponse(
         std::span<std::uint8_t>& Buffer);
 
     void PushAttachRequest(
@@ -282,26 +282,26 @@ namespace Mile::Cirno
         std::vector<std::uint8_t>& Buffer,
         RemoveRequest const& Value);
 
-    void PushStatRequest(
+    void PushReadStatusRequest(
         std::vector<std::uint8_t>& Buffer,
-        StatRequest const& Value);
+        ReadStatusRequest const& Value);
 
-    StatResponse PopStatResponse(
+    ReadStatusResponse PopReadStatusResponse(
         std::span<std::uint8_t>& Buffer);
 
-    void PushWriteStatRequest(
+    void PushWriteStatusRequest(
         std::vector<std::uint8_t>& Buffer,
-        WriteStatRequest const& Value);
+        WriteStatusRequest const& Value);
 
     void PushAccessRequest(
         std::vector<std::uint8_t>& Buffer,
         AccessRequest const& Value);
 
-    void PushWindowsReadDirRequest(
+    void PushWindowsReadDirectoryRequest(
         std::vector<std::uint8_t>& Buffer,
-        WindowsReadDirRequest const& Value);
+        WindowsReadDirectoryRequest const& Value);
 
-    WindowsReadDirResponse PopWindowsReadDirResponse(
+    WindowsReadDirectoryResponse PopWindowsReadDirectoryResponse(
         std::span<std::uint8_t>& Buffer);
 
     void PushWindowsOpenRequest(

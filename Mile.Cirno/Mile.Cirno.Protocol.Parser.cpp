@@ -192,13 +192,13 @@ void Mile::Cirno::PushDirectoryEntry(
     Mile::Cirno::PushString(Buffer, Value.Name);
 }
 
-Mile::Cirno::Stat Mile::Cirno::PopStat(
+Mile::Cirno::Status Mile::Cirno::PopStatus(
     std::span<std::uint8_t>& Buffer)
 {
     std::uint16_t Size = Mile::Cirno::PopUInt16(Buffer);
     std::span<std::uint8_t> Content = Mile::Cirno::PopBytes(Content, Size);
 
-    Mile::Cirno::Stat Result;
+    Mile::Cirno::Status Result;
     Result.Type = Mile::Cirno::PopUInt16(Buffer);
     Result.Dev = Mile::Cirno::PopUInt32(Buffer);
     Result.UniqueId = Mile::Cirno::PopQid(Buffer);
@@ -221,9 +221,9 @@ Mile::Cirno::Stat Mile::Cirno::PopStat(
     return Result;
 }
 
-void Mile::Cirno::PushStat(
+void Mile::Cirno::PushStatus(
     std::vector<std::uint8_t>& Buffer,
-    Stat const& Value)
+    Status const& Value)
 {
     std::vector<std::uint8_t> Content;
 
@@ -308,17 +308,17 @@ Mile::Cirno::LinuxErrorResponse Mile::Cirno::PopLinuxErrorResponse(
     return Result;
 }
 
-void Mile::Cirno::PushStatFsRequest(
+void Mile::Cirno::PushFileSystemStatusRequest(
     std::vector<std::uint8_t>& Buffer,
-    Mile::Cirno::StatFsRequest const& Value)
+    Mile::Cirno::FileSystemStatusRequest const& Value)
 {
     Mile::Cirno::PushUInt32(Buffer, Value.FileId);
 }
 
-Mile::Cirno::StatFsResponse Mile::Cirno::PopStatFsResponse(
+Mile::Cirno::FileSystemStatusResponse Mile::Cirno::PopFileSystemStatusResponse(
     std::span<std::uint8_t>& Buffer)
 {
-    Mile::Cirno::StatFsResponse Result;
+    Mile::Cirno::FileSystemStatusResponse Result;
     Result.FileSystemType = Mile::Cirno::PopUInt32(Buffer);
     Result.BlockSize = Mile::Cirno::PopUInt32(Buffer);
     Result.TotalBlocks = Mile::Cirno::PopUInt64(Buffer);
@@ -368,9 +368,9 @@ Mile::Cirno::LinuxCreateResponse Mile::Cirno::PopLinuxCreateResponse(
     return Result;
 }
 
-void Mile::Cirno::PushSymLinkRequest(
+void Mile::Cirno::PushMakeSymbolicLinkRequest(
     std::vector<std::uint8_t>& Buffer,
-    Mile::Cirno::SymLinkRequest const& Value)
+    Mile::Cirno::MakeSymbolicLinkRequest const& Value)
 {
     Mile::Cirno::PushUInt32(Buffer, Value.FileId);
     Mile::Cirno::PushString(Buffer, Value.Name);
@@ -378,17 +378,17 @@ void Mile::Cirno::PushSymLinkRequest(
     Mile::Cirno::PushUInt32(Buffer, Value.Gid);
 }
 
-Mile::Cirno::SymLinkResponse Mile::Cirno::PopSymLinkResponse(
+Mile::Cirno::MakeSymbolicLinkResponse Mile::Cirno::PopMakeSymbolicLinkResponse(
     std::span<std::uint8_t>& Buffer)
 {
-    Mile::Cirno::SymLinkResponse Result;
+    Mile::Cirno::MakeSymbolicLinkResponse Result;
     Result.UniqueId = Mile::Cirno::PopQid(Buffer);
     return Result;
 }
 
-void Mile::Cirno::PushMkNodRequest(
+void Mile::Cirno::PushMakeDeviceNodeRequest(
     std::vector<std::uint8_t>& Buffer,
-    Mile::Cirno::MkNodRequest const& Value)
+    Mile::Cirno::MakeDeviceNodeRequest const& Value)
 {
     Mile::Cirno::PushUInt32(Buffer, Value.DirectoryFileId);
     Mile::Cirno::PushString(Buffer, Value.Name);
@@ -398,10 +398,10 @@ void Mile::Cirno::PushMkNodRequest(
     Mile::Cirno::PushUInt32(Buffer, Value.Gid);
 }
 
-Mile::Cirno::MkNodResponse Mile::Cirno::PopMkNodResponse(
+Mile::Cirno::MakeDeviceNodeResponse Mile::Cirno::PopMakeDeviceNodeResponse(
     std::span<std::uint8_t>& Buffer)
 {
-    Mile::Cirno::MkNodResponse Result;
+    Mile::Cirno::MakeDeviceNodeResponse Result;
     Result.UniqueId = Mile::Cirno::PopQid(Buffer);
     return Result;
 }
@@ -430,18 +430,18 @@ Mile::Cirno::ReadLinkResponse Mile::Cirno::PopReadLinkResponse(
     return Result;
 }
 
-void Mile::Cirno::PushGetAttrRequest(
+void Mile::Cirno::PushGetAttributesRequest(
     std::vector<std::uint8_t>& Buffer,
-    Mile::Cirno::GetAttrRequest const& Value)
+    Mile::Cirno::GetAttributesRequest const& Value)
 {
     Mile::Cirno::PushUInt32(Buffer, Value.FileId);
     Mile::Cirno::PushUInt64(Buffer, Value.RequestMask);
 }
 
-Mile::Cirno::GetAttrResponse Mile::Cirno::PopGetAttrResponse(
+Mile::Cirno::GetAttributesResponse Mile::Cirno::PopGetAttributesResponse(
     std::span<std::uint8_t>& Buffer)
 {
-    Mile::Cirno::GetAttrResponse Result;
+    Mile::Cirno::GetAttributesResponse Result;
     Result.Valid = Mile::Cirno::PopUInt64(Buffer);
     Result.UniqueId = Mile::Cirno::PopQid(Buffer);
     Result.Mode = Mile::Cirno::PopUInt32(Buffer);
@@ -465,9 +465,9 @@ Mile::Cirno::GetAttrResponse Mile::Cirno::PopGetAttrResponse(
     return Result;
 }
 
-void Mile::Cirno::PushSetAttrRequest(
+void Mile::Cirno::PushSetAttributesRequest(
     std::vector<std::uint8_t>& Buffer,
-    Mile::Cirno::SetAttrRequest const& Value)
+    Mile::Cirno::SetAttributesRequest const& Value)
 {
     Mile::Cirno::PushUInt32(Buffer, Value.FileId);
     Mile::Cirno::PushUInt32(Buffer, Value.Valid);
@@ -481,26 +481,26 @@ void Mile::Cirno::PushSetAttrRequest(
     Mile::Cirno::PushUInt64(Buffer, Value.LastWriteTimeNanoseconds);
 }
 
-void Mile::Cirno::PushXattrWalkRequest(
+void Mile::Cirno::PushExtendedAttributesWalkRequest(
     std::vector<std::uint8_t>& Buffer,
-    Mile::Cirno::XattrWalkRequest const& Value)
+    Mile::Cirno::ExtendedAttributesWalkRequest const& Value)
 {
     Mile::Cirno::PushUInt32(Buffer, Value.FileId);
     Mile::Cirno::PushUInt32(Buffer, Value.NewFileId);
     Mile::Cirno::PushString(Buffer, Value.Name);
 }
 
-Mile::Cirno::XattrWalkResponse Mile::Cirno::PopXattrWalkResponse(
+Mile::Cirno::ExtendedAttributesWalkResponse Mile::Cirno::PopExtendedAttributesWalkResponse(
     std::span<std::uint8_t>& Buffer)
 {
-    Mile::Cirno::XattrWalkResponse Result;
+    Mile::Cirno::ExtendedAttributesWalkResponse Result;
     Result.Size = PopUInt64(Buffer);
     return Result;
 }
 
-void Mile::Cirno::PushXattrCreateRequest(
+void Mile::Cirno::PushExtendedAttributesCreateRequest(
     std::vector<std::uint8_t>& Buffer,
-    Mile::Cirno::XattrCreateRequest const& Value)
+    Mile::Cirno::ExtendedAttributesCreateRequest const& Value)
 {
     Mile::Cirno::PushUInt32(Buffer, Value.FileId);
     Mile::Cirno::PushString(Buffer, Value.Name);
@@ -508,19 +508,19 @@ void Mile::Cirno::PushXattrCreateRequest(
     Mile::Cirno::PushUInt32(Buffer, Value.Flags);
 }
 
-void Mile::Cirno::PushReadDirRequest(
+void Mile::Cirno::PushReadDirectoryRequest(
     std::vector<std::uint8_t>& Buffer,
-    Mile::Cirno::ReadDirRequest const& Value)
+    Mile::Cirno::ReadDirectoryRequest const& Value)
 {
     Mile::Cirno::PushUInt32(Buffer, Value.FileId);
     Mile::Cirno::PushUInt64(Buffer, Value.Offset);
     Mile::Cirno::PushUInt32(Buffer, Value.Count);
 }
 
-Mile::Cirno::ReadDirResponse Mile::Cirno::PopReadDirResponse(
+Mile::Cirno::ReadDirectoryResponse Mile::Cirno::PopReadDirectoryResponse(
     std::span<std::uint8_t>& Buffer)
 {
-    Mile::Cirno::ReadDirResponse Result;
+    Mile::Cirno::ReadDirectoryResponse Result;
     // Discard the unused Length field.
     Mile::Cirno::PopUInt32(Buffer);
     while (!Buffer.empty())
@@ -530,9 +530,9 @@ Mile::Cirno::ReadDirResponse Mile::Cirno::PopReadDirResponse(
     return Result;
 }
 
-void Mile::Cirno::PushFsyncRequest(
+void Mile::Cirno::PushFlushFileRequest(
     std::vector<std::uint8_t>& Buffer,
-    Mile::Cirno::FsyncRequest const& Value)
+    Mile::Cirno::FlushFileRequest const& Value)
 {
     Mile::Cirno::PushUInt32(Buffer, Value.FileId);
 }
@@ -591,9 +591,9 @@ void Mile::Cirno::PushLinkRequest(
     Mile::Cirno::PushString(Buffer, Value.Name);
 }
 
-void Mile::Cirno::PushMkDirRequest(
+void Mile::Cirno::PushMakeDirectoryRequest(
     std::vector<std::uint8_t>& Buffer,
-    Mile::Cirno::MkDirRequest const& Value)
+    Mile::Cirno::MakeDirectoryRequest const& Value)
 {
     Mile::Cirno::PushUInt32(Buffer, Value.DirectoryFileId);
     Mile::Cirno::PushString(Buffer, Value.Name);
@@ -601,10 +601,10 @@ void Mile::Cirno::PushMkDirRequest(
     Mile::Cirno::PushUInt32(Buffer, Value.Gid);
 }
 
-Mile::Cirno::MkDirResponse Mile::Cirno::PopMkDirResponse(
+Mile::Cirno::MakeDirectoryResponse Mile::Cirno::PopMakeDirectoryResponse(
     std::span<std::uint8_t>& Buffer)
 {
-    Mile::Cirno::MkDirResponse Result;
+    Mile::Cirno::MakeDirectoryResponse Result;
     Result.UniqueId = Mile::Cirno::PopQid(Buffer);
     return Result;
 }
@@ -645,9 +645,9 @@ Mile::Cirno::VersionResponse Mile::Cirno::PopVersionResponse(
     return Result;
 }
 
-void Mile::Cirno::PushAuthRequest(
+void Mile::Cirno::PushAuthenticationRequest(
     std::vector<std::uint8_t>& Buffer,
-    Mile::Cirno::AuthRequest const& Value)
+    Mile::Cirno::AuthenticationRequest const& Value)
 {
     Mile::Cirno::PushUInt32(Buffer, Value.AuthenticationFileId);
     Mile::Cirno::PushString(Buffer, Value.UserName);
@@ -656,10 +656,10 @@ void Mile::Cirno::PushAuthRequest(
     Mile::Cirno::PushUInt32(Buffer, Value.NumericUserName);
 }
 
-Mile::Cirno::AuthResponse Mile::Cirno::PopAuthResponse(
+Mile::Cirno::AuthenticationResponse Mile::Cirno::PopAuthenticationResponse(
     std::span<std::uint8_t>& Buffer)
 {
-    Mile::Cirno::AuthResponse Result;
+    Mile::Cirno::AuthenticationResponse Result;
     Result.AuthenticationUniqueId = Mile::Cirno::PopQid(Buffer);
     return Result;
 }
@@ -825,35 +825,35 @@ void Mile::Cirno::PushRemoveRequest(
     Mile::Cirno::PushUInt32(Buffer, Value.FileId);
 }
 
-void Mile::Cirno::PushStatRequest(
+void Mile::Cirno::PushReadStatusRequest(
     std::vector<std::uint8_t>& Buffer,
-    Mile::Cirno::StatRequest const& Value)
+    Mile::Cirno::ReadStatusRequest const& Value)
 {
     Mile::Cirno::PushUInt32(Buffer, Value.FileId);
 }
 
-Mile::Cirno::StatResponse Mile::Cirno::PopStatResponse(
+Mile::Cirno::ReadStatusResponse Mile::Cirno::PopReadStatusResponse(
     std::span<std::uint8_t>& Buffer)
 {
-    Mile::Cirno::StatResponse Result;
+    Mile::Cirno::ReadStatusResponse Result;
     std::uint16_t Length = Mile::Cirno::PopUInt16(Buffer);
     for (std::uint16_t i = 0; i < Length; ++i)
     {
-        Result.Stat.push_back(Mile::Cirno::PopStat(Buffer));
+        Result.Status.push_back(Mile::Cirno::PopStatus(Buffer));
     }
     return Result;
 }
 
-void Mile::Cirno::PushWriteStatRequest(
+void Mile::Cirno::PushWriteStatusRequest(
     std::vector<std::uint8_t>& Buffer,
-    Mile::Cirno::WriteStatRequest const& Value)
+    Mile::Cirno::WriteStatusRequest const& Value)
 {
     Mile::Cirno::PushUInt32(Buffer, Value.FileId);
-    std::uint16_t Length = static_cast<std::uint16_t>(Value.Stat.size());
+    std::uint16_t Length = static_cast<std::uint16_t>(Value.Status.size());
     Mile::Cirno::PushUInt16(Buffer, Length);
-    for (auto const& Item: Value.Stat)
+    for (auto const& Item: Value.Status)
     {
-        Mile::Cirno::PushStat(Buffer, Item);
+        Mile::Cirno::PushStatus(Buffer, Item);
     }
 }
 
@@ -865,19 +865,19 @@ void Mile::Cirno::PushAccessRequest(
     Mile::Cirno::PushUInt32(Buffer, Value.Flags);
 }
 
-void Mile::Cirno::PushWindowsReadDirRequest(
+void Mile::Cirno::PushWindowsReadDirectoryRequest(
     std::vector<std::uint8_t>& Buffer,
-    Mile::Cirno::WindowsReadDirRequest const& Value)
+    Mile::Cirno::WindowsReadDirectoryRequest const& Value)
 {
     Mile::Cirno::PushUInt32(Buffer, Value.FileId);
     Mile::Cirno::PushUInt64(Buffer, Value.Offset);
     Mile::Cirno::PushUInt32(Buffer, Value.Count);
 }
 
-Mile::Cirno::WindowsReadDirResponse Mile::Cirno::PopWindowsReadDirResponse(
+Mile::Cirno::WindowsReadDirectoryResponse Mile::Cirno::PopWindowsReadDirectoryResponse(
     std::span<std::uint8_t>& Buffer)
 {
-    Mile::Cirno::WindowsReadDirResponse Result;
+    Mile::Cirno::WindowsReadDirectoryResponse Result;
     // Discard the unused Length field.
     Mile::Cirno::PopUInt32(Buffer);
     while (!Buffer.empty())

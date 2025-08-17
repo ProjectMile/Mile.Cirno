@@ -49,7 +49,7 @@ typedef enum _MILE_CIRNO_MESSAGE_TYPE
     //   type[1] version[4] path[8]
     // %Name%<DirectoryEntry>[%Length%]
     //   qid<Qid>[1] offset[8] type[1] name<String>[1]
-    // %Name%<Stat>[%Length%]
+    // %Name%<Status>[%Length%]
     //   9P2000, 9P2000.L and 9P2000.W
     //     size[2] type[2] dev[4] qid<Qid>[1] mode[4] atime[4] mtime[4]
     //     length[8] name[String][1] uid[String][1] gid[String][1]
@@ -70,10 +70,10 @@ typedef enum _MILE_CIRNO_MESSAGE_TYPE
     // header<Header>[1] ecode[4]
     MileCirnoLinuxErrorResponseMessage,
     // header<Header>[1] fid[4]
-    MileCirnoStatFsRequestMessage = 8,
+    MileCirnoFileSystemStatusRequestMessage = 8,
     // header<Header>[1] type[4] bsize[4] blocks[8] bfree[8] bavail[8] files[8]
     // ffree[8] fsid[8] namelen[4]
-    MileCirnoStatFsResponseMessage,
+    MileCirnoFileSystemStatusResponseMessage,
     // header<Header>[1] fid[4] flags[4]
     MileCirnoLinuxOpenRequestMessage = 12,
     // header<Header>[1] qid<Qid>[1] iounit[4]
@@ -83,14 +83,14 @@ typedef enum _MILE_CIRNO_MESSAGE_TYPE
     // header<Header>[1] qid<Qid>[1] iounit[4]
     MileCirnoLinuxCreateResponseMessage,
     // header<Header>[1] fid[4] name<String>[1] symtgt<String>[1] gid[4]
-    MileCirnoSymLinkRequestMessage = 16,
+    MileCirnoMakeSymbolicLinkRequestMessage = 16,
     // header<Header>[1] qid<Qid>[1]
-    MileCirnoSymLinkResponseMessage,
+    MileCirnoMakeSymbolicLinkResponseMessage,
     // header<Header>[1] dfid[4] name<String>[1] mode[4] major[4] minor[4]
     // gid[4]
-    MileCirnoMkNodRequestMessage = 18,
+    MileCirnoMakeDeviceNodeRequestMessage = 18,
     // header<Header>[1] qid<Qid>[1]
-    MileCirnoMkNodResponseMessage,
+    MileCirnoMakeDeviceNodeResponseMessage,
     // header<Header>[1] fid[4] dfid[4] name<String>[1]
     MileCirnoRenameRequestMessage = 20,
     // header<Header>[1]
@@ -100,33 +100,33 @@ typedef enum _MILE_CIRNO_MESSAGE_TYPE
     // header<Header>[1] target<String>[1]
     MileCirnoReadLinkResponseMessage,
     // header<Header>[1] fid[4] request_mask[8]
-    MileCirnoGetAttrRequestMessage = 24,
+    MileCirnoGetAttributesRequestMessage = 24,
     // header<Header>[1] valid[8] qid<Qid>[1] mode[4] uid[4] gid[4] nlink[8]
     // rdev[8] size[8] blksize[8] blocks[8] atime_sec[8] atime_nsec[8]
     // mtime_sec[8] mtime_nsec[8] ctime_sec[8] ctime_nsec[8] btime_sec[8]
     // btime_nsec[8] gen[8] data_version[8]
-    MileCirnoGetAttrResponseMessage,
+    MileCirnoGetAttributesResponseMessage,
     // header<Header>[1] fid[4] valid[4] mode[4] uid[4] gid[4] size[8]
     // atime_sec[8] atime_nsec[8] mtime_sec[8] mtime_nsec[8]
-    MileCirnoSetAttrRequestMessage = 26,
+    MileCirnoSetAttributesRequestMessage = 26,
     // header<Header>[1]
-    MileCirnoSetAttrResponseMessage,
+    MileCirnoSetAttributesResponseMessage,
     // header<Header>[1] fid[4] newfid[4] name<String>[1]
-    MileCirnoXattrWalkRequestMessage = 30,
+    MileCirnoExtendedAttributesWalkRequestMessage = 30,
     // header<Header>[1] size[8]
-    MileCirnoXattrWalkResponseMessage,
+    MileCirnoExtendedAttributesWalkResponseMessage,
     // header<Header>[1] fid[4] name<String>[1] attr_size[8] flags[4]
-    MileCirnoXattrCreateRequestMessage = 32,
+    MileCirnoExtendedAttributesCreateRequestMessage = 32,
     // header<Header>[1]
-    MileCirnoXattrCreateResponseMessage,
+    MileCirnoExtendedAttributesCreateResponseMessage,
     // header<Header>[1] fid[4] offset[8] count[4]
-    MileCirnoReadDirRequestMessage = 40,
+    MileCirnoReadDirectoryRequestMessage = 40,
     // header<Header>[1] count[4] data<DirectoryEntry>[count]
-    MileCirnoReadDirResponseMessage,
+    MileCirnoReadDirectoryResponseMessage,
     // header<Header>[1] fid[4]
-    MileCirnoFsyncRequestMessage = 50,
+    MileCirnoFlushFileRequestMessage = 50,
     // header<Header>[1]
-    MileCirnoFsyncResponseMessage,
+    MileCirnoFlushFileResponseMessage,
     // header<Header>[1] fid[4] type[1] flags[4] start[8] length[8] proc_id[4]
     // client_id<String>[1]
     MileCirnoLockRequestMessage = 52,
@@ -143,9 +143,9 @@ typedef enum _MILE_CIRNO_MESSAGE_TYPE
     // header<Header>[1]
     MileCirnoLinkResponseMessage,
     // header<Header>[1] dfid[4] name<String>[1] mode[4] gid[4]
-    MileCirnoMkDirRequestMessage = 72,
+    MileCirnoMakeDirectoryRequestMessage = 72,
     // header<Header>[1] qid<Qid>[1]
-    MileCirnoMkDirResponseMessage,
+    MileCirnoMakeDirectoryResponseMessage,
     // header<Header>[1] olddirfid[4] oldname<String>[1] newdirfid[4]
     // newname<String>[1]
     MileCirnoRenameAtRequestMessage = 74,
@@ -168,10 +168,10 @@ typedef enum _MILE_CIRNO_MESSAGE_TYPE
     //   header<Header>[1] afid[4] uname<String>[1] aname<String>[1] n_uname[4]
     // 9P2000.W
     //   Not used
-    MileCirnoAuthRequestMessage = 102,
+    MileCirnoAuthenticationRequestMessage = 102,
     // Not used in 9P2000.W
     // header<Header>[1] aqid<Qid>[1]
-    MileCirnoAuthResponseMessage,
+    MileCirnoAuthenticationResponseMessage,
     // 9P2000 and 9P2000.u
     //   header<Header>[1] fid[4] afid[4] uname<String>[1] aname<String>[1]
     // 9P2000.L and 9P2000.W
@@ -240,22 +240,22 @@ typedef enum _MILE_CIRNO_MESSAGE_TYPE
     //   header<Header>[1] fid[4]
     // 9P2000.L and 9P2000.W
     //   Not used
-    MileCirnoStatRequestMessage = 124,
+    MileCirnoReadStatusRequestMessage = 124,
     // 9P2000 and 9P2000.u
-    //   header<Header>[1] stat<Stat>[n]
+    //   header<Header>[1] stat<Status>[n]
     // 9P2000.L and 9P2000.W
     //   Not used
-    MileCirnoStatResponseMessage,
+    MileCirnoReadStatusResponseMessage,
     // 9P2000 and 9P2000.u
-    //   header<Header>[1] fid[4] stat<Stat>[n]
+    //   header<Header>[1] fid[4] stat<Status>[n]
     // 9P2000.L and 9P2000.W
     //   Not used
-    MileCirnoWriteStatRequestMessage = 126,
+    MileCirnoWriteStatusRequestMessage = 126,
     // 9P2000 and 9P2000.u
     //   header<Header>[1]
     // 9P2000.L and 9P2000.W
     //   Not used
-    MileCirnoWriteStatResponseMessage,
+    MileCirnoWriteStatusResponseMessage,
 
     /* 9P2000.W */
 
@@ -264,9 +264,9 @@ typedef enum _MILE_CIRNO_MESSAGE_TYPE
     // header<Header>[1]
     MileCirnoAccessResponseMessage,
     // header<Header>[1] fid[4] offset[8] count[4]
-    MileCirnoWindowsReadDirRequestMessage = 130,
+    MileCirnoWindowsReadDirectoryRequestMessage = 130,
     // header<Header>[1] count[4] data<WindowsDirectoryEntry>[count]
-    MileCirnoWindowsReadDirResponseMessage,
+    MileCirnoWindowsReadDirectoryResponseMessage,
     // header<Header>[1] fid[4] newfid[4] flags[4] wflags[4] mode[4] gid[4]
     // attr_mask[8] nwname[2] wname<String>[nwname]
     MileCirnoWindowsOpenRequestMessage = 132,
@@ -379,60 +379,61 @@ typedef enum _MILE_CIRNO_LINUX_OPEN_CREATE_FLAGS
 } MILE_CIRNO_LINUX_OPEN_CREATE_FLAGS, *PMILE_CIRNO_LINUX_OPEN_CREATE_FLAGS;
 
 /**
- * @brief The request_mask field flags used in MileCirnoGetAttrRequestMessage
- *        and the valid flags used in MileCirnoGetAttrResponseMessage.
+ * @brief The request_mask field flags used in
+ *        MileCirnoGetAttributesRequestMessage and the valid flags used in
+ *        MileCirnoGetAttributesResponseMessage.
  */
 typedef enum _MILE_CIRNO_LINUX_GETATTR_FLAGS
 {
-    MileCirnoLinuxGetAttrFlagMode = 0x00000001,
-    MileCirnoLinuxGetAttrFlagNumberOfHardLinks = 0x00000002,
-    MileCirnoLinuxGetAttrFlagOwnerUserId = 0x00000004,
-    MileCirnoLinuxGetAttrFlagGroupId = 0x00000008,
-    MileCirnoLinuxGetAttrFlagDeviceId = 0x00000010,
-    MileCirnoLinuxGetAttrFlagLastAccessTime = 0x00000020,
-    MileCirnoLinuxGetAttrFlagLastWriteTime = 0x00000040,
-    MileCirnoLinuxGetAttrFlagChangeTime = 0x00000080,
-    MileCirnoLinuxGetAttrFlagInodeNumber = 0x00000100,
-    MileCirnoLinuxGetAttrFlagSize = 0x00000200,
-    MileCirnoLinuxGetAttrFlagAllocatedBlocks = 0x00000400,
-    // Everything up to and including MileCirnoLinuxGetAttrFlagBlocks is
-    // MileCirnoLinuxGetAttrFlagBasic.
-    MileCirnoLinuxGetAttrFlagBasic =
-        MileCirnoLinuxGetAttrFlagMode |
-        MileCirnoLinuxGetAttrFlagNumberOfHardLinks |
-        MileCirnoLinuxGetAttrFlagOwnerUserId |
-        MileCirnoLinuxGetAttrFlagGroupId |
-        MileCirnoLinuxGetAttrFlagDeviceId |
-        MileCirnoLinuxGetAttrFlagLastAccessTime |
-        MileCirnoLinuxGetAttrFlagLastWriteTime |
-        MileCirnoLinuxGetAttrFlagChangeTime |
-        MileCirnoLinuxGetAttrFlagInodeNumber |
-        MileCirnoLinuxGetAttrFlagSize |
-        MileCirnoLinuxGetAttrFlagAllocatedBlocks,
-    MileCirnoLinuxGetAttrFlagBirthTime = 0x00000800,
-    MileCirnoLinuxGetAttrFlagGenration = 0x00001000,
-    MileCirnoLinuxGetAttrFlagDataVersion = 0x00002000,
-    MileCirnoLinuxGetAttrFlagAll =
-        MileCirnoLinuxGetAttrFlagBasic |
-        MileCirnoLinuxGetAttrFlagBirthTime |
-        MileCirnoLinuxGetAttrFlagGenration |
-        MileCirnoLinuxGetAttrFlagDataVersion,
+    MileCirnoLinuxGetAttributesFlagMode = 0x00000001,
+    MileCirnoLinuxGetAttributesFlagNumberOfHardLinks = 0x00000002,
+    MileCirnoLinuxGetAttributesFlagOwnerUserId = 0x00000004,
+    MileCirnoLinuxGetAttributesFlagGroupId = 0x00000008,
+    MileCirnoLinuxGetAttributesFlagDeviceId = 0x00000010,
+    MileCirnoLinuxGetAttributesFlagLastAccessTime = 0x00000020,
+    MileCirnoLinuxGetAttributesFlagLastWriteTime = 0x00000040,
+    MileCirnoLinuxGetAttributesFlagChangeTime = 0x00000080,
+    MileCirnoLinuxGetAttributesFlagInodeNumber = 0x00000100,
+    MileCirnoLinuxGetAttributesFlagSize = 0x00000200,
+    MileCirnoLinuxGetAttributesFlagAllocatedBlocks = 0x00000400,
+    // Everything up to and including MileCirnoLinuxGetAttributesFlagBlocks is
+    // MileCirnoLinuxGetAttributesFlagBasic.
+    MileCirnoLinuxGetAttributesFlagBasic =
+        MileCirnoLinuxGetAttributesFlagMode |
+        MileCirnoLinuxGetAttributesFlagNumberOfHardLinks |
+        MileCirnoLinuxGetAttributesFlagOwnerUserId |
+        MileCirnoLinuxGetAttributesFlagGroupId |
+        MileCirnoLinuxGetAttributesFlagDeviceId |
+        MileCirnoLinuxGetAttributesFlagLastAccessTime |
+        MileCirnoLinuxGetAttributesFlagLastWriteTime |
+        MileCirnoLinuxGetAttributesFlagChangeTime |
+        MileCirnoLinuxGetAttributesFlagInodeNumber |
+        MileCirnoLinuxGetAttributesFlagSize |
+        MileCirnoLinuxGetAttributesFlagAllocatedBlocks,
+    MileCirnoLinuxGetAttributesFlagBirthTime = 0x00000800,
+    MileCirnoLinuxGetAttributesFlagGenration = 0x00001000,
+    MileCirnoLinuxGetAttributesFlagDataVersion = 0x00002000,
+    MileCirnoLinuxGetAttributesFlagAll =
+        MileCirnoLinuxGetAttributesFlagBasic |
+        MileCirnoLinuxGetAttributesFlagBirthTime |
+        MileCirnoLinuxGetAttributesFlagGenration |
+        MileCirnoLinuxGetAttributesFlagDataVersion,
 } MILE_CIRNO_LINUX_GETATTR_FLAGS, *PMILE_CIRNO_LINUX_GETATTR_FLAGS;
 
 /**
- * @brief The valid field flags used in MileCirnoSetAttrRequestMessage.
+ * @brief The valid field flags used in MileCirnoSetAttributesRequestMessage.
  */
 typedef enum _MILE_CIRNO_LINUX_SETATTR_FLAGS
 {
-    MileCirnoLinuxSetAttrFlagMode = 0x00000001,
-    MileCirnoLinuxSetAttrFlagOwnerUserId = 0x00000002,
-    MileCirnoLinuxSetAttrFlagGroupId = 0x00000004,
-    MileCirnoLinuxSetAttrFlagSize = 0x00000008,
-    MileCirnoLinuxSetAttrFlagLastAccessTime = 0x00000010,
-    MileCirnoLinuxSetAttrFlagLastWriteTime = 0x00000020,
-    MileCirnoLinuxSetAttrFlagChangeTime = 0x00000040,
-    MileCirnoLinuxSetAttrFlagLastAccessTimeSet = 0x00000080,
-    MileCirnoLinuxSetAttrFlagLastWriteTimeSet = 0x00000100,
+    MileCirnoLinuxSetAttributesFlagMode = 0x00000001,
+    MileCirnoLinuxSetAttributesFlagOwnerUserId = 0x00000002,
+    MileCirnoLinuxSetAttributesFlagGroupId = 0x00000004,
+    MileCirnoLinuxSetAttributesFlagSize = 0x00000008,
+    MileCirnoLinuxSetAttributesFlagLastAccessTime = 0x00000010,
+    MileCirnoLinuxSetAttributesFlagLastWriteTime = 0x00000020,
+    MileCirnoLinuxSetAttributesFlagChangeTime = 0x00000040,
+    MileCirnoLinuxSetAttributesFlagLastAccessTimeSet = 0x00000080,
+    MileCirnoLinuxSetAttributesFlagLastWriteTimeSet = 0x00000100,
 } MILE_CIRNO_LINUX_SETATTR_FLAGS, *PMILE_CIRNO_LINUX_SETATTR_FLAGS;
 
 typedef enum _MILE_CIRNO_LINUX_LOCK_TYPE
@@ -536,7 +537,7 @@ namespace Mile
             std::string Name;
         };
 
-        struct Stat
+        struct Status
         {
             std::uint16_t Type;
             std::uint32_t Dev;
@@ -582,12 +583,12 @@ namespace Mile
             std::uint32_t Code;
         };
 
-        struct StatFsRequest
+        struct FileSystemStatusRequest
         {
             std::uint32_t FileId; // fid
         };
 
-        struct StatFsResponse
+        struct FileSystemStatusResponse
         {
             std::uint32_t FileSystemType; // type
             std::uint32_t BlockSize; // bsize
@@ -627,7 +628,7 @@ namespace Mile
             std::uint32_t IoUnit;
         };
 
-        struct SymLinkRequest
+        struct MakeSymbolicLinkRequest
         {
             std::uint32_t FileId; // fid
             std::string Name;
@@ -635,12 +636,12 @@ namespace Mile
             std::uint32_t Gid;
         };
 
-        struct SymLinkResponse
+        struct MakeSymbolicLinkResponse
         {
             Qid UniqueId; // qid
         };
 
-        struct MkNodRequest
+        struct MakeDeviceNodeRequest
         {
             std::uint32_t DirectoryFileId; // dfid
             std::string Name;
@@ -650,7 +651,7 @@ namespace Mile
             std::uint32_t Gid;
         };
 
-        struct MkNodResponse
+        struct MakeDeviceNodeResponse
         {
             Qid UniqueId; // qid
         };
@@ -674,13 +675,13 @@ namespace Mile
             std::string Target;
         };
 
-        struct GetAttrRequest
+        struct GetAttributesRequest
         {
             std::uint32_t FileId; // fid
             std::uint64_t RequestMask; // request_mask
         };
 
-        struct GetAttrResponse
+        struct GetAttributesResponse
         {
             std::uint64_t Valid; // MILE_CIRNO_LINUX_GETATTR_FLAGS
             Qid UniqueId; // qid
@@ -704,7 +705,7 @@ namespace Mile
             std::uint64_t DataVersion; // data_version
         };
 
-        struct SetAttrRequest
+        struct SetAttributesRequest
         {
             std::uint32_t FileId; // fid
             std::uint32_t Valid; // MILE_CIRNO_LINUX_SETATTR_FLAGS
@@ -718,21 +719,21 @@ namespace Mile
             std::uint64_t LastWriteTimeNanoseconds; // mtime_nsec
         };
 
-        // SetAttrResponse
+        // SetAttributesResponse
 
-        struct XattrWalkRequest
+        struct ExtendedAttributesWalkRequest
         {
             std::uint32_t FileId; // fid
             std::uint32_t NewFileId; // newfid
             std::string Name;
         };
 
-        struct XattrWalkResponse
+        struct ExtendedAttributesWalkResponse
         {
             std::uint64_t Size;
         };
 
-        struct XattrCreateRequest
+        struct ExtendedAttributesCreateRequest
         {
             std::uint32_t FileId; // fid
             std::string Name;
@@ -740,30 +741,30 @@ namespace Mile
             std::uint32_t Flags;
         };
 
-        // XattrCreateResponse
+        // ExtendedAttributesCreateResponse
 
-        struct ReadDirRequest
+        struct ReadDirectoryRequest
         {
             std::uint32_t FileId; // fid
             std::uint64_t Offset;
             std::uint32_t Count;
         };
 
-        struct ReadDirResponse
+        struct ReadDirectoryResponse
         {
             std::vector<DirectoryEntry> Data; // count, data
         };
 
-        const std::uint32_t ReadDirResponseHeaderSize =
+        const std::uint32_t ReadDirectoryResponseHeaderSize =
             HeaderSize
             + sizeof(std::uint32_t); // count
 
-        struct FsyncRequest
+        struct FlushFileRequest
         {
             std::uint32_t FileId; // fid
         };
 
-        // FsyncResponse
+        // FlushFileResponse
 
         struct LockRequest
         {
@@ -809,7 +810,7 @@ namespace Mile
 
         // LinkResponse
 
-        struct MkDirRequest
+        struct MakeDirectoryRequest
         {
             std::uint32_t DirectoryFileId; // dfid
             std::string Name;
@@ -817,7 +818,7 @@ namespace Mile
             std::uint32_t Gid;
         };
 
-        struct MkDirResponse
+        struct MakeDirectoryResponse
         {
             Qid UniqueId; // qid
         };
@@ -857,7 +858,7 @@ namespace Mile
             std::string ProtocolVersion; // version
         };
 
-        struct AuthRequest
+        struct AuthenticationRequest
         {
             std::uint32_t AuthenticationFileId; // afid
             std::string UserName; // uname
@@ -865,7 +866,7 @@ namespace Mile
             std::uint32_t NumericUserName; // n_uname (9P2000.L)
         };
 
-        struct AuthResponse
+        struct AuthenticationResponse
         {
             Qid AuthenticationUniqueId; // aqid
         };
@@ -984,23 +985,23 @@ namespace Mile
 
         // RemoveResponse
 
-        struct StatRequest
+        struct ReadStatusRequest
         {
             std::uint32_t FileId; // fid
         };
 
-        struct StatResponse
+        struct ReadStatusResponse
         {
-            std::vector<Stat> Stat;
+            std::vector<Status> Status; // stat
         };
 
-        struct WriteStatRequest
+        struct WriteStatusRequest
         {
             std::uint32_t FileId; // fid
-            std::vector<Stat> Stat;
+            std::vector<Status> Status; // stat
         };
 
-        // WriteStatResponse
+        // WriteStatusResponse
 
         struct AccessRequest
         {
@@ -1010,14 +1011,14 @@ namespace Mile
 
         // AccessResponse
 
-        struct WindowsReadDirRequest
+        struct WindowsReadDirectoryRequest
         {
             std::uint32_t FileId; // fid
             std::uint64_t Offset;
             std::uint32_t Count;
         };
 
-        struct WindowsReadDirResponse
+        struct WindowsReadDirectoryResponse
         {
             std::vector<WindowsDirectoryEntry> Data; // count, data
         };

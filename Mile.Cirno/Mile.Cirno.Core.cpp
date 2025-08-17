@@ -397,58 +397,58 @@ Mile::Cirno::LinuxOpenResponse Mile::Cirno::Client::LinuxOpen(
     return Mile::Cirno::PopLinuxOpenResponse(ResponseSpan);
 }
 
-Mile::Cirno::ReadDirResponse Mile::Cirno::Client::ReadDir(
-    Mile::Cirno::ReadDirRequest const& Request)
+Mile::Cirno::ReadDirectoryResponse Mile::Cirno::Client::ReadDirectory(
+    Mile::Cirno::ReadDirectoryRequest const& Request)
 {
     std::vector<std::uint8_t> RequestBuffer;
-    Mile::Cirno::PushReadDirRequest(
+    Mile::Cirno::PushReadDirectoryRequest(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
     this->Request(
-        MileCirnoReadDirRequestMessage,
+        MileCirnoReadDirectoryRequestMessage,
         RequestBuffer,
-        MileCirnoReadDirResponseMessage,
+        MileCirnoReadDirectoryResponseMessage,
         ResponseBuffer);
     std::span<std::uint8_t> ResponseSpan =
         std::span<std::uint8_t>(ResponseBuffer);
-    return Mile::Cirno::PopReadDirResponse(ResponseSpan);
+    return Mile::Cirno::PopReadDirectoryResponse(ResponseSpan);
 }
 
-Mile::Cirno::GetAttrResponse Mile::Cirno::Client::GetAttr(
-    Mile::Cirno::GetAttrRequest const& Request)
+Mile::Cirno::GetAttributesResponse Mile::Cirno::Client::GetAttributes(
+    Mile::Cirno::GetAttributesRequest const& Request)
 {
     std::vector<std::uint8_t> RequestBuffer;
-    Mile::Cirno::PushGetAttrRequest(
+    Mile::Cirno::PushGetAttributesRequest(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
     this->Request(
-        MileCirnoGetAttrRequestMessage,
+        MileCirnoGetAttributesRequestMessage,
         RequestBuffer,
-        MileCirnoGetAttrResponseMessage,
+        MileCirnoGetAttributesResponseMessage,
         ResponseBuffer);
     std::span<std::uint8_t> ResponseSpan =
         std::span<std::uint8_t>(ResponseBuffer);
-    return Mile::Cirno::PopGetAttrResponse(ResponseSpan);
+    return Mile::Cirno::PopGetAttributesResponse(ResponseSpan);
 }
 
-Mile::Cirno::StatFsResponse Mile::Cirno::Client::StatFs(
-    Mile::Cirno::StatFsRequest const& Request)
+Mile::Cirno::FileSystemStatusResponse Mile::Cirno::Client::FileSystemStatus(
+    Mile::Cirno::FileSystemStatusRequest const& Request)
 {
     std::vector<std::uint8_t> RequestBuffer;
-    Mile::Cirno::PushStatFsRequest(
+    Mile::Cirno::PushFileSystemStatusRequest(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
     this->Request(
-        MileCirnoStatFsRequestMessage,
+        MileCirnoFileSystemStatusRequestMessage,
         RequestBuffer,
-        MileCirnoStatFsResponseMessage,
+        MileCirnoFileSystemStatusResponseMessage,
         ResponseBuffer);
     std::span<std::uint8_t> ResponseSpan =
         std::span<std::uint8_t>(ResponseBuffer);
-    return Mile::Cirno::PopStatFsResponse(ResponseSpan);
+    return Mile::Cirno::PopFileSystemStatusResponse(ResponseSpan);
 }
 
 Mile::Cirno::ReadResponse Mile::Cirno::Client::Read(
@@ -484,33 +484,33 @@ void Mile::Cirno::Client::Remove(
         ResponseBuffer);
 }
 
-void Mile::Cirno::Client::SetAttr(
-    Mile::Cirno::SetAttrRequest const& Request)
+void Mile::Cirno::Client::SetAttributes(
+    Mile::Cirno::SetAttributesRequest const& Request)
 {
     std::vector<std::uint8_t> RequestBuffer;
-    Mile::Cirno::PushSetAttrRequest(
+    Mile::Cirno::PushSetAttributesRequest(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
     this->Request(
-        MileCirnoSetAttrRequestMessage,
+        MileCirnoSetAttributesRequestMessage,
         RequestBuffer,
-        MileCirnoSetAttrResponseMessage,
+        MileCirnoSetAttributesResponseMessage,
         ResponseBuffer);
 }
 
-void Mile::Cirno::Client::Fsync(
-    Mile::Cirno::FsyncRequest const& Request)
+void Mile::Cirno::Client::FlushFile(
+    Mile::Cirno::FlushFileRequest const& Request)
 {
     std::vector<std::uint8_t> RequestBuffer;
-    Mile::Cirno::PushFsyncRequest(
+    Mile::Cirno::PushFlushFileRequest(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
     this->Request(
-        MileCirnoFsyncRequestMessage,
+        MileCirnoFlushFileRequestMessage,
         RequestBuffer,
-        MileCirnoFsyncResponseMessage,
+        MileCirnoFlushFileResponseMessage,
         ResponseBuffer);
 }
 
@@ -547,22 +547,22 @@ Mile::Cirno::WriteResponse Mile::Cirno::Client::Write(
     return Mile::Cirno::PopWriteResponse(ResponseSpan);
 }
 
-Mile::Cirno::MkDirResponse Mile::Cirno::Client::MkDir(
-    Mile::Cirno::MkDirRequest const& Request)
+Mile::Cirno::MakeDirectoryResponse Mile::Cirno::Client::MakeDirectory(
+    Mile::Cirno::MakeDirectoryRequest const& Request)
 {
     std::vector<std::uint8_t> RequestBuffer;
-    Mile::Cirno::PushMkDirRequest(
+    Mile::Cirno::PushMakeDirectoryRequest(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
     this->Request(
-        MileCirnoMkDirRequestMessage,
+        MileCirnoMakeDirectoryRequestMessage,
         RequestBuffer,
-        MileCirnoMkDirResponseMessage,
+        MileCirnoMakeDirectoryResponseMessage,
         ResponseBuffer);
     std::span<std::uint8_t> ResponseSpan =
         std::span<std::uint8_t>(ResponseBuffer);
-    return Mile::Cirno::PopMkDirResponse(ResponseSpan);
+    return Mile::Cirno::PopMakeDirectoryResponse(ResponseSpan);
 }
 
 Mile::Cirno::LinuxCreateResponse Mile::Cirno::Client::LinuxCreate(

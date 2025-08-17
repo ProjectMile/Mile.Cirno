@@ -79,14 +79,14 @@ namespace Mile::Cirno
         LinuxOpenResponse LinuxOpen(
             LinuxOpenRequest const& Request);
 
-        ReadDirResponse ReadDir(
-            ReadDirRequest const& Request);
+        ReadDirectoryResponse ReadDirectory(
+            ReadDirectoryRequest const& Request);
 
-        GetAttrResponse GetAttr(
-            GetAttrRequest const& Request);
+        GetAttributesResponse GetAttributes(
+            GetAttributesRequest const& Request);
 
-        StatFsResponse StatFs(
-            StatFsRequest const& Request);
+        FileSystemStatusResponse FileSystemStatus(
+            FileSystemStatusRequest const& Request);
 
         ReadResponse Read(
             ReadRequest const& Request);
@@ -94,11 +94,11 @@ namespace Mile::Cirno
         void Remove(
             RemoveRequest const& Request);
 
-        void SetAttr(
-            SetAttrRequest const& Request);
+        void SetAttributes(
+            SetAttributesRequest const& Request);
 
-        void Fsync(
-            FsyncRequest const& Request);
+        void FlushFile(
+            FlushFileRequest const& Request);
 
         void RenameAt(
             RenameAtRequest const& Request);
@@ -106,8 +106,8 @@ namespace Mile::Cirno
         WriteResponse Write(
             WriteRequest const& Request);
 
-        MkDirResponse MkDir(
-            MkDirRequest const& Request);
+        MakeDirectoryResponse MakeDirectory(
+            MakeDirectoryRequest const& Request);
 
         LinuxCreateResponse LinuxCreate(
             LinuxCreateRequest const& Request);

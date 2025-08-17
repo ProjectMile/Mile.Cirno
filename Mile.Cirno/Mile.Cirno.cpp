@@ -261,15 +261,15 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
             }
             else
             {
-                // TODO: MkDir
+                // TODO: MakeDirectory
             }
         }
 
-        Mile::Cirno::GetAttrRequest GetAttrRequest;
-        GetAttrRequest.FileId = WalkRequest.NewFileId;
-        GetAttrRequest.RequestMask = MileCirnoLinuxGetAttrFlagMode;
-        Mile::Cirno::GetAttrResponse GetAttrResponse =
-            g_Instance->GetAttr(GetAttrRequest);
+        Mile::Cirno::GetAttributesRequest GetAttributesRequest;
+        GetAttributesRequest.FileId = WalkRequest.NewFileId;
+        GetAttributesRequest.RequestMask = MileCirnoLinuxGetAttributesFlagMode;
+        Mile::Cirno::GetAttributesResponse GetAttributesResponse =
+            g_Instance->GetAttributes(GetAttributesRequest);
 
         bool RequestCreate = false;
         std::uint32_t Flags =
@@ -318,7 +318,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
         default:
             break;
         }
-        if (APTX_IFDIR & GetAttrResponse.Mode)
+        if (APTX_IFDIR & GetAttributesResponse.Mode)
         {
             DokanFileInfo->IsDirectory = TRUE;
             Flags |= MileCirnoLinuxOpenCreateFlagDirectory;
@@ -479,9 +479,9 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFlushFileBuffers(
 
     try
     {
-        Mile::Cirno::FsyncRequest Request = {};
+        Mile::Cirno::FlushFileRequest Request = {};
         Request.FileId = FileId;
-        g_Instance->Fsync(Request);
+        g_Instance->FlushFile(Request);
     }
     catch (...)
     {
@@ -509,15 +509,16 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetFileInformation(
 
     try
     {
-        Mile::Cirno::GetAttrRequest Request;
+        Mile::Cirno::GetAttributesRequest Request;
         Request.FileId = FileId;
         Request.RequestMask =
-            MileCirnoLinuxGetAttrFlagMode |
-            MileCirnoLinuxGetAttrFlagNumberOfHardLinks |
-            MileCirnoLinuxGetAttrFlagLastAccessTime |
-            MileCirnoLinuxGetAttrFlagLastWriteTime |
-            MileCirnoLinuxGetAttrFlagSize;
-        Mile::Cirno::GetAttrResponse Response = g_Instance->GetAttr(Request);
+            MileCirnoLinuxGetAttributesFlagMode |
+            MileCirnoLinuxGetAttributesFlagNumberOfHardLinks |
+            MileCirnoLinuxGetAttributesFlagLastAccessTime |
+            MileCirnoLinuxGetAttributesFlagLastWriteTime |
+            MileCirnoLinuxGetAttributesFlagSize;
+        Mile::Cirno::GetAttributesResponse Response =
+            g_Instance->GetAttributes(Request);
 
         if (APTX_IFDIR & Response.Mode)
         {
@@ -579,14 +580,14 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
         std::uint64_t LastOffset = 0;
         do
         {
-            Mile::Cirno::ReadDirRequest Request;
+            Mile::Cirno::ReadDirectoryRequest Request;
             Request.FileId = FileId;
             Request.Offset = LastOffset;
             LastOffset = 0;
             Request.Count = g_MaximumMessageSize;
-            Request.Count -= Mile::Cirno::ReadDirResponseHeaderSize;
-            Mile::Cirno::ReadDirResponse Response =
-                g_Instance->ReadDir(Request);
+            Request.Count -= Mile::Cirno::ReadDirectoryResponseHeaderSize;
+            Mile::Cirno::ReadDirectoryResponse Response =
+                g_Instance->ReadDirectory(Request);
             for (Mile::Cirno::DirectoryEntry const& Entry : Response.Data)
             {
                 LastOffset = Entry.Offset;
@@ -627,16 +628,16 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
                         }
                     });
 
-                    Mile::Cirno::GetAttrRequest InformationRequest;
+                    Mile::Cirno::GetAttributesRequest InformationRequest;
                     InformationRequest.FileId = WalkRequest.NewFileId;
                     InformationRequest.RequestMask =
-                        MileCirnoLinuxGetAttrFlagMode |
-                        MileCirnoLinuxGetAttrFlagNumberOfHardLinks |
-                        MileCirnoLinuxGetAttrFlagLastAccessTime |
-                        MileCirnoLinuxGetAttrFlagLastWriteTime |
-                        MileCirnoLinuxGetAttrFlagSize;
-                    Mile::Cirno::GetAttrResponse InformationResponse =
-                        g_Instance->GetAttr(InformationRequest);
+                        MileCirnoLinuxGetAttributesFlagMode |
+                        MileCirnoLinuxGetAttributesFlagNumberOfHardLinks |
+                        MileCirnoLinuxGetAttributesFlagLastAccessTime |
+                        MileCirnoLinuxGetAttributesFlagLastWriteTime |
+                        MileCirnoLinuxGetAttributesFlagSize;
+                    Mile::Cirno::GetAttributesResponse InformationResponse =
+                        g_Instance->GetAttributes(InformationRequest);
 
                     if (APTX_IFDIR & InformationResponse.Mode)
                     {
@@ -689,9 +690,9 @@ NTSTATUS DOKAN_CALLBACK MileCirnoSetFileAttributes(
 
     try
     {
-        Mile::Cirno::SetAttrRequest Request = {};
+        Mile::Cirno::SetAttributesRequest Request = {};
         Request.FileId = FileId;
-        Request.Valid = MileCirnoLinuxSetAttrFlagMode;
+        Request.Valid = MileCirnoLinuxSetAttributesFlagMode;
         Request.Mode = APTX_IRUSR | APTX_IRGRP | APTX_IROTH;
         if (FILE_ATTRIBUTE_READONLY & FileAttributes)
         {
@@ -704,7 +705,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoSetFileAttributes(
         {
             Request.Mode |= APTX_IFLNK;
         }
-        g_Instance->SetAttr(Request);
+        g_Instance->SetAttributes(Request);
     }
     catch (...)
     {
@@ -733,14 +734,14 @@ NTSTATUS DOKAN_CALLBACK MileCirnoSetFileTime(
 
     try
     {
-        Mile::Cirno::SetAttrRequest Request = {};
+        Mile::Cirno::SetAttributesRequest Request = {};
         Request.FileId = FileId;
         Request.Valid = 0;
         if (LastAccessTime)
         {
             Request.Valid =
-                MileCirnoLinuxSetAttrFlagLastAccessTime |
-                MileCirnoLinuxSetAttrFlagLastAccessTimeSet;
+                MileCirnoLinuxSetAttributesFlagLastAccessTime |
+                MileCirnoLinuxSetAttributesFlagLastAccessTimeSet;
             ::FromFileTime(
                 *LastAccessTime,
                 Request.LastAccessTimeSeconds,
@@ -749,14 +750,14 @@ NTSTATUS DOKAN_CALLBACK MileCirnoSetFileTime(
         if (LastWriteTime)
         {
             Request.Valid =
-                MileCirnoLinuxSetAttrFlagLastWriteTime |
-                MileCirnoLinuxSetAttrFlagLastWriteTimeSet;
+                MileCirnoLinuxSetAttributesFlagLastWriteTime |
+                MileCirnoLinuxSetAttributesFlagLastWriteTimeSet;
             ::FromFileTime(
                 *LastWriteTime,
                 Request.LastWriteTimeSeconds,
                 Request.LastWriteTimeNanoseconds);
         }
-        g_Instance->SetAttr(Request);
+        g_Instance->SetAttributes(Request);
     }
     catch (...)
     {
@@ -791,13 +792,13 @@ NTSTATUS DOKAN_CALLBACK MileCirnoDeleteDirectory(
 
     try
     {
-        Mile::Cirno::ReadDirRequest Request;
+        Mile::Cirno::ReadDirectoryRequest Request;
         Request.FileId = FileId;
         Request.Offset = 0;
         Request.Count = g_MaximumMessageSize;
-        Request.Count -= Mile::Cirno::ReadDirResponseHeaderSize;
-        Mile::Cirno::ReadDirResponse Response =
-            g_Instance->ReadDir(Request);
+        Request.Count -= Mile::Cirno::ReadDirectoryResponseHeaderSize;
+        Mile::Cirno::ReadDirectoryResponse Response =
+            g_Instance->ReadDirectory(Request);
         if (Response.Data.size() > 2)
         {
             return STATUS_DIRECTORY_NOT_EMPTY;
@@ -827,11 +828,11 @@ NTSTATUS DOKAN_CALLBACK MileCirnoSetEndOfFile(
 
     try
     {
-        Mile::Cirno::SetAttrRequest Request = {};
+        Mile::Cirno::SetAttributesRequest Request = {};
         Request.FileId = FileId;
-        Request.Valid = MileCirnoLinuxSetAttrFlagSize;
+        Request.Valid = MileCirnoLinuxSetAttributesFlagSize;
         Request.FileSize = ByteOffset;
-        g_Instance->SetAttr(Request);
+        g_Instance->SetAttributes(Request);
     }
     catch (...)
     {
@@ -851,9 +852,10 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetDiskFreeSpace(
 
     try
     {
-        Mile::Cirno::StatFsRequest Request;
+        Mile::Cirno::FileSystemStatusRequest Request;
         Request.FileId = g_RootDirectoryFileId;
-        Mile::Cirno::StatFsResponse Response = g_Instance->StatFs(Request);
+        Mile::Cirno::FileSystemStatusResponse Response =
+            g_Instance->FileSystemStatus(Request);
         if (FreeBytesAvailable)
         {
             *FreeBytesAvailable = Response.BlockSize * Response.AvailableBlocks;
