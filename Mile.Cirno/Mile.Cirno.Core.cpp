@@ -547,6 +547,24 @@ Mile::Cirno::WriteResponse Mile::Cirno::Client::Write(
     return Mile::Cirno::PopWriteResponse(ResponseSpan);
 }
 
+Mile::Cirno::MkDirResponse Mile::Cirno::Client::MkDir(
+    Mile::Cirno::MkDirRequest const& Request)
+{
+    std::vector<std::uint8_t> RequestBuffer;
+    Mile::Cirno::PushMkDirRequest(
+        RequestBuffer,
+        Request);
+    std::vector<std::uint8_t> ResponseBuffer;
+    this->Request(
+        MileCirnoMkDirRequestMessage,
+        RequestBuffer,
+        MileCirnoMkDirResponseMessage,
+        ResponseBuffer);
+    std::span<std::uint8_t> ResponseSpan =
+        std::span<std::uint8_t>(ResponseBuffer);
+    return Mile::Cirno::PopMkDirResponse(ResponseSpan);
+}
+
 void Mile::Cirno::Client::Initialize()
 {
     this->m_ReceiveWorkerThread = Mile::CreateThread([this]()

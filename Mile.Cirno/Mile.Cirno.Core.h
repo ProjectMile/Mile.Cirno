@@ -106,6 +106,9 @@ namespace Mile::Cirno
         WriteResponse Write(
             WriteRequest const& Request);
 
+        MkDirResponse MkDir(
+            MkDirRequest const& Request);
+
     private:
 
         void Initialize();
