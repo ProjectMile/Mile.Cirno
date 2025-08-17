@@ -616,6 +616,99 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
     return STATUS_SUCCESS;
 }
 
+NTSTATUS DOKAN_CALLBACK MileCirnoSetFileAttributes(
+    _In_ LPCWSTR FileName,
+    _In_ DWORD FileAttributes,
+    _Inout_ PDOKAN_FILE_INFO DokanFileInfo)
+{
+    UNREFERENCED_PARAMETER(FileName);
+
+    std::uint32_t FileId = static_cast<std::uint32_t>(
+        DokanFileInfo->Context);
+    if (MILE_CIRNO_NOFID == FileId)
+    {
+        return STATUS_INVALID_HANDLE;
+    }
+
+    try
+    {
+        Mile::Cirno::SetAttrRequest Request = {};
+        Request.FileId = FileId;
+        Request.Valid = MileCirnoLinuxSetAttrFlagMode;
+        Request.Mode = APTX_IRUSR | APTX_IRGRP | APTX_IROTH;
+        if (FILE_ATTRIBUTE_READONLY & FileAttributes)
+        {
+            Request.Mode |= APTX_IWUSR | APTX_IWGRP | APTX_IWOTH;
+        }
+        Request.Mode |= (FILE_ATTRIBUTE_DIRECTORY & FileAttributes)
+            ? APTX_IFDIR
+            : APTX_IFREG;
+        if (FILE_ATTRIBUTE_REPARSE_POINT & FileAttributes)
+        {
+            Request.Mode |= APTX_IFLNK;
+        }
+        g_Instance->SetAttr(Request);
+    }
+    catch (...)
+    {
+        return ::GetNtStatusAndLogToConsole("SetFileAttributes");
+    }
+
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS DOKAN_CALLBACK MileCirnoSetFileTime(
+    _In_ LPCWSTR FileName,
+    _In_ CONST FILETIME* CreationTime,
+    _In_ CONST FILETIME* LastAccessTime,
+    _In_ CONST FILETIME* LastWriteTime,
+    _Inout_ PDOKAN_FILE_INFO DokanFileInfo)
+{
+    UNREFERENCED_PARAMETER(FileName);
+    UNREFERENCED_PARAMETER(CreationTime);
+
+    std::uint32_t FileId = static_cast<std::uint32_t>(
+        DokanFileInfo->Context);
+    if (MILE_CIRNO_NOFID == FileId)
+    {
+        return STATUS_INVALID_HANDLE;
+    }
+
+    try
+    {
+        Mile::Cirno::SetAttrRequest Request = {};
+        Request.FileId = FileId;
+        Request.Valid = 0;
+        if (LastAccessTime)
+        {
+            Request.Valid =
+                MileCirnoLinuxSetAttrFlagLastAccessTime |
+                MileCirnoLinuxSetAttrFlagLastAccessTimeSet;
+            ::FromFileTime(
+                *LastAccessTime,
+                Request.LastAccessTimeSeconds,
+                Request.LastAccessTimeNanoseconds);
+        }
+        if (LastWriteTime)
+        {
+            Request.Valid =
+                MileCirnoLinuxSetAttrFlagLastWriteTime |
+                MileCirnoLinuxSetAttrFlagLastWriteTimeSet;
+            ::FromFileTime(
+                *LastWriteTime,
+                Request.LastWriteTimeSeconds,
+                Request.LastWriteTimeNanoseconds);
+        }
+        g_Instance->SetAttr(Request);
+    }
+    catch (...)
+    {
+        return ::GetNtStatusAndLogToConsole("SetFileTime");
+    }
+
+    return STATUS_SUCCESS;
+}
+
 NTSTATUS DOKAN_CALLBACK MileCirnoDeleteFile(
     _In_ LPCWSTR FileName,
     _Inout_ PDOKAN_FILE_INFO DokanFileInfo)
@@ -656,6 +749,36 @@ NTSTATUS DOKAN_CALLBACK MileCirnoDeleteDirectory(
     catch (...)
     {
         return ::GetNtStatusAndLogToConsole("DeleteDirectory");
+    }
+
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS DOKAN_CALLBACK MileCirnoSetEndOfFile(
+    _In_ LPCWSTR FileName,
+    _In_ LONGLONG ByteOffset,
+    _Inout_ PDOKAN_FILE_INFO DokanFileInfo)
+{
+    UNREFERENCED_PARAMETER(FileName);
+
+    std::uint32_t FileId = static_cast<std::uint32_t>(
+        DokanFileInfo->Context);
+    if (MILE_CIRNO_NOFID == FileId)
+    {
+        return STATUS_INVALID_HANDLE;
+    }
+
+    try
+    {
+        Mile::Cirno::SetAttrRequest Request = {};
+        Request.FileId = FileId;
+        Request.Valid = MileCirnoLinuxSetAttrFlagSize;
+        Request.FileSize = ByteOffset;
+        g_Instance->SetAttr(Request);
+    }
+    catch (...)
+    {
+        return ::GetNtStatusAndLogToConsole("SetEndOfFile");
     }
 
     return STATUS_SUCCESS;
@@ -908,12 +1031,12 @@ int main()
     Operations.GetFileInformation = ::MileCirnoGetFileInformation;
     Operations.FindFiles = ::MileCirnoFindFiles;
     Operations.FindFilesWithPattern = nullptr;
-    Operations.SetFileAttributesW;
-    Operations.SetFileTime;
+    Operations.SetFileAttributesW = ::MileCirnoSetFileAttributes;
+    Operations.SetFileTime = ::MileCirnoSetFileTime;
     Operations.DeleteFileW = ::MileCirnoDeleteFile;
     Operations.DeleteDirectory = ::MileCirnoDeleteDirectory;
     Operations.MoveFileW; //
-    Operations.SetEndOfFile; //
+    Operations.SetEndOfFile = ::MileCirnoSetEndOfFile;
     Operations.SetAllocationSize;
     Operations.LockFile;
     Operations.UnlockFile;
