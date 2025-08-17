@@ -494,6 +494,77 @@ NTSTATUS DOKAN_CALLBACK MileCirnoReadFile(
     return STATUS_SUCCESS;
 }
 
+NTSTATUS DOKAN_CALLBACK MileCirnoWriteFile(
+    _In_ LPCWSTR FileName,
+    _In_ LPCVOID Buffer,
+    _In_ DWORD NumberOfBytesToWrite,
+    _Out_opt_ LPDWORD NumberOfBytesWritten,
+    _In_ LONGLONG Offset,
+    _Inout_ PDOKAN_FILE_INFO DokanFileInfo)
+{
+    UNREFERENCED_PARAMETER(FileName);
+
+    std::uint32_t FileId = static_cast<std::uint32_t>(
+        DokanFileInfo->Context);
+    if (MILE_CIRNO_NOFID == FileId)
+    {
+        return STATUS_INVALID_HANDLE;
+    }
+
+    DWORD ProceededSize = 0;
+    DWORD UnproceededSize = NumberOfBytesToWrite;
+
+    try
+    {
+        if (DokanFileInfo->WriteToEndOfFile || -1 == Offset)
+        {
+            Mile::Cirno::GetAttributesRequest Request;
+            Request.FileId = FileId;
+            Request.RequestMask = MileCirnoLinuxGetAttributesFlagSize;
+            Mile::Cirno::GetAttributesResponse Response =
+                g_Instance->GetAttributes(Request);
+            Offset = Response.FileSize;
+        }
+
+        while (UnproceededSize)
+        {
+            Mile::Cirno::WriteRequest Request;
+            Request.FileId = FileId;
+            Request.Offset = Offset + ProceededSize;
+            std::uint32_t RequestCount = g_MaximumMessageSize;
+            RequestCount -= Mile::Cirno::WriteRequestHeaderSize;
+            if (UnproceededSize < RequestCount)
+            {
+                RequestCount = UnproceededSize;
+            }
+            Request.Data.resize(RequestCount);
+            std::memcpy(
+                Request.Data.data(),
+                static_cast<const std::uint8_t*>(Buffer) + ProceededSize,
+                Request.Data.size());
+            Mile::Cirno::WriteResponse Response = g_Instance->Write(Request);
+            DWORD CurrentProceededSize = static_cast<DWORD>(Response.Count);
+            if (!CurrentProceededSize)
+            {
+                break;
+            }
+            ProceededSize += CurrentProceededSize;
+            UnproceededSize -= CurrentProceededSize;
+        }
+    }
+    catch (...)
+    {
+        return ::GetNtStatusAndLogToConsole("WriteFile");
+    }
+
+    if (NumberOfBytesWritten)
+    {
+        *NumberOfBytesWritten = ProceededSize;
+    }
+
+    return STATUS_SUCCESS;
+}
+
 NTSTATUS DOKAN_CALLBACK MileCirnoFlushFileBuffers(
     _In_ LPCWSTR FileName,
     _Inout_ PDOKAN_FILE_INFO DokanFileInfo)
@@ -1162,7 +1233,7 @@ int main()
     Operations.Cleanup = ::MileCirnoCleanup;
     Operations.CloseFile = ::MileCirnoCloseFile;
     Operations.ReadFile = ::MileCirnoReadFile;
-    Operations.WriteFile; //
+    Operations.WriteFile = ::MileCirnoWriteFile;
     Operations.FlushFileBuffers = ::MileCirnoFlushFileBuffers;
     Operations.GetFileInformation = ::MileCirnoGetFileInformation;
     Operations.FindFiles = ::MileCirnoFindFiles;
