@@ -201,6 +201,22 @@ namespace
     std::uint32_t g_MaximumMessageSize = Mile::Cirno::DefaultMaximumMessageSize;
 }
 
+std::uint32_t SimpleAttach(
+    std::uint32_t const& AuthenticationFileId,
+    std::string const& UserName,
+    std::string const& AccessName,
+    std::uint32_t const& NumericUserName)
+{
+    Mile::Cirno::AttachRequest Request;
+    Request.FileId = g_Instance->AllocateFileId();
+    Request.AuthenticationFileId = AuthenticationFileId;
+    Request.UserName = UserName;
+    Request.AccessName = AccessName;
+    Request.NumericUserName = NumericUserName;
+    g_Instance->Attach(Request);
+    return Request.FileId;
+}
+
 std::uint32_t SimpleWalk(
     std::uint32_t const& RootDirectoryFileId,
     std::filesystem::path const& RelativeFilePath)
@@ -995,7 +1011,7 @@ int main()
         {
             if (MILE_CIRNO_NOFID == g_RootDirectoryFileId)
             {
-                g_Instance->FreeFileId(g_RootDirectoryFileId);
+                ::SimpleClunk(g_RootDirectoryFileId);
             }
             delete g_Instance;
             g_Instance = nullptr;
@@ -1051,19 +1067,11 @@ int main()
             g_MaximumMessageSize = Response.MaximumMessageSize;
         }
 
-        {
-            Mile::Cirno::AttachRequest Request;
-            Request.FileId = g_Instance->AllocateFileId();
-            Request.AuthenticationFileId = MILE_CIRNO_NOFID;
-            Request.UserName = "";
-            Request.AccessName = AccessName;
-            Request.NumericUserName = MILE_CIRNO_NONUNAME;
-            Mile::Cirno::AttachResponse Response = g_Instance->Attach(Request);
-            g_RootDirectoryFileId = Request.FileId;
-            std::printf(
-                "[INFO] Response.UniqueId.Path = 0x%016llX\n",
-                Response.UniqueId.Path);
-        }
+        g_RootDirectoryFileId = ::SimpleAttach(
+            MILE_CIRNO_NOFID,
+            "",
+            AccessName,
+            MILE_CIRNO_NONUNAME);
     }
     catch (...)
     {
