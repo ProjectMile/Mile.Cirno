@@ -201,6 +201,30 @@ namespace
     std::uint32_t g_MaximumMessageSize = Mile::Cirno::DefaultMaximumMessageSize;
 }
 
+std::uint32_t SimpleWalk(
+    std::uint32_t const& RootDirectoryFileId,
+    std::filesystem::path const& RelativeFilePath)
+{
+    Mile::Cirno::WalkRequest WalkRequest;
+    WalkRequest.FileId = RootDirectoryFileId;
+    WalkRequest.NewFileId = g_Instance->AllocateFileId();
+    for (std::filesystem::path const& Element : RelativeFilePath)
+    {
+        WalkRequest.Names.push_back(Element.string());
+    }
+    g_Instance->Walk(WalkRequest);
+    return WalkRequest.NewFileId;
+}
+
+void SimpleClunk(
+    std::uint32_t const& FileId)
+{
+    Mile::Cirno::ClunkRequest Request;
+    Request.FileId = FileId;
+    g_Instance->Clunk(Request);
+    g_Instance->FreeFileId(FileId);
+}
+
 NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
     _In_ LPCWSTR FileName,
     _In_ PDOKAN_IO_SECURITY_CONTEXT SecurityContext,
@@ -232,17 +256,10 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
 
     try
     {
-        Mile::Cirno::WalkRequest WalkRequest;
-        WalkRequest.FileId = g_RootDirectoryFileId;
-        WalkRequest.NewFileId = g_Instance->AllocateFileId();
-        std::filesystem::path RelativePath(&FileName[1]);
-        for (std::filesystem::path const& Element : RelativePath)
-        {
-            WalkRequest.Names.push_back(Element.string());
-        }
+        std::uint32_t FileId = MILE_CIRNO_NOFID;
         try
         {
-            g_Instance->Walk(WalkRequest);
+            FileId = ::SimpleWalk(g_RootDirectoryFileId, &FileName[1]);
         }
         catch (...)
         {
@@ -266,7 +283,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
         }
 
         Mile::Cirno::GetAttributesRequest GetAttributesRequest;
-        GetAttributesRequest.FileId = WalkRequest.NewFileId;
+        GetAttributesRequest.FileId = FileId;
         GetAttributesRequest.RequestMask = MileCirnoLinuxGetAttributesFlagMode;
         Mile::Cirno::GetAttributesResponse GetAttributesResponse =
             g_Instance->GetAttributes(GetAttributesRequest);
@@ -327,7 +344,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
         if (!RequestCreate)
         {
             Mile::Cirno::LinuxOpenRequest Request;
-            Request.FileId = WalkRequest.NewFileId;
+            Request.FileId = FileId;
             Request.Flags = Flags;
             g_Instance->LinuxOpen(Request);
         }
@@ -336,7 +353,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
             // TODO: LinuxCreate
         }
 
-        DokanFileInfo->Context = WalkRequest.NewFileId;
+        DokanFileInfo->Context = FileId;
     }
     catch (...)
     {
@@ -389,10 +406,7 @@ void DOKAN_CALLBACK MileCirnoCloseFile(
 
     try
     {
-        Mile::Cirno::ClunkRequest Request;
-        Request.FileId = FileId;
-        g_Instance->Clunk(Request);
-        g_Instance->FreeFileId(FileId);
+        ::SimpleClunk(FileId);
     }
     catch (...)
     {
@@ -605,31 +619,26 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
 
                 try
                 {
-                    Mile::Cirno::WalkRequest WalkRequest;
-                    WalkRequest.FileId = FileId;
-                    WalkRequest.NewFileId = g_Instance->AllocateFileId();
-                    WalkRequest.Names.push_back(Entry.Name);
-                    g_Instance->Walk(WalkRequest);
+                    std::uint32_t CurrentFileId =
+                        ::SimpleWalk(FileId, Entry.Name);
                     auto CurrentCleanupHandler = Mile::ScopeExitTaskHandler([&]()
                     {
-                        if (MILE_CIRNO_NOFID != WalkRequest.NewFileId)
+                        if (MILE_CIRNO_NOFID != CurrentFileId)
                         {
                             try
                             {
-                                Mile::Cirno::ClunkRequest ClunkRequest;
-                                ClunkRequest.FileId = WalkRequest.NewFileId;
-                                g_Instance->Clunk(ClunkRequest);
+                                ::SimpleClunk(CurrentFileId);
                             }
                             catch (...)
                             {
                                 ::GetNtStatusAndLogToConsole("FindFiles.Clunk");
                             }
-                            g_Instance->FreeFileId(WalkRequest.NewFileId);
+                            g_Instance->FreeFileId(CurrentFileId);
                         }
                     });
 
                     Mile::Cirno::GetAttributesRequest InformationRequest;
-                    InformationRequest.FileId = WalkRequest.NewFileId;
+                    InformationRequest.FileId = CurrentFileId;
                     InformationRequest.RequestMask =
                         MileCirnoLinuxGetAttributesFlagMode |
                         MileCirnoLinuxGetAttributesFlagNumberOfHardLinks |
