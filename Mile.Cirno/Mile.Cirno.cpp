@@ -270,105 +270,140 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
         L"[INFO] FileName = %s\n",
         FileName);
 
-    try
+    bool MaybeRequestLinuxCreate = false;
+    bool MaybeRequestCreateDirectory = false;
+    std::uint32_t FileMode = 0;
+    std::uint32_t Flags =
+        MileCirnoLinuxOpenCreateFlagLargeFile |
+        MileCirnoLinuxOpenCreateFlagCloseOnExecute;
+    if ((FILE_GENERIC_READ | FILE_GENERIC_WRITE) & ConvertedDesiredAccess)
     {
-        std::uint32_t FileId = MILE_CIRNO_NOFID;
-        try
+        Flags |= MileCirnoLinuxOpenCreateFlagReadWrite;
+        FileMode |= APTX_IRUSR | APTX_IRGRP | APTX_IROTH;
+        FileMode |= APTX_IWUSR | APTX_IWGRP | APTX_IWOTH;
+    }
+    else if (FILE_GENERIC_READ & ConvertedDesiredAccess)
+    {
+        Flags |= MileCirnoLinuxOpenCreateFlagReadOnly;
+        FileMode |= APTX_IRUSR | APTX_IRGRP | APTX_IROTH;
+    }
+    else if (FILE_GENERIC_WRITE & ConvertedDesiredAccess)
+    {
+        Flags |= MileCirnoLinuxOpenCreateFlagWriteOnly;
+        FileMode |= APTX_IWUSR | APTX_IWGRP | APTX_IWOTH;
+    }
+    if (FILE_FLAG_OVERLAPPED & ConvertedFlagsAndAttributes)
+    {
+        Flags |= MileCirnoLinuxOpenCreateFlagNonBlock;
+    }
+    switch (ConvertedCreationDisposition)
+    {
+    case CREATE_NEW: // fallthrough
+        Flags |= MileCirnoLinuxOpenCreateFlagCreateOnlyWhenNotExist;
+    case CREATE_ALWAYS: // fallthrough
+    case OPEN_ALWAYS:
+        MaybeRequestLinuxCreate = true;
+        if (DokanFileInfo->IsDirectory)
         {
-            FileId = ::SimpleWalk(g_RootDirectoryFileId, &FileName[1]);
+            MaybeRequestCreateDirectory = true;
         }
-        catch (...)
-        {
-            bool RequestCreateDirectory = false;
-            if (DokanFileInfo->IsDirectory)
-            {
-                if (CREATE_NEW == ConvertedCreationDisposition ||
-                    OPEN_ALWAYS == ConvertedCreationDisposition)
-                {
-                    RequestCreateDirectory = true;
-                }
-            }
-            if (!RequestCreateDirectory)
-            {
-                throw;
-            }
-            else
-            {
-                // TODO: MakeDirectory
-            }
-        }
-
-        Mile::Cirno::GetAttributesRequest GetAttributesRequest;
-        GetAttributesRequest.FileId = FileId;
-        GetAttributesRequest.RequestMask = MileCirnoLinuxGetAttributesFlagMode;
-        Mile::Cirno::GetAttributesResponse GetAttributesResponse =
-            g_Instance->GetAttributes(GetAttributesRequest);
-
-        bool RequestCreate = false;
-        std::uint32_t Flags =
-            MileCirnoLinuxOpenCreateFlagLargeFile |
-            MileCirnoLinuxOpenCreateFlagCloseOnExecute;
-        if ((FILE_GENERIC_READ | FILE_GENERIC_WRITE) & ConvertedDesiredAccess)
-        {
-            Flags |= MileCirnoLinuxOpenCreateFlagReadWrite;
-        }
-        else if (FILE_GENERIC_READ & ConvertedDesiredAccess)
-        {
-            Flags |= MileCirnoLinuxOpenCreateFlagReadOnly;
-        }
-        else if (FILE_GENERIC_WRITE & ConvertedDesiredAccess)
+        Flags |= MileCirnoLinuxOpenCreateFlagCreate;
+        break;
+    case OPEN_EXISTING:
+        break;
+    case TRUNCATE_EXISTING:
+        Flags |= MileCirnoLinuxOpenCreateFlagTruncate;
+        if ((MileCirnoLinuxOpenCreateFlagReadWrite & Flags) ||
+            (MileCirnoLinuxOpenCreateFlagWriteOnly & Flags))
         {
             Flags |= MileCirnoLinuxOpenCreateFlagWriteOnly;
         }
-        if (FILE_FLAG_OVERLAPPED & ConvertedFlagsAndAttributes)
+        break;
+    default:
+        break;
+    }
+
+    try
+    {
+        std::filesystem::path FilePath(&FileName[1]);
+        if (FilePath.empty() || FilePath.is_absolute())
         {
-            Flags |= MileCirnoLinuxOpenCreateFlagNonBlock;
+            return STATUS_OBJECT_NAME_NOT_FOUND;
         }
-        switch (ConvertedCreationDisposition)
+
+        std::uint32_t RootDirectoryFileId = ::SimpleWalk(
+            g_RootDirectoryFileId,
+            FilePath.parent_path());
+
+        std::uint32_t RootDirectoryFileMode = 0;
+        std::uint32_t RootDirectoryGroupId = 0;
         {
-        case CREATE_NEW:
-            RequestCreate = true;
-            Flags |= MileCirnoLinuxOpenCreateFlagCreate;
-            Flags |= MileCirnoLinuxOpenCreateFlagCreateOnlyWhenNotExist;
-            break;
-        case CREATE_ALWAYS:
-            RequestCreate = true;
-            Flags |= MileCirnoLinuxOpenCreateFlagCreate;
-            break;
-        case OPEN_EXISTING:
-            break;
-        case OPEN_ALWAYS:
-            Flags |= MileCirnoLinuxOpenCreateFlagCreate;
-            break;
-        case TRUNCATE_EXISTING:
-            Flags |= MileCirnoLinuxOpenCreateFlagTruncate;
-            if ((MileCirnoLinuxOpenCreateFlagReadWrite & Flags) ||
-                (MileCirnoLinuxOpenCreateFlagWriteOnly & Flags))
+            Mile::Cirno::GetAttributesRequest Request;
+            Request.FileId = RootDirectoryFileId;
+            Request.RequestMask =
+                MileCirnoLinuxGetAttributesFlagMode |
+                MileCirnoLinuxGetAttributesFlagGroupId;
+            Mile::Cirno::GetAttributesResponse Response =
+                g_Instance->GetAttributes(Request);
+            RootDirectoryFileMode = Response.Mode;
+            RootDirectoryGroupId = Response.GroupId;
+        }
+
+        std::uint32_t FileId = MILE_CIRNO_NOFID;
+        try
+        {
+            FileId = ::SimpleWalk(RootDirectoryFileId, FilePath.filename());
+        }
+        catch (...)
+        {
+            if (MaybeRequestCreateDirectory)
             {
-                Flags |= MileCirnoLinuxOpenCreateFlagWriteOnly;
+                Mile::Cirno::MakeDirectoryRequest Request;
+                Request.DirectoryFileId = RootDirectoryFileId;
+                Request.Name = FilePath.filename().string();
+                Request.Mode = APTX_IRWXU;
+                Request.Mode |= APTX_IRGRP | APTX_IXGRP;
+                Request.Mode |= APTX_IROTH | APTX_IXOTH;
+                Request.GroupId = RootDirectoryGroupId;
+                g_Instance->MakeDirectory(Request);
+                FileId = ::SimpleWalk(RootDirectoryFileId, FilePath.filename());
+                DokanFileInfo->Context = FileId;
+                return STATUS_SUCCESS;
             }
-            break;
-        default:
-            break;
-        }
-        if (APTX_IFDIR & GetAttributesResponse.Mode)
-        {
-            DokanFileInfo->IsDirectory = TRUE;
-            Flags |= MileCirnoLinuxOpenCreateFlagDirectory;
+
+            if (MaybeRequestLinuxCreate)
+            {
+                Mile::Cirno::LinuxCreateRequest Request;
+                Request.FileId = RootDirectoryFileId;
+                Request.Name = FilePath.filename().string();
+                Request.Flags = Flags;
+                Request.Mode = FileMode;
+                Request.GroupId = RootDirectoryGroupId;
+                FileId = ::SimpleWalk(RootDirectoryFileId, FilePath.filename());
+                DokanFileInfo->Context = FileId;
+                return STATUS_SUCCESS;
+            }
+
+            throw;
         }
 
-        if (!RequestCreate)
         {
-            Mile::Cirno::LinuxOpenRequest Request;
+            Mile::Cirno::GetAttributesRequest Request;
             Request.FileId = FileId;
-            Request.Flags = Flags;
-            g_Instance->LinuxOpen(Request);
-        }
-        else
-        {
-            // TODO: LinuxCreate
+            Request.RequestMask = MileCirnoLinuxGetAttributesFlagMode;
+            Mile::Cirno::GetAttributesResponse Response =
+                g_Instance->GetAttributes(Request);
+            if (APTX_IFDIR & Response.Mode)
+            {
+                DokanFileInfo->IsDirectory = TRUE;
+                Flags |= MileCirnoLinuxOpenCreateFlagDirectory;
+            }
         }
 
+        Mile::Cirno::LinuxOpenRequest Request;
+        Request.FileId = FileId;
+        Request.Flags = Flags;
+        g_Instance->LinuxOpen(Request);
         DokanFileInfo->Context = FileId;
     }
     catch (...)
