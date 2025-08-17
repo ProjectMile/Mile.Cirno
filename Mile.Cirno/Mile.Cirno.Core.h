@@ -97,6 +97,9 @@ namespace Mile::Cirno
         void SetAttr(
             SetAttrRequest const& Request);
 
+        void Fsync(
+            FsyncRequest const& Request);
+
     private:
 
         void Initialize();

@@ -499,6 +499,21 @@ void Mile::Cirno::Client::SetAttr(
         ResponseBuffer);
 }
 
+void Mile::Cirno::Client::Fsync(
+    Mile::Cirno::FsyncRequest const& Request)
+{
+    std::vector<std::uint8_t> RequestBuffer;
+    Mile::Cirno::PushFsyncRequest(
+        RequestBuffer,
+        Request);
+    std::vector<std::uint8_t> ResponseBuffer;
+    this->Request(
+        MileCirnoFsyncRequestMessage,
+        RequestBuffer,
+        MileCirnoFsyncResponseMessage,
+        ResponseBuffer);
+}
+
 void Mile::Cirno::Client::Initialize()
 {
     this->m_ReceiveWorkerThread = Mile::CreateThread([this]()
