@@ -639,17 +639,16 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
                         ::SimpleWalk(FileId, Entry.Name);
                     auto CurrentCleanupHandler = Mile::ScopeExitTaskHandler([&]()
                     {
-                        if (MILE_CIRNO_NOFID != CurrentFileId)
+                        try
                         {
-                            try
+                            if (MILE_CIRNO_NOFID != CurrentFileId)
                             {
                                 ::SimpleClunk(CurrentFileId);
                             }
-                            catch (...)
-                            {
-                                ::GetNtStatusAndLogToConsole("FindFiles.Clunk");
-                            }
-                            g_Instance->FreeFileId(CurrentFileId);
+                        }
+                        catch (...)
+                        {
+                            ::GetNtStatusAndLogToConsole("FindFiles");
                         }
                     });
 
@@ -684,7 +683,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
                 }
                 catch (...)
                 {
-                    ::GetNtStatusAndLogToConsole("FindFiles.Walk");
+                    ::GetNtStatusAndLogToConsole("FindFiles");
                 }
 
                 FillFindData(&FindData, DokanFileInfo);
@@ -832,6 +831,67 @@ NTSTATUS DOKAN_CALLBACK MileCirnoDeleteDirectory(
     catch (...)
     {
         return ::GetNtStatusAndLogToConsole("DeleteDirectory");
+    }
+
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS DOKAN_CALLBACK MileCirnoMoveFile(
+    _In_ LPCWSTR FileName,
+    _In_ LPCWSTR NewFileName,
+    _In_ BOOL ReplaceIfExisting,
+    _Inout_ PDOKAN_FILE_INFO DokanFileInfo)
+{
+    UNREFERENCED_PARAMETER(ReplaceIfExisting);
+
+    std::uint32_t FileId = static_cast<std::uint32_t>(
+        DokanFileInfo->Context);
+    if (MILE_CIRNO_NOFID == FileId)
+    {
+        return STATUS_INVALID_HANDLE;
+    }
+
+    std::filesystem::path OldFilePath(&FileName[1]);
+    std::filesystem::path NewFilePath(&NewFileName[1]);
+
+    try
+    {
+        std::uint32_t OldDirectoryFileId =
+            ::SimpleWalk(g_RootDirectoryFileId, OldFilePath.parent_path());
+
+        std::uint32_t NewDirectoryFileId =
+            ::SimpleWalk(g_RootDirectoryFileId, NewFilePath.parent_path());
+
+        auto CleanupHandler = Mile::ScopeExitTaskHandler([&]()
+        {
+            try
+            {
+                if (MILE_CIRNO_NOFID != NewDirectoryFileId)
+                {
+                    ::SimpleClunk(NewDirectoryFileId);
+                }
+
+                if (MILE_CIRNO_NOFID != OldDirectoryFileId)
+                {
+                    ::SimpleClunk(OldDirectoryFileId);
+                }
+            }
+            catch (...)
+            {
+                ::GetNtStatusAndLogToConsole("MoveFile");
+            }
+        });
+
+        Mile::Cirno::RenameAtRequest Request;
+        Request.OldDirectoryFileId = OldDirectoryFileId;
+        Request.OldName = OldFilePath.filename().string();
+        Request.NewDirectoryFileId = NewDirectoryFileId;
+        Request.NewName = NewFilePath.filename().string();
+        g_Instance->RenameAt(Request);
+    }
+    catch (...)
+    {
+        return ::GetNtStatusAndLogToConsole("MoveFile");
     }
 
     return STATUS_SUCCESS;
@@ -1111,7 +1171,7 @@ int main()
     Operations.SetFileTime = ::MileCirnoSetFileTime;
     Operations.DeleteFileW = ::MileCirnoDeleteFile;
     Operations.DeleteDirectory = ::MileCirnoDeleteDirectory;
-    Operations.MoveFileW; //
+    Operations.MoveFileW = ::MileCirnoMoveFile;
     Operations.SetEndOfFile = ::MileCirnoSetEndOfFile;
     Operations.SetAllocationSize;
     Operations.LockFile;
