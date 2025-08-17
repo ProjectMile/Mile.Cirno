@@ -240,7 +240,30 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
         {
             WalkRequest.Names.push_back(Element.string());
         }
-        g_Instance->Walk(WalkRequest);
+        try
+        {
+            g_Instance->Walk(WalkRequest);
+        }
+        catch (...)
+        {
+            bool RequestCreateDirectory = false;
+            if (DokanFileInfo->IsDirectory)
+            {
+                if (CREATE_NEW == ConvertedCreationDisposition ||
+                    OPEN_ALWAYS == ConvertedCreationDisposition)
+                {
+                    RequestCreateDirectory = true;
+                }
+            }
+            if (!RequestCreateDirectory)
+            {
+                throw;
+            }
+            else
+            {
+                // TODO: MkDir
+            }
+        }
 
         Mile::Cirno::GetAttrRequest GetAttrRequest;
         GetAttrRequest.FileId = WalkRequest.NewFileId;
@@ -252,18 +275,18 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
         std::uint32_t Flags =
             MileCirnoLinuxOpenCreateFlagLargeFile |
             MileCirnoLinuxOpenCreateFlagCloseOnExecute;
-        /*if ((GENERIC_READ | GENERIC_WRITE) & ConvertedDesiredAccess)
+        if ((FILE_GENERIC_READ | FILE_GENERIC_WRITE) & ConvertedDesiredAccess)
         {
             Flags |= MileCirnoLinuxOpenCreateFlagReadWrite;
         }
-        else if (GENERIC_READ & ConvertedDesiredAccess)
+        else if (FILE_GENERIC_READ & ConvertedDesiredAccess)
         {
             Flags |= MileCirnoLinuxOpenCreateFlagReadOnly;
         }
-        else if (GENERIC_WRITE & ConvertedDesiredAccess)
+        else if (FILE_GENERIC_WRITE & ConvertedDesiredAccess)
         {
             Flags |= MileCirnoLinuxOpenCreateFlagWriteOnly;
-        }*/
+        }
         if (FILE_FLAG_OVERLAPPED & ConvertedFlagsAndAttributes)
         {
             Flags |= MileCirnoLinuxOpenCreateFlagNonBlock;
@@ -286,27 +309,34 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
             break;
         case TRUNCATE_EXISTING:
             Flags |= MileCirnoLinuxOpenCreateFlagTruncate;
+            if ((MileCirnoLinuxOpenCreateFlagReadWrite & Flags) ||
+                (MileCirnoLinuxOpenCreateFlagWriteOnly & Flags))
+            {
+                Flags |= MileCirnoLinuxOpenCreateFlagWriteOnly;
+            }
             break;
         default:
             break;
         }
-        if (S_IFDIR & GetAttrResponse.Mode)
+        if (APTX_IFDIR & GetAttrResponse.Mode)
         {
+            DokanFileInfo->IsDirectory = TRUE;
             Flags |= MileCirnoLinuxOpenCreateFlagDirectory;
         }
 
+        if (!RequestCreate)
         {
             Mile::Cirno::LinuxOpenRequest Request;
             Request.FileId = WalkRequest.NewFileId;
             Request.Flags = Flags;
             g_Instance->LinuxOpen(Request);
         }
+        else
+        {
+            // TODO: LinuxCreate
+        }
 
         DokanFileInfo->Context = WalkRequest.NewFileId;
-        if (S_IFDIR & GetAttrResponse.Mode)
-        {
-            DokanFileInfo->IsDirectory = TRUE;
-        }
     }
     catch (...)
     {
