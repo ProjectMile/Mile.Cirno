@@ -289,6 +289,48 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
         }
     }
 
+    //if (!FileExists)
+    //{
+    //    if (DokanFileInfo->IsDirectory)
+    //    {
+    //        return STATUS_INVALID_PARAMETER;
+    //    }
+    //    // TODO: CreateFile
+    //}
+    //else
+    //{
+    //    if (IsStatusDirectory)
+    //    {
+    //        DokanFileInfo->IsDirectory = TRUE;
+    //        if (CreateOptions & FILE_NON_DIRECTORY_FILE)
+    //            return STATUS_OBJECT_NAME_NOT_FOUND;
+    //        // TODO: OpenDirectory and return
+    //    }
+    //    else
+    //    {
+    //        if (FILE_OVERWRITE == CreateDisposition)
+    //        {
+    //            // TODO: RemoveFile
+    //            // TODO: CreateFile and return
+    //        }
+    //        else if (
+    //            FILE_SUPERSEDE == CreateDisposition ||
+    //            FILE_OVERWRITE_IF == CreateDisposition)
+    //        {
+    //            // TODO: TruncateFile
+    //        }
+    //        else if (FILE_CREATE == CreateDisposition)
+    //        {
+    //            return STATUS_OBJECT_NAME_COLLISION;
+    //        }
+
+    //        // TODO: OpenFile
+    //        // if OK and (FILE_OVERWRITE_IF == CreateDisposition || FILE_OPEN_IF == CreateDisposition) return STATUS_OBJECT_NAME_COLLISION
+
+    //        // return res
+    //    }
+    //}
+
     // TODO: MakeFile or OpenFile
     // Then return
 
