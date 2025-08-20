@@ -592,8 +592,24 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
                 Mile::Cirno::LinuxOpenRequest Request;
                 Request.FileId = FileId;
                 Request.Flags = ConvertedFlags;
-                g_Instance->LinuxOpen(Request);
-                DokanFileInfo->Context = FileId;
+                try
+                {
+                    g_Instance->LinuxOpen(Request);
+                    DokanFileInfo->Context = FileId;
+                }
+                catch (...)
+                {
+                    Status = ::GetNtStatusAndLogToConsole("ZwCreateFile.Open");
+                    if (STATUS_MEDIA_WRITE_PROTECTED == Status)
+                    {
+                        Status = STATUS_SUCCESS;
+                        Request.Flags &= ~MileCirnoLinuxOpenCreateFlagWriteOnly;
+                        Request.Flags &= ~MileCirnoLinuxOpenCreateFlagReadWrite;
+                        Request.Flags |= MileCirnoLinuxOpenCreateFlagReadOnly;
+                        g_Instance->LinuxOpen(Request);
+                        DokanFileInfo->Context = FileId;
+                    }
+                }
             }
         }
         catch (...)
