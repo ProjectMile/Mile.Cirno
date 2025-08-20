@@ -354,28 +354,28 @@ typedef enum _MILE_CIRNO_OPEN_MODE
  */
 typedef enum _MILE_CIRNO_LINUX_OPEN_CREATE_FLAGS
 {
-    MileCirnoLinuxOpenCreateFlagReadOnly = 000000000U,
-    MileCirnoLinuxOpenCreateFlagWriteOnly = 000000001U,
-    MileCirnoLinuxOpenCreateFlagReadWrite = 000000002U,
+    MileCirnoLinuxOpenCreateFlagReadOnly = 000000000U, // O_RDONLY
+    MileCirnoLinuxOpenCreateFlagWriteOnly = 000000001U, // O_WRONLY
+    MileCirnoLinuxOpenCreateFlagReadWrite = 000000002U, // O_RDWR
     MileCirnoLinuxOpenCreateFlagNoAccess = 000000003U,
-    MileCirnoLinuxOpenCreateFlagAccessMask = 000000003U,
-    MileCirnoLinuxOpenCreateFlagCreate = 000000100U,
-    MileCirnoLinuxOpenCreateFlagCreateOnlyWhenNotExist = 000000200U,
-    MileCirnoLinuxOpenCreateFlagNoControllingTerminal = 000000400U,
-    MileCirnoLinuxOpenCreateFlagTruncate = 000001000U,
-    MileCirnoLinuxOpenCreateFlagAppend = 000002000U,
-    MileCirnoLinuxOpenCreateFlagNonBlock = 000004000U,
-    MileCirnoLinuxOpenCreateFlagDataSynchronize = 000010000U,
-    MileCirnoLinuxOpenCreateFlagFileAsynchronize = 000020000U,
-    MileCirnoLinuxOpenCreateFlagDirect = 000040000U,
-    MileCirnoLinuxOpenCreateFlagLargeFile = 000100000U,
-    MileCirnoLinuxOpenCreateFlagDirectory = 000200000U,
-    MileCirnoLinuxOpenCreateFlagNoFollowSymbolicLink = 000400000U,
-    MileCirnoLinuxOpenCreateFlagNoLastAccessTime = 001000000U,
-    MileCirnoLinuxOpenCreateFlagCloseOnExecute = 002000000U,
-    MileCirnoLinuxOpenCreateFlagSynchronize = 004000000U,
-    MileCirnoLinuxOpenCreateFlagPath = 010000000U,
-    MileCirnoLinuxOpenCreateFlagTemporaryFile = 020000000U,
+    MileCirnoLinuxOpenCreateFlagAccessMask = 000000003U, // O_ACCMODE
+    MileCirnoLinuxOpenCreateFlagCreate = 000000100U, // O_CREAT
+    MileCirnoLinuxOpenCreateFlagExclusive = 000000200U, // O_EXCL
+    MileCirnoLinuxOpenCreateFlagNoControllingTerminal = 000000400U, // O_NOCTTY
+    MileCirnoLinuxOpenCreateFlagTruncate = 000001000U, // O_TRUNC
+    MileCirnoLinuxOpenCreateFlagAppend = 000002000U, // O_APPEND
+    MileCirnoLinuxOpenCreateFlagNonBlock = 000004000U, // O_NONBLOCK
+    MileCirnoLinuxOpenCreateFlagDataSynchronize = 000010000U, // O_DSYNC
+    MileCirnoLinuxOpenCreateFlagFileAsynchronize = 000020000U, // FASYNC
+    MileCirnoLinuxOpenCreateFlagDirect = 000040000U, // O_DIRECT
+    MileCirnoLinuxOpenCreateFlagLargeFile = 000100000U, // O_LARGEFILE
+    MileCirnoLinuxOpenCreateFlagDirectory = 000200000U, // O_DIRECTORY
+    MileCirnoLinuxOpenCreateFlagNoFollow = 000400000U, // O_NOFOLLOW
+    MileCirnoLinuxOpenCreateFlagNoAccessTime = 001000000U, // O_NOATIME
+    MileCirnoLinuxOpenCreateFlagCloseOnExecute = 002000000U, // O_CLOEXEC
+    MileCirnoLinuxOpenCreateFlagSynchronize = 004000000U, // O_SYNC
+    MileCirnoLinuxOpenCreateFlagPath = 010000000U, // O_PATH
+    MileCirnoLinuxOpenCreateFlagTemporaryFile = 020000000U, // O_TMPFILE
 } MILE_CIRNO_LINUX_OPEN_CREATE_FLAGS, *PMILE_CIRNO_LINUX_OPEN_CREATE_FLAGS;
 
 /**
