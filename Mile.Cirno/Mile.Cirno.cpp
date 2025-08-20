@@ -1330,6 +1330,36 @@ NTSTATUS DOKAN_CALLBACK MileCirnoSetEndOfFile(
     return STATUS_SUCCESS;
 }
 
+NTSTATUS DOKAN_CALLBACK MileCirnoSetAllocationSize(
+    _In_ LPCWSTR FileName,
+    _In_ LONGLONG AllocSize,
+    _Inout_ PDOKAN_FILE_INFO DokanFileInfo)
+{
+    UNREFERENCED_PARAMETER(FileName);
+
+    std::uint32_t FileId = static_cast<std::uint32_t>(
+        DokanFileInfo->Context);
+    if (MILE_CIRNO_NOFID == FileId)
+    {
+        return STATUS_INVALID_HANDLE;
+    }
+
+    try
+    {
+        Mile::Cirno::SetAttributesRequest Request = {};
+        Request.FileId = FileId;
+        Request.Valid = MileCirnoLinuxSetAttributesFlagSize;
+        Request.FileSize = AllocSize;
+        g_Instance->SetAttributes(Request);
+    }
+    catch (...)
+    {
+        return ::GetNtStatusAndLogToConsole("SetEndOfFile");
+    }
+
+    return STATUS_SUCCESS;
+}
+
 NTSTATUS DOKAN_CALLBACK MileCirnoGetDiskFreeSpace(
     _Out_opt_ PULONGLONG FreeBytesAvailable,
     _Out_opt_ PULONGLONG TotalNumberOfBytes,
@@ -1575,7 +1605,7 @@ int main()
     Operations.DeleteDirectory = ::MileCirnoDeleteDirectory;
     Operations.MoveFileW = ::MileCirnoMoveFile;
     Operations.SetEndOfFile = ::MileCirnoSetEndOfFile;
-    Operations.SetAllocationSize;
+    Operations.SetAllocationSize = ::MileCirnoSetAllocationSize;
     Operations.LockFile;
     Operations.UnlockFile;
     Operations.GetDiskFreeSpaceW = ::MileCirnoGetDiskFreeSpace;
