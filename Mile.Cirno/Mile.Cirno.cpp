@@ -266,7 +266,9 @@ NTSTATUS MileCirnoSimpleWalk(
         WalkRequest.NewFileId = OutputFileId;
         for (std::filesystem::path const& Element : RelativeFilePath)
         {
-            WalkRequest.Names.push_back(Element.string());
+            WalkRequest.Names.push_back(Mile::ToString(
+                CP_UTF8,
+                Element.wstring()));
         }
         g_Instance->Walk(WalkRequest);
     }
@@ -311,7 +313,9 @@ NTSTATUS MileCirnoSimpleMakeDirectory(
             {
                 Mile::Cirno::MakeDirectoryRequest Request;
                 Request.DirectoryFileId = RelativeRootDirectoryFileId;
-                Request.Name = RelativeFilePath.filename().string();
+                Request.Name = Mile::ToString(
+                    CP_UTF8,
+                    RelativeFilePath.filename().wstring());
                 Request.Mode = APTX_IRWXU;
                 Request.Mode |= APTX_IRGRP | APTX_IXGRP;
                 Request.Mode |= APTX_IROTH | APTX_IXOTH;
@@ -362,7 +366,9 @@ NTSTATUS MileCirnoSimpleLinuxCreate(
             {
                 Mile::Cirno::LinuxCreateRequest Request;
                 Request.FileId = RelativeRootDirectoryFileId;
-                Request.Name = RelativeFilePath.filename().string();
+                Request.Name = Mile::ToString(
+                    CP_UTF8,
+                    RelativeFilePath.filename().wstring());
                 Request.Flags = Flags;
                 Request.Mode = Mode;
                 Request.GroupId = RootDirectoryGroupId;
@@ -379,21 +385,6 @@ NTSTATUS MileCirnoSimpleLinuxCreate(
     }
 
     return Status;
-}
-
-std::uint32_t SimpleWalk(
-    std::uint32_t const& RootDirectoryFileId,
-    std::filesystem::path const& RelativeFilePath)
-{
-    Mile::Cirno::WalkRequest WalkRequest;
-    WalkRequest.FileId = RootDirectoryFileId;
-    WalkRequest.NewFileId = g_Instance->AllocateFileId();
-    for (std::filesystem::path const& Element : RelativeFilePath)
-    {
-        WalkRequest.Names.push_back(Element.string());
-    }
-    g_Instance->Walk(WalkRequest);
-    return WalkRequest.NewFileId;
 }
 
 #define MILE_CIRNO_ACCESS_READ ( \
@@ -951,25 +942,31 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
                     FindData.cFileName,
                     Mile::ToWideString(CP_UTF8, Entry.Name).c_str());
 
+                std::uint32_t CurrentFileId = MILE_CIRNO_NOFID;
+                auto CurrentCleanupHandler = Mile::ScopeExitTaskHandler([&]()
+                {
+                    try
+                    {
+                        if (MILE_CIRNO_NOFID != CurrentFileId)
+                        {
+                            ::MileCirnoSimpleClunk(CurrentFileId);
+                        }
+                    }
+                    catch (...)
+                    {
+                        ::GetNtStatusAndLogToConsole("FindFiles");
+                    }
+                });
+                if (STATUS_SUCCESS != ::MileCirnoSimpleWalk(
+                    CurrentFileId,
+                    FileId,
+                    Mile::ToWideString(CP_UTF8, Entry.Name)))
+                {
+                    continue;
+                }
+
                 try
                 {
-                    std::uint32_t CurrentFileId =
-                        ::SimpleWalk(FileId, Entry.Name);
-                    auto CurrentCleanupHandler = Mile::ScopeExitTaskHandler([&]()
-                    {
-                        try
-                        {
-                            if (MILE_CIRNO_NOFID != CurrentFileId)
-                            {
-                                ::MileCirnoSimpleClunk(CurrentFileId);
-                            }
-                        }
-                        catch (...)
-                        {
-                            ::GetNtStatusAndLogToConsole("FindFiles");
-                        }
-                    });
-
                     Mile::Cirno::GetAttributesRequest InformationRequest;
                     InformationRequest.FileId = CurrentFileId;
                     InformationRequest.RequestMask =
@@ -1172,39 +1169,58 @@ NTSTATUS DOKAN_CALLBACK MileCirnoMoveFile(
     std::filesystem::path OldFilePath(&FileName[1]);
     std::filesystem::path NewFilePath(&NewFileName[1]);
 
+    NTSTATUS Status = STATUS_SUCCESS;
+
+    std::uint32_t OldDirectoryFileId = MILE_CIRNO_NOFID;
+    std::uint32_t NewDirectoryFileId = MILE_CIRNO_NOFID;
+    auto CleanupHandler = Mile::ScopeExitTaskHandler([&]()
+    {
+        try
+        {
+            if (MILE_CIRNO_NOFID != NewDirectoryFileId)
+            {
+                ::MileCirnoSimpleClunk(NewDirectoryFileId);
+            }
+
+            if (MILE_CIRNO_NOFID != OldDirectoryFileId)
+            {
+                ::MileCirnoSimpleClunk(OldDirectoryFileId);
+            }
+        }
+        catch (...)
+        {
+            ::GetNtStatusAndLogToConsole("MoveFile");
+        }
+    });
+
+    Status = ::MileCirnoSimpleWalk(
+        OldDirectoryFileId,
+        g_RootDirectoryFileId,
+        OldFilePath.parent_path());
+    if (STATUS_SUCCESS != Status)
+    {
+        return Status;
+    }
+    Status = ::MileCirnoSimpleWalk(
+        NewDirectoryFileId,
+        g_RootDirectoryFileId,
+        NewFilePath.parent_path());
+    if (STATUS_SUCCESS != Status)
+    {
+        return Status;
+    }
+
     try
     {
-        std::uint32_t OldDirectoryFileId =
-            ::SimpleWalk(g_RootDirectoryFileId, OldFilePath.parent_path());
-
-        std::uint32_t NewDirectoryFileId =
-            ::SimpleWalk(g_RootDirectoryFileId, NewFilePath.parent_path());
-
-        auto CleanupHandler = Mile::ScopeExitTaskHandler([&]()
-        {
-            try
-            {
-                if (MILE_CIRNO_NOFID != NewDirectoryFileId)
-                {
-                    ::MileCirnoSimpleClunk(NewDirectoryFileId);
-                }
-
-                if (MILE_CIRNO_NOFID != OldDirectoryFileId)
-                {
-                    ::MileCirnoSimpleClunk(OldDirectoryFileId);
-                }
-            }
-            catch (...)
-            {
-                ::GetNtStatusAndLogToConsole("MoveFile");
-            }
-        });
-
         Mile::Cirno::RenameAtRequest Request;
         Request.OldDirectoryFileId = OldDirectoryFileId;
-        Request.OldName = OldFilePath.filename().string();
+        Request.OldName = Mile::ToString(
+            CP_UTF8,
+            OldFilePath.filename().wstring());
         Request.NewDirectoryFileId = NewDirectoryFileId;
-        Request.NewName = NewFilePath.filename().string();
+        Request.NewName = Mile::ToString(
+            CP_UTF8,
+            NewFilePath.filename().wstring());
         g_Instance->RenameAt(Request);
     }
     catch (...)
