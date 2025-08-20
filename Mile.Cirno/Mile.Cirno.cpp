@@ -1580,6 +1580,9 @@ int main()
         break;
     }
     // Use ExitProcess to ensure exit the process successfully when failed.
-    ::ExitProcess(static_cast<UINT>(DokanStatus));
+    if (DOKAN_SUCCESS != DokanStatus)
+    {
+        ::ExitProcess(static_cast<UINT>(DokanStatus));
+    }
     return DokanStatus;
 }
