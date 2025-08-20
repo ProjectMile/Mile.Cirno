@@ -848,7 +848,8 @@ namespace Mile
             std::string ProtocolVersion; // version
         };
 
-        const std::uint32_t DefaultMaximumMessageSize = 1 << 16;
+        // I think 1 MiB will be enough for most 9p scenarios.
+        const std::uint32_t DefaultMaximumMessageSize = 1 << 20;
 
         const std::string DefaultProtocolVersion = "9P2000.L";
 
