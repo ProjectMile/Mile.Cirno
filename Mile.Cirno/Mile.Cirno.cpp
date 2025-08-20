@@ -1520,5 +1520,50 @@ int main()
     Operations.GetFileSecurityW;
     Operations.SetFileSecurityW;
     Operations.FindStreams;
-    return ::DokanMain(&Options, &Operations);
+    int DokanStatus = ::DokanMain(&Options, &Operations);
+    switch (DokanStatus)
+    {
+    case DOKAN_SUCCESS:
+        std::printf(
+            "[INFO] The operation completed successfully.\n");
+        break;
+    case DOKAN_ERROR:
+        std::printf(
+            "[ERROR] Failed to mount %s to %s.\n",
+            AccessName.c_str(),
+            MountPoint.c_str());
+        break;
+    case DOKAN_DRIVE_LETTER_ERROR:
+        std::printf(
+            "[ERROR] The drive letter is not available.\n");
+        break;
+    case DOKAN_DRIVER_INSTALL_ERROR:
+        std::printf(
+            "[ERROR] Unable to install Dokany driver.\n");
+        break;
+    case DOKAN_START_ERROR:
+        std::printf(
+            "[ERROR] Unable to connect to Dokany driver.\n");
+        break;
+    case DOKAN_MOUNT_ERROR:
+        std::printf(
+            "[ERROR] Unable to assign a drive letter or mount point.\n");
+        break;
+    case DOKAN_MOUNT_POINT_ERROR:
+        std::printf(
+            "[ERROR] The mount point is invalid.\n");
+        break;
+    case DOKAN_VERSION_ERROR:
+        std::printf(
+            "[ERROR] The version of Dokany driver is not supported.\n");
+        break;
+    default:
+        std::printf(
+            "[ERROR] Unknown Dokany error: %d\n",
+            DokanStatus);
+        break;
+    }
+    // Use ExitProcess to ensure exit the process successfully when failed.
+    ::ExitProcess(static_cast<UINT>(DokanStatus));
+    return DokanStatus;
 }
