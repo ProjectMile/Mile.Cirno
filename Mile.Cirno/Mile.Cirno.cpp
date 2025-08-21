@@ -211,6 +211,21 @@ std::uint32_t CalculateFnv1aHash(
     return Hash;
 }
 
+DWORD ToFileAttributes(
+    std::uint32_t PosixFileMode)
+{
+    DWORD Result = APTX_IFDIR & PosixFileMode
+        ? FILE_ATTRIBUTE_DIRECTORY
+        : FILE_ATTRIBUTE_NORMAL;
+        
+    if (!((APTX_IWUSR | APTX_IWGRP | APTX_IWOTH) & PosixFileMode))
+    {
+        Result |= FILE_ATTRIBUTE_READONLY;
+    }
+
+    return Result;
+}
+
 namespace
 {
     Mile::Cirno::Client* g_Instance = nullptr;
@@ -878,12 +893,8 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetFileInformation(
         Mile::Cirno::GetAttributesResponse Response =
             g_Instance->GetAttributes(Request);
 
-        if (APTX_IFDIR & Response.Mode)
-        {
-            Buffer->dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY;
-        }
-
-        Buffer->ftCreationTime;
+        Buffer->dwFileAttributes = ::ToFileAttributes(
+            Response.Mode);
 
         Buffer->ftLastAccessTime = ::ToFileTime(
             Response.LastAccessTimeSeconds,
@@ -892,7 +903,10 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetFileInformation(
             Response.LastWriteTimeSeconds,
             Response.LastWriteTimeNanoseconds);
 
-        Buffer->dwVolumeSerialNumber;
+        // Assume creation time is the same as last write time.
+        Buffer->ftCreationTime = Buffer->ftLastWriteTime;
+
+        Buffer->dwVolumeSerialNumber = g_VolumeSerialNumber;
 
         Buffer->nFileSizeHigh =
             static_cast<DWORD>(Response.FileSize >> 32);
@@ -902,8 +916,10 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetFileInformation(
         Buffer->nNumberOfLinks =
             static_cast<DWORD>(Response.NumberOfHardLinks);
 
-        Buffer->nFileIndexHigh;
-        Buffer->nFileIndexLow;
+        Buffer->nFileIndexHigh =
+            static_cast<DWORD>(Response.UniqueId.Path >> 32);
+        Buffer->nFileIndexLow =
+            static_cast<DWORD>(Response.UniqueId.Path);
     }
     catch (...)
     {
@@ -956,7 +972,6 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
                 }
 
                 WIN32_FIND_DATAW FindData = {};
-                FindData.dwFileAttributes = FILE_ATTRIBUTE_NORMAL;
                 ::wcscpy_s(
                     FindData.cFileName,
                     Mile::ToWideString(CP_UTF8, Entry.Name).c_str());
@@ -997,12 +1012,8 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
                     Mile::Cirno::GetAttributesResponse InformationResponse =
                         g_Instance->GetAttributes(InformationRequest);
 
-                    if (APTX_IFDIR & InformationResponse.Mode)
-                    {
-                        FindData.dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY;
-                    }
-
-                    FindData.ftCreationTime;
+                    FindData.dwFileAttributes = ::ToFileAttributes(
+                        InformationResponse.Mode);
 
                     FindData.ftLastAccessTime = ::ToFileTime(
                         InformationResponse.LastAccessTimeSeconds,
@@ -1010,6 +1021,10 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
                     FindData.ftLastWriteTime = ::ToFileTime(
                         InformationResponse.LastWriteTimeSeconds,
                         InformationResponse.LastWriteTimeNanoseconds);
+
+                    // Assume creation time is the same as last write time.
+                    FindData.ftCreationTime = FindData.ftLastWriteTime;
+
                     FindData.nFileSizeHigh =
                         static_cast<DWORD>(InformationResponse.FileSize >> 32);
                     FindData.nFileSizeLow =
