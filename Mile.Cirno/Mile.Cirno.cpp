@@ -1,5 +1,5 @@
 ﻿/*
- * PROJECT:    Mile.Cirno
+ * PROJECT:    Mouri Internal Library Essentials
  * FILE:       Mile.Cirno.cpp
  * PURPOSE:    Implementation for Mile.Cirno
  *
@@ -217,7 +217,7 @@ DWORD ToFileAttributes(
     DWORD Result = APTX_IFDIR & PosixFileMode
         ? FILE_ATTRIBUTE_DIRECTORY
         : FILE_ATTRIBUTE_NORMAL;
-        
+
     if (!((APTX_IWUSR | APTX_IWGRP | APTX_IWOTH) & PosixFileMode))
     {
         Result |= FILE_ATTRIBUTE_READONLY;
@@ -362,7 +362,7 @@ NTSTATUS MileCirnoSimpleMakeDirectory(
             Status = ::GetNtStatusAndLogToConsole(
                 "MileCirnoSimpleMakeDirectory");
         }
-        
+
         ::MileCirnoSimpleClunk(RelativeRootDirectoryFileId);
     }
 
