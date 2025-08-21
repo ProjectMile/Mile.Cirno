@@ -13,7 +13,7 @@ more information.
 
 ## Features
 
-- Provide read only client support for 9P2000.L protocol, based on
+- Provide read and write client support for 9P2000.L protocol, based on
   [Mile.Dokany](https://github.com/ProjectMile/Mile.Dokany), the customized
   version of [Dokany](https://github.com/dokan-dev/dokany) which user-mode
   library is specialized for NuGet integration and optimized for binary size.
@@ -77,7 +77,6 @@ in your Windows guest.
 
 ## Todo List
 
-- [ ] Provide write support.
 - [ ] Provide 9p2000 and 9p2000.u support.
 - [ ] Support 9p transport over VirtIO.
 - [ ] Simple server implementation.
