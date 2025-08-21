@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  PROJECT:    Mouri Internal Library Essentials
+  FILE:       Mile.Cirno.svg
+  PURPOSE:    Application icon for Mile.Cirno
+
+  LICENSE:    The MIT License
+
+  MAINTAINER: MouriNaruto (Kenji.Mouri@outlook.com)
+-->
+<!-- This is actually a nine which designed to look like a "⑨". -->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="96"
+  height="96"
+  viewBox="0 0 96 96">
+  <!--
+    The icon is 96x96 pixels with each grid cell is 6x6 pixels for making it
+    easy to scale up or down, which is suitable for making high resolution
+    icons.
+    This icon uses the color of Cirno's hair as the stroke color.
+    Cirno's hair color is #77a9cb, which is captured from the
+    https://www.youtube.com/watch?v=V_bQNPG2OyE.
+  -->
+  <defs>
+    <style>
+      .cirno-icon {
+        fill: none;
+        stroke: #77a9cb;
+        stroke-width: 12;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+    </style>
+  </defs>
+  <!-- Outer Circle -->
+  <circle class="cirno-icon" cx="48" cy="48" r="42"/>
+  <!-- Upper part of the "9" -->
+  <circle class="cirno-icon" cx="48" cy="36" r="12"/>
+  <!-- Lower part of the "9" -->
+  <path class="cirno-icon" d="
+    M 60 36
+    A 36 36 0 0 1 48 72"/>
+</svg>

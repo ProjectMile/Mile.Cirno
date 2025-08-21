@@ -54,5 +54,8 @@
     <ClInclude Include="Mile.Cirno.Protocol.h" />
     <ClInclude Include="Mile.Cirno.Protocol.Parser.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Mile.Cirno.svg" />
+  </ItemGroup>
   <Import Sdk="Mile.Project.Configurations" Version="1.0.1622" Project="Mile.Project.Cpp.targets" />
 </Project>
