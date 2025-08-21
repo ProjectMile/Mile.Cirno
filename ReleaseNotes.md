@@ -10,6 +10,7 @@
 - Fix several logic errors.
 - Improve Mile.Cirno.Protocol definitions based on Windows Subsystem for Linux
   source code.
+- Add the project icon.
 - Fix the source code file header comment format.
 - Update Mile.Dokany to 1.1.662.
 - Update Mile.Project.Configurations to 1.0.1622.
