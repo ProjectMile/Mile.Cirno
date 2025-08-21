@@ -194,9 +194,28 @@ void FromFileTime(
     UnixTimeNanoseconds = (RawValue.QuadPart % Win32TimeFrequency) * 100;
 }
 
+std::uint32_t CalculateFnv1aHash(
+    std::string_view Data)
+{
+    // Reference: http://www.isthe.com/chongo/tech/comp/fnv/index.html
+
+    const std::uint32_t FnvPrime = 0x01000193;
+    const std::uint32_t FnvOffsetBasis = 0x811C9DC5;
+
+    std::uint32_t Hash = FnvOffsetBasis;
+    for (char const& Byte : Data)
+    {
+        Hash ^= static_cast<std::uint8_t>(Byte);
+        Hash *= FnvPrime;
+    }
+    return Hash;
+}
+
 namespace
 {
     Mile::Cirno::Client* g_Instance = nullptr;
+    std::string g_AccessName;
+    std::uint32_t g_VolumeSerialNumber = 0;
     std::uint32_t g_RootDirectoryFileId = MILE_CIRNO_NOFID;
     std::uint32_t g_MaximumMessageSize = Mile::Cirno::DefaultMaximumMessageSize;
 }
@@ -1326,6 +1345,62 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetDiskFreeSpace(
     return STATUS_SUCCESS;
 }
 
+NTSTATUS DOKAN_CALLBACK MileCirnoGetVolumeInformation(
+    _Out_opt_ LPWSTR VolumeNameBuffer,
+    _In_ DWORD VolumeNameSize,
+    _Out_opt_ LPDWORD VolumeSerialNumber,
+    _Out_opt_ LPDWORD MaximumComponentLength,
+    _Out_opt_ LPDWORD FileSystemFlags,
+    _Out_opt_ LPWSTR FileSystemNameBuffer,
+    _In_ DWORD FileSystemNameSize,
+    _Inout_ PDOKAN_FILE_INFO DokanFileInfo)
+{
+    UNREFERENCED_PARAMETER(DokanFileInfo);
+
+    if (VolumeNameBuffer)
+    {
+        std::wstring ConvertedAccessName = Mile::ToWideString(
+            CP_UTF8,
+            g_AccessName);
+        ::wcsncpy_s(
+            VolumeNameBuffer,
+            VolumeNameSize,
+            ConvertedAccessName.c_str(),
+            _TRUNCATE);
+    }
+
+    if (VolumeSerialNumber)
+    {
+        *VolumeSerialNumber = g_VolumeSerialNumber;
+    }
+
+    if (MaximumComponentLength)
+    {
+        *MaximumComponentLength = 255;
+    }
+
+    if (FileSystemFlags)
+    {
+        *FileSystemFlags =
+            FILE_CASE_SENSITIVE_SEARCH |
+            FILE_CASE_PRESERVED_NAMES |
+            FILE_SUPPORTS_REMOTE_STORAGE |
+            FILE_UNICODE_ON_DISK;
+    }
+
+    if (FileSystemNameBuffer)
+    {
+        // We should return the file system name as "NTFS" for compatibility.
+        ::wcsncpy_s(
+            FileSystemNameBuffer,
+            FileSystemNameSize,
+            L"NTFS",
+            _TRUNCATE);
+    }
+
+    return STATUS_SUCCESS;
+}
+
 int main()
 {
     ::std::printf(
@@ -1502,6 +1577,14 @@ int main()
             std::printf("[ERROR] Attach to %s failed.\n", AccessName.c_str());
             return -1;
         }
+
+        g_AccessName = AccessName;
+
+        g_VolumeSerialNumber = ::CalculateFnv1aHash(Mile::FormatString(
+            "Mile.Cirno://%s:%s/%s",
+            Host.c_str(),
+            Port.c_str(),
+            AccessName.c_str()));
     }
     catch (...)
     {
@@ -1546,7 +1629,7 @@ int main()
     Operations.LockFile;
     Operations.UnlockFile;
     Operations.GetDiskFreeSpaceW = ::MileCirnoGetDiskFreeSpace;
-    Operations.GetVolumeInformationW;
+    Operations.GetVolumeInformationW = ::MileCirnoGetVolumeInformation;
     Operations.Mounted;
     Operations.Unmounted;
     Operations.GetFileSecurityW;
