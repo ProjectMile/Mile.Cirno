@@ -518,6 +518,15 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
     {
         ConvertedFlags |= MileCirnoLinuxOpenCreateFlagReadWrite;
     }
+    if (!(FILE_SYNCHRONOUS_IO_ALERT & CreateOptions) &&
+        !(FILE_SYNCHRONOUS_IO_NONALERT & CreateOptions))
+    {
+        ConvertedFlags |= MileCirnoLinuxOpenCreateFlagNonBlock;
+    }
+    if (FILE_NO_INTERMEDIATE_BUFFERING & CreateOptions)
+    {
+        ConvertedFlags |= MileCirnoLinuxOpenCreateFlagDirect;
+    }
 
     std::uint32_t FileId = MILE_CIRNO_NOFID;
     Status = ::MileCirnoSimpleWalk(
@@ -625,8 +634,12 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
                 catch (...)
                 {
                     Status = ::GetNtStatusAndLogToConsole("ZwCreateFile.Open");
-                    if (STATUS_MEDIA_WRITE_PROTECTED == Status)
+                    if (STATUS_MEDIA_WRITE_PROTECTED == Status ||
+                        STATUS_ACCESS_DENIED == Status)
                     {
+                        std::printf(
+                            "[INFO] Retrying to open File %u as read-only.\n",
+                            FileId);
                         Status = STATUS_SUCCESS;
                         Request.Flags &= ~MileCirnoLinuxOpenCreateFlagWriteOnly;
                         Request.Flags &= ~MileCirnoLinuxOpenCreateFlagReadWrite;
@@ -1005,7 +1018,6 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
                     InformationRequest.FileId = CurrentFileId;
                     InformationRequest.RequestMask =
                         MileCirnoLinuxGetAttributesFlagMode |
-                        MileCirnoLinuxGetAttributesFlagNumberOfHardLinks |
                         MileCirnoLinuxGetAttributesFlagLastAccessTime |
                         MileCirnoLinuxGetAttributesFlagLastWriteTime |
                         MileCirnoLinuxGetAttributesFlagSize;
