@@ -383,7 +383,7 @@ typedef enum _MILE_CIRNO_LINUX_OPEN_CREATE_FLAGS
  *        MileCirnoGetAttributesRequestMessage and the valid flags used in
  *        MileCirnoGetAttributesResponseMessage.
  */
-typedef enum _MILE_CIRNO_LINUX_GETATTR_FLAGS
+typedef enum _MILE_CIRNO_LINUX_GETATTRIBUTES_FLAGS
 {
     MileCirnoLinuxGetAttributesFlagMode = 0x00000001,
     MileCirnoLinuxGetAttributesFlagNumberOfHardLinks = 0x00000002,
@@ -418,12 +418,12 @@ typedef enum _MILE_CIRNO_LINUX_GETATTR_FLAGS
         MileCirnoLinuxGetAttributesFlagBirthTime |
         MileCirnoLinuxGetAttributesFlagGenration |
         MileCirnoLinuxGetAttributesFlagDataVersion,
-} MILE_CIRNO_LINUX_GETATTR_FLAGS, *PMILE_CIRNO_LINUX_GETATTR_FLAGS;
+} MILE_CIRNO_LINUX_GETATTRIBUTES_FLAGS, *PMILE_CIRNO_LINUX_GETATTRIBUTES_FLAGS;
 
 /**
  * @brief The valid field flags used in MileCirnoSetAttributesRequestMessage.
  */
-typedef enum _MILE_CIRNO_LINUX_SETATTR_FLAGS
+typedef enum _MILE_CIRNO_LINUX_SETATTRIBUTES_FLAGS
 {
     MileCirnoLinuxSetAttributesFlagMode = 0x00000001,
     MileCirnoLinuxSetAttributesFlagOwnerUserId = 0x00000002,
@@ -434,7 +434,7 @@ typedef enum _MILE_CIRNO_LINUX_SETATTR_FLAGS
     MileCirnoLinuxSetAttributesFlagChangeTime = 0x00000040,
     MileCirnoLinuxSetAttributesFlagLastAccessTimeSet = 0x00000080,
     MileCirnoLinuxSetAttributesFlagLastWriteTimeSet = 0x00000100,
-} MILE_CIRNO_LINUX_SETATTR_FLAGS, *PMILE_CIRNO_LINUX_SETATTR_FLAGS;
+} MILE_CIRNO_LINUX_SETATTRIBUTES_FLAGS, *PMILE_CIRNO_LINUX_SETATTRIBUTES_FLAGS;
 
 typedef enum _MILE_CIRNO_LINUX_LOCK_TYPE
 {
