@@ -216,7 +216,7 @@ DWORD ToFileAttributes(
 {
     DWORD Result = APTX_IFDIR & PosixFileMode
         ? FILE_ATTRIBUTE_DIRECTORY
-        : FILE_ATTRIBUTE_NORMAL;
+        : FILE_ATTRIBUTE_ARCHIVE;
 
     if (!((APTX_IWUSR | APTX_IWGRP | APTX_IWOTH) & PosixFileMode))
     {
