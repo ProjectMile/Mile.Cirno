@@ -487,7 +487,6 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
 
     bool Readable = false;
     bool Writable = false;
-    bool IsRoot = (0 == ::_wcsicmp(FileName, L"\\"));
     if (GENERIC_ALL == DesiredAccess)
     {
         DesiredAccess = FILE_ALL_ACCESS;
@@ -506,15 +505,15 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
     {
         ConvertedFileMode |= APTX_IXUSR | APTX_IXGRP | APTX_IXOTH;
     }
-    if ((Readable && !Writable) || IsRoot)
+    if (Readable && !Writable)
     {
         ConvertedFlags |= MileCirnoLinuxOpenCreateFlagReadOnly;
     }
-    else if (!Readable && Writable && !IsRoot)
+    else if (!Readable && Writable)
     {
         ConvertedFlags |= MileCirnoLinuxOpenCreateFlagWriteOnly;
     }
-    else if (Readable && Writable && !IsRoot)
+    else if (Readable && Writable)
     {
         ConvertedFlags |= MileCirnoLinuxOpenCreateFlagReadWrite;
     }
