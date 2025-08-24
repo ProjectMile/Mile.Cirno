@@ -279,7 +279,9 @@ NTSTATUS MileCirnoSimpleAttach(
     {
         NTSTATUS Status = ::GetNtStatusAndLogToConsole(
             "MileCirnoSimpleAttach");
-        ::MileCirnoSimpleClunk(OutputFileId);
+        // Only unregister the file ID because the file ID is not used by the
+        // server if failed to attach.
+        g_Instance->FreeFileId(OutputFileId);
         OutputFileId = MILE_CIRNO_NOFID;
         return Status;
     }
@@ -310,7 +312,9 @@ NTSTATUS MileCirnoSimpleWalk(
     {
         NTSTATUS Status = ::GetNtStatusAndLogToConsole(
             "MileCirnoSimpleWalk");
-        ::MileCirnoSimpleClunk(OutputFileId);
+        // Only unregister the file ID because the file ID is not used by the
+        // server if failed to walk.
+        g_Instance->FreeFileId(OutputFileId);
         OutputFileId = MILE_CIRNO_NOFID;
         return Status;
     }
