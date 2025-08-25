@@ -111,8 +111,7 @@ NTSTATUS ToNtStatus(
     return STATUS_UNSUCCESSFUL;
 }
 
-NTSTATUS GetNtStatusAndLogToConsole(
-    std::string const& CheckPoint) noexcept
+NTSTATUS GetNtStatus()
 {
     try
     {
@@ -120,18 +119,10 @@ NTSTATUS GetNtStatusAndLogToConsole(
     }
     catch (Mile::Cirno::LinuxErrorResponse const& ex)
     {
-        std::printf(
-            "[Mile.Cirno] %s Failed. (Linux Error Code = %d)\n",
-            CheckPoint.c_str(),
-            ex.Code);
         return ::ToNtStatus(ex.Code);
     }
     catch (Mile::Cirno::ErrorResponse const& ex)
     {
-        std::printf(
-            "[Mile.Cirno] %s Failed. (Error Code = %d)\n",
-            CheckPoint.c_str(),
-            ex.Code);
         if (ex.Code > APTX_ERANGE || 11 == ex.Code)
         {
             // Because there is no convention implementation for non-Linux
@@ -142,18 +133,9 @@ NTSTATUS GetNtStatusAndLogToConsole(
         }
         return ::ToNtStatus(ex.Code);
     }
-    catch (std::exception const& ex)
-    {
-        std::printf(
-            "[Mile.Cirno] %s Failed. (Exception: %s)\n",
-            CheckPoint.c_str(),
-            ex.what());
-    }
     catch (...)
     {
-        std::printf(
-            "[Mile.Cirno] %s Failed. (Unknown Exception)\n",
-            CheckPoint.c_str());
+
     }
 
     return STATUS_UNSUCCESSFUL;
@@ -247,12 +229,8 @@ NTSTATUS MileCirnoSimpleClunk(
     }
     catch (...)
     {
-        return ::GetNtStatusAndLogToConsole("MileCirnoSimpleClunk");
+        return ::GetNtStatus();
     }
-
-    std::printf(
-        "[Mile.Cirno] File ID %u is clunked.\n",
-        FileId);
 
     return STATUS_SUCCESS;
 }
@@ -277,8 +255,7 @@ NTSTATUS MileCirnoSimpleAttach(
     }
     catch (...)
     {
-        NTSTATUS Status = ::GetNtStatusAndLogToConsole(
-            "MileCirnoSimpleAttach");
+        NTSTATUS Status = ::GetNtStatus();
         // Only unregister the file ID because the file ID is not used by the
         // server if failed to attach.
         g_Instance->FreeFileId(OutputFileId);
@@ -310,8 +287,7 @@ NTSTATUS MileCirnoSimpleWalk(
     }
     catch (...)
     {
-        NTSTATUS Status = ::GetNtStatusAndLogToConsole(
-            "MileCirnoSimpleWalk");
+        NTSTATUS Status = ::GetNtStatus();
         // Only unregister the file ID because the file ID is not used by the
         // server if failed to walk.
         g_Instance->FreeFileId(OutputFileId);
@@ -363,8 +339,7 @@ NTSTATUS MileCirnoSimpleMakeDirectory(
         }
         catch (...)
         {
-            Status = ::GetNtStatusAndLogToConsole(
-                "MileCirnoSimpleMakeDirectory");
+            Status = ::GetNtStatus();
         }
 
         ::MileCirnoSimpleClunk(RelativeRootDirectoryFileId);
@@ -415,8 +390,7 @@ NTSTATUS MileCirnoSimpleLinuxCreate(
         }
         catch (...)
         {
-            Status = ::GetNtStatusAndLogToConsole(
-                "MileCirnoSimpleLinuxCreate");
+            Status = ::GetNtStatus();
         }
 
         ::MileCirnoSimpleClunk(RelativeRootDirectoryFileId);
@@ -454,14 +428,9 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
 
     DokanFileInfo->Context = MILE_CIRNO_NOFID;
 
-    std::wprintf(
-        L"[INFO] FileName = %s\n",
-        FileName);
-
     if (0 == ::_wcsicmp(FileName, L"\\System Volume Information") ||
         0 == ::_wcsicmp(FileName, L"\\$RECYCLE.BIN"))
     {
-        std::wprintf(L"[INFO] %s is skipped.\n", FileName);
         return STATUS_NO_SUCH_FILE;
     }
 
@@ -636,13 +605,10 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
                 }
                 catch (...)
                 {
-                    Status = ::GetNtStatusAndLogToConsole("ZwCreateFile.Open");
+                    Status = ::GetNtStatus();
                     if (STATUS_MEDIA_WRITE_PROTECTED == Status ||
                         STATUS_ACCESS_DENIED == Status)
                     {
-                        std::printf(
-                            "[INFO] Retrying to open File %u as read-only.\n",
-                            FileId);
                         Status = STATUS_SUCCESS;
                         Request.Flags &= ~MileCirnoLinuxOpenCreateFlagWriteOnly;
                         Request.Flags &= ~MileCirnoLinuxOpenCreateFlagReadWrite;
@@ -655,7 +621,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
         }
         catch (...)
         {
-            Status = ::GetNtStatusAndLogToConsole("ZwCreateFile.Open");
+            Status = ::GetNtStatus();
         }
     }
 
@@ -690,7 +656,7 @@ void DOKAN_CALLBACK MileCirnoCleanup(
         }
         catch (...)
         {
-            ::GetNtStatusAndLogToConsole("Cleanup");
+
         }
     }
 }
@@ -714,7 +680,7 @@ void DOKAN_CALLBACK MileCirnoCloseFile(
     }
     catch (...)
     {
-        ::GetNtStatusAndLogToConsole("CloseFile");
+
     }
 }
 
@@ -771,7 +737,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoReadFile(
     }
     catch (...)
     {
-        return ::GetNtStatusAndLogToConsole("ReadFile");
+        return ::GetNtStatus();
     }
 
     if (ReadLength)
@@ -842,7 +808,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoWriteFile(
     }
     catch (...)
     {
-        return ::GetNtStatusAndLogToConsole("WriteFile");
+        return ::GetNtStatus();
     }
 
     if (NumberOfBytesWritten)
@@ -874,7 +840,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFlushFileBuffers(
     }
     catch (...)
     {
-        return ::GetNtStatusAndLogToConsole("FlushFileBuffers");
+        return ::GetNtStatus();
     }
 
     return STATUS_SUCCESS;
@@ -939,7 +905,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetFileInformation(
     }
     catch (...)
     {
-        return ::GetNtStatusAndLogToConsole("GetFileInformation");
+        return ::GetNtStatus();
     }
 
     return STATUS_SUCCESS;
@@ -1004,7 +970,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
                     }
                     catch (...)
                     {
-                        ::GetNtStatusAndLogToConsole("FindFiles");
+
                     }
                 });
                 if (STATUS_SUCCESS != ::MileCirnoSimpleWalk(
@@ -1047,7 +1013,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
                 }
                 catch (...)
                 {
-                    ::GetNtStatusAndLogToConsole("FindFiles");
+                    continue;
                 }
 
                 FillFindData(&FindData, DokanFileInfo);
@@ -1056,7 +1022,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
     }
     catch (...)
     {
-        return ::GetNtStatusAndLogToConsole("FindFiles");
+        return ::GetNtStatus();
     }
 
     return STATUS_SUCCESS;
@@ -1097,7 +1063,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoSetFileAttributes(
     }
     catch (...)
     {
-        return ::GetNtStatusAndLogToConsole("SetFileAttributes");
+        return ::GetNtStatus();
     }
 
     return STATUS_SUCCESS;
@@ -1149,7 +1115,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoSetFileTime(
     }
     catch (...)
     {
-        return ::GetNtStatusAndLogToConsole("SetFileTime");
+        return ::GetNtStatus();
     }
 
     return STATUS_SUCCESS;
@@ -1194,7 +1160,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoDeleteDirectory(
     }
     catch (...)
     {
-        return ::GetNtStatusAndLogToConsole("DeleteDirectory");
+        return ::GetNtStatus();
     }
 
     return STATUS_SUCCESS;
@@ -1238,7 +1204,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoMoveFile(
         }
         catch (...)
         {
-            ::GetNtStatusAndLogToConsole("MoveFile");
+
         }
     });
 
@@ -1274,7 +1240,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoMoveFile(
     }
     catch (...)
     {
-        return ::GetNtStatusAndLogToConsole("MoveFile");
+        return ::GetNtStatus();
     }
 
     return STATUS_SUCCESS;
@@ -1304,7 +1270,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoSetEndOfFile(
     }
     catch (...)
     {
-        return ::GetNtStatusAndLogToConsole("SetEndOfFile");
+        return ::GetNtStatus();
     }
 
     return STATUS_SUCCESS;
@@ -1334,7 +1300,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoSetAllocationSize(
     }
     catch (...)
     {
-        return ::GetNtStatusAndLogToConsole("SetEndOfFile");
+        return ::GetNtStatus();
     }
 
     return STATUS_SUCCESS;
@@ -1369,7 +1335,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetDiskFreeSpace(
     }
     catch (...)
     {
-        return ::GetNtStatusAndLogToConsole("GetDiskFreeSpace");
+        return ::GetNtStatus();
     }
 
     return STATUS_SUCCESS;
@@ -1558,8 +1524,8 @@ int main()
         int WSAError = ::WSAStartup(MAKEWORD(2, 2), &WSAData);
         if (NO_ERROR != WSAError)
         {
-            std::wprintf(
-                L"[ERROR] WSAStartup failed (%d).\n",
+            std::printf(
+                "[ERROR] WSAStartup failed (%d).\n",
                 WSAError);
             return -1;
         }
@@ -1618,7 +1584,6 @@ int main()
     }
     catch (...)
     {
-        ::GetNtStatusAndLogToConsole("Initialize");
         return -1;
     }
 
@@ -1640,26 +1605,323 @@ int main()
     Options.VolumeSecurityDescriptor;
 
     DOKAN_OPERATIONS Operations = {};
-    Operations.ZwCreateFile = ::MileCirnoZwCreateFile;
-    Operations.Cleanup = ::MileCirnoCleanup;
-    Operations.CloseFile = ::MileCirnoCloseFile;
-    Operations.ReadFile = ::MileCirnoReadFile;
-    Operations.WriteFile = ::MileCirnoWriteFile;
-    Operations.FlushFileBuffers = ::MileCirnoFlushFileBuffers;
-    Operations.GetFileInformation = ::MileCirnoGetFileInformation;
-    Operations.FindFiles = ::MileCirnoFindFiles;
+    Operations.ZwCreateFile = [](
+        _In_ LPCWSTR FileName,
+        _In_ PDOKAN_IO_SECURITY_CONTEXT SecurityContext,
+        _In_ ACCESS_MASK DesiredAccess,
+        _In_ ULONG FileAttributes,
+        _In_ ULONG ShareAccess,
+        _In_ ULONG CreateDisposition,
+        _In_ ULONG CreateOptions,
+        _Inout_ PDOKAN_FILE_INFO DokanFileInfo) -> NTSTATUS
+    {
+        NTSTATUS Status = ::MileCirnoZwCreateFile(
+            FileName,
+            SecurityContext,
+            DesiredAccess,
+            FileAttributes,
+            ShareAccess,
+            CreateDisposition,
+            CreateOptions,
+            DokanFileInfo);
+        ::OutputDebugStringW(Mile::FormatWideString(
+            L"[Mile.Cirno] "
+            L"ZwCreateFile(\"%s\") = 0x%08X, "
+            L"FileId = %llu\n",
+            FileName,
+            Status,
+            DokanFileInfo->Context).c_str());
+        return Status;
+    };
+    Operations.Cleanup = [](
+        _In_ LPCWSTR FileName,
+        _Inout_ PDOKAN_FILE_INFO DokanFileInfo)
+    {
+        ::MileCirnoCleanup(FileName, DokanFileInfo);
+        ::OutputDebugStringW(Mile::FormatWideString(
+            L"[Mile.Cirno] "
+            L"Cleanup(\"%s\", DeletePending=%d)\n",
+            FileName,
+            DokanFileInfo->DeletePending).c_str());
+    };
+    Operations.CloseFile = [](
+        _In_ LPCWSTR FileName,
+        _Inout_ PDOKAN_FILE_INFO DokanFileInfo)
+    {
+        ::MileCirnoCloseFile(FileName, DokanFileInfo);
+        ::OutputDebugStringW(Mile::FormatWideString(
+            L"[Mile.Cirno] "
+            L"CloseFile(\"%s\")\n",
+            FileName).c_str());
+    };
+    Operations.ReadFile = [](
+        _In_ LPCWSTR FileName,
+        _Out_opt_ LPVOID Buffer,
+        _In_ DWORD BufferLength,
+        _Out_opt_ LPDWORD ReadLength,
+        _In_ LONGLONG Offset,
+        _Inout_ PDOKAN_FILE_INFO DokanFileInfo) -> NTSTATUS
+    {
+        NTSTATUS Status = ::MileCirnoReadFile(
+            FileName,
+            Buffer,
+            BufferLength,
+            ReadLength,
+            Offset,
+            DokanFileInfo);
+        ::OutputDebugStringW(Mile::FormatWideString(
+            L"[Mile.Cirno] "
+            L"ReadFile(\"%s\", Length=%u, Offset=%llu) = 0x%08X, "
+            L"ReadLength=%u\n",
+            FileName,
+            BufferLength,
+            Offset,
+            Status,
+            ReadLength ? *ReadLength : 0).c_str());
+        return Status;
+    };
+    Operations.WriteFile = [](
+        _In_ LPCWSTR FileName,
+        _In_ LPCVOID Buffer,
+        _In_ DWORD NumberOfBytesToWrite,
+        _Out_opt_ LPDWORD NumberOfBytesWritten,
+        _In_ LONGLONG Offset,
+        _Inout_ PDOKAN_FILE_INFO DokanFileInfo) -> NTSTATUS
+    {
+        NTSTATUS Status = ::MileCirnoWriteFile(
+            FileName,
+            Buffer,
+            NumberOfBytesToWrite,
+            NumberOfBytesWritten,
+            Offset,
+            DokanFileInfo);
+        ::OutputDebugStringW(Mile::FormatWideString(
+            L"[Mile.Cirno] "
+            L"WriteFile(\"%s\", Length=%u, Offset=%llu) = 0x%08X, "
+            L"NumberOfBytesWritten=%u\n",
+            FileName,
+            NumberOfBytesToWrite,
+            Offset,
+            Status,
+            NumberOfBytesWritten ? *NumberOfBytesWritten : 0).c_str());
+        return Status;
+    };
+    Operations.FlushFileBuffers = [](
+        _In_ LPCWSTR FileName,
+        _Inout_ PDOKAN_FILE_INFO DokanFileInfo) -> NTSTATUS
+    {
+        NTSTATUS Status = ::MileCirnoFlushFileBuffers(
+            FileName,
+            DokanFileInfo);
+        ::OutputDebugStringW(Mile::FormatWideString(
+            L"[Mile.Cirno] "
+            L"FlushFileBuffers(\"%s\") = 0x%08X\n",
+            FileName,
+            Status).c_str());
+        return Status;
+    };
+    Operations.GetFileInformation = [](
+        _In_ LPCWSTR FileName,
+        _Out_ LPBY_HANDLE_FILE_INFORMATION Buffer,
+        _Inout_ PDOKAN_FILE_INFO DokanFileInfo) -> NTSTATUS
+    {
+        NTSTATUS Status = ::MileCirnoGetFileInformation(
+            FileName,
+            Buffer,
+            DokanFileInfo);
+        ::OutputDebugStringW(Mile::FormatWideString(
+            L"[Mile.Cirno] "
+            L"GetFileInformation(\"%s\") = 0x%08X\n",
+            FileName,
+            Status).c_str());
+        return Status;
+    };
+    Operations.FindFiles = [](
+        _In_ LPCWSTR FileName,
+        _In_ PFillFindData FillFindData,
+        _Inout_ PDOKAN_FILE_INFO DokanFileInfo) -> NTSTATUS
+    {
+        NTSTATUS Status = ::MileCirnoFindFiles(
+            FileName,
+            FillFindData,
+            DokanFileInfo);
+        ::OutputDebugStringW(Mile::FormatWideString(
+            L"[Mile.Cirno] "
+            L"FindFiles(\"%s\") = 0x%08X\n",
+            FileName,
+            Status).c_str());
+        return Status;
+    };
     Operations.FindFilesWithPattern = nullptr;
-    Operations.SetFileAttributesW = ::MileCirnoSetFileAttributes;
-    Operations.SetFileTime = ::MileCirnoSetFileTime;
-    Operations.DeleteFileW = ::MileCirnoDeleteFile;
-    Operations.DeleteDirectory = ::MileCirnoDeleteDirectory;
-    Operations.MoveFileW = ::MileCirnoMoveFile;
-    Operations.SetEndOfFile = ::MileCirnoSetEndOfFile;
-    Operations.SetAllocationSize = ::MileCirnoSetAllocationSize;
+    Operations.SetFileAttributesW = [](
+        _In_ LPCWSTR FileName,
+        _In_ DWORD FileAttributes,
+        _Inout_ PDOKAN_FILE_INFO DokanFileInfo) -> NTSTATUS
+    {
+        NTSTATUS Status = ::MileCirnoSetFileAttributes(
+            FileName,
+            FileAttributes,
+            DokanFileInfo);
+        ::OutputDebugStringW(Mile::FormatWideString(
+            L"[Mile.Cirno] "
+            L"SetFileAttributes(\"%s\", Attributes=0x%08X) = 0x%08X\n",
+            FileName,
+            FileAttributes,
+            Status).c_str());
+        return Status;
+    };
+    Operations.SetFileTime = [](
+        _In_ LPCWSTR FileName,
+        _In_ CONST FILETIME* CreationTime,
+        _In_ CONST FILETIME* LastAccessTime,
+        _In_ CONST FILETIME* LastWriteTime,
+        _Inout_ PDOKAN_FILE_INFO DokanFileInfo) -> NTSTATUS
+    {
+        NTSTATUS Status = ::MileCirnoSetFileTime(
+            FileName,
+            CreationTime,
+            LastAccessTime,
+            LastWriteTime,
+            DokanFileInfo);
+        ::OutputDebugStringW(Mile::FormatWideString(
+            L"[Mile.Cirno] "
+            L"SetFileTime(\"%s\") = 0x%08X\n",
+            FileName,
+            Status).c_str());
+        return Status;
+    };
+    Operations.DeleteFileW = [](
+        _In_ LPCWSTR FileName,
+        _Inout_ PDOKAN_FILE_INFO DokanFileInfo) -> NTSTATUS
+    {
+        NTSTATUS Status = ::MileCirnoDeleteFile(
+            FileName,
+            DokanFileInfo);
+        ::OutputDebugStringW(Mile::FormatWideString(
+            L"[Mile.Cirno] "
+            L"DeleteFile(\"%s\") = 0x%08X\n",
+            FileName,
+            Status).c_str());
+        return Status;
+    };
+    Operations.DeleteDirectory = [](
+        _In_ LPCWSTR FileName,
+        _Inout_ PDOKAN_FILE_INFO DokanFileInfo) -> NTSTATUS
+    {
+        NTSTATUS Status = ::MileCirnoDeleteDirectory(
+            FileName,
+            DokanFileInfo);
+        ::OutputDebugStringW(Mile::FormatWideString(
+            L"[Mile.Cirno] "
+            L"DeleteDirectory(\"%s\") = 0x%08X\n",
+            FileName,
+            Status).c_str());
+        return Status;
+    };
+    Operations.MoveFileW = [](
+        _In_ LPCWSTR FileName,
+        _In_ LPCWSTR NewFileName,
+        _In_ BOOL ReplaceIfExisting,
+        _Inout_ PDOKAN_FILE_INFO DokanFileInfo) -> NTSTATUS
+    {
+        NTSTATUS Status = ::MileCirnoMoveFile(
+            FileName,
+            NewFileName,
+            ReplaceIfExisting,
+            DokanFileInfo);
+        ::OutputDebugStringW(Mile::FormatWideString(
+            L"[Mile.Cirno] "
+            L"MoveFile(\"%s\", \"%s\", ReplaceIfExisting=%d) = 0x%08X\n",
+            FileName,
+            NewFileName,
+            ReplaceIfExisting,
+            Status).c_str());
+        return Status;
+    };
+    Operations.SetEndOfFile = [](
+        _In_ LPCWSTR FileName,
+        _In_ LONGLONG ByteOffset,
+        _Inout_ PDOKAN_FILE_INFO DokanFileInfo) -> NTSTATUS
+    {
+        NTSTATUS Status = ::MileCirnoSetEndOfFile(
+            FileName,
+            ByteOffset,
+            DokanFileInfo);
+        ::OutputDebugStringW(Mile::FormatWideString(
+            L"[Mile.Cirno] "
+            L"SetEndOfFile(\"%s\", Offset=%llu) = 0x%08X\n",
+            FileName,
+            ByteOffset,
+            Status).c_str());
+        return Status;
+    };
+    Operations.SetAllocationSize = [](
+        _In_ LPCWSTR FileName,
+        _In_ LONGLONG AllocSize,
+        _Inout_ PDOKAN_FILE_INFO DokanFileInfo) -> NTSTATUS
+    {
+        NTSTATUS Status = ::MileCirnoSetAllocationSize(
+            FileName,
+            AllocSize,
+            DokanFileInfo);
+        ::OutputDebugStringW(Mile::FormatWideString(
+            L"[Mile.Cirno] "
+            L"SetAllocationSize(\"%s\", Size=%llu) = 0x%08X\n",
+            FileName,
+            AllocSize,
+            Status).c_str());
+        return Status;
+    };
     Operations.LockFile;
     Operations.UnlockFile;
-    Operations.GetDiskFreeSpaceW = ::MileCirnoGetDiskFreeSpace;
-    Operations.GetVolumeInformationW = ::MileCirnoGetVolumeInformation;
+    Operations.GetDiskFreeSpaceW = [](
+        _Out_opt_ PULONGLONG FreeBytesAvailable,
+        _Out_opt_ PULONGLONG TotalNumberOfBytes,
+        _Out_opt_ PULONGLONG TotalNumberOfFreeBytes,
+        _Inout_ PDOKAN_FILE_INFO DokanFileInfo) -> NTSTATUS
+    {
+        NTSTATUS Status = ::MileCirnoGetDiskFreeSpace(
+            FreeBytesAvailable,
+            TotalNumberOfBytes,
+            TotalNumberOfFreeBytes,
+            DokanFileInfo);
+        ::OutputDebugStringW(Mile::FormatWideString(
+            L"[Mile.Cirno] "
+            L"GetDiskFreeSpace() = 0x%08X, "
+            L"FreeBytesAvailable=%llu, "
+            L"TotalNumberOfBytes=%llu, "
+            L"TotalNumberOfFreeBytes=%llu\n",
+            Status,
+            FreeBytesAvailable ? *FreeBytesAvailable : 0,
+            TotalNumberOfBytes ? *TotalNumberOfBytes : 0,
+            TotalNumberOfFreeBytes ? *TotalNumberOfFreeBytes : 0).c_str());
+        return Status;
+    };
+    Operations.GetVolumeInformationW = [](
+        _Out_opt_ LPWSTR VolumeNameBuffer,
+        _In_ DWORD VolumeNameSize,
+        _Out_opt_ LPDWORD VolumeSerialNumber,
+        _Out_opt_ LPDWORD MaximumComponentLength,
+        _Out_opt_ LPDWORD FileSystemFlags,
+        _Out_opt_ LPWSTR FileSystemNameBuffer,
+        _In_ DWORD FileSystemNameSize,
+        _Inout_ PDOKAN_FILE_INFO DokanFileInfo) -> NTSTATUS
+    {
+        NTSTATUS Status = ::MileCirnoGetVolumeInformation(
+            VolumeNameBuffer,
+            VolumeNameSize,
+            VolumeSerialNumber,
+            MaximumComponentLength,
+            FileSystemFlags,
+            FileSystemNameBuffer,
+            FileSystemNameSize,
+            DokanFileInfo);
+        ::OutputDebugStringW(Mile::FormatWideString(
+            L"[Mile.Cirno] "
+            L"GetVolumeInformation() = 0x%08X\n",
+            Status).c_str());
+        return Status;
+    };
     Operations.Mounted;
     Operations.Unmounted;
     Operations.GetFileSecurityW;
