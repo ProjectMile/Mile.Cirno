@@ -571,57 +571,50 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
             ConvertedFlags |= MileCirnoLinuxOpenCreateFlagTruncate;
         }
 
+        Mile::Cirno::LinuxOpenResponse Response = {};
         try
         {
-            std::uint32_t FileMode = 0;
+            Mile::Cirno::LinuxOpenRequest Request;
+            Request.FileId = FileId;
+            Request.Flags = ConvertedFlags;
+            try
             {
-                Mile::Cirno::GetAttributesRequest Request;
-                Request.FileId = FileId;
-                Request.RequestMask = MileCirnoLinuxGetAttributesFlagMode;
-                Mile::Cirno::GetAttributesResponse Response =
-                    g_Instance->GetAttributes(Request);
-                FileMode = Response.Mode;
+                Response = g_Instance->LinuxOpen(Request);
             }
-
-            if (APTX_IFDIR & FileMode)
+            catch (...)
             {
-                DokanFileInfo->IsDirectory = TRUE;
-                ConvertedFlags |= MileCirnoLinuxOpenCreateFlagDirectory;
-                if (FILE_NON_DIRECTORY_FILE & CreateOptions)
+                Status = ::GetNtStatus();
+                if (STATUS_MEDIA_WRITE_PROTECTED == Status ||
+                    STATUS_ACCESS_DENIED == Status)
                 {
-                    Status = STATUS_OBJECT_NAME_NOT_FOUND;
-                }
-            }
-
-            if (STATUS_SUCCESS == Status)
-            {
-                Mile::Cirno::LinuxOpenRequest Request;
-                Request.FileId = FileId;
-                Request.Flags = ConvertedFlags;
-                try
-                {
-                    g_Instance->LinuxOpen(Request);
-                    DokanFileInfo->Context = FileId;
-                }
-                catch (...)
-                {
-                    Status = ::GetNtStatus();
-                    if (STATUS_MEDIA_WRITE_PROTECTED == Status ||
-                        STATUS_ACCESS_DENIED == Status)
-                    {
-                        Status = STATUS_SUCCESS;
-                        Request.Flags &= ~MileCirnoLinuxOpenCreateFlagWriteOnly;
-                        Request.Flags &= ~MileCirnoLinuxOpenCreateFlagReadWrite;
-                        Request.Flags |= MileCirnoLinuxOpenCreateFlagReadOnly;
-                        g_Instance->LinuxOpen(Request);
-                        DokanFileInfo->Context = FileId;
-                    }
+                    Status = STATUS_SUCCESS;
+                    Request.Flags &= ~MileCirnoLinuxOpenCreateFlagWriteOnly;
+                    Request.Flags &= ~MileCirnoLinuxOpenCreateFlagReadWrite;
+                    Request.Flags |= MileCirnoLinuxOpenCreateFlagReadOnly;
+                    Response = g_Instance->LinuxOpen(Request);
                 }
             }
         }
         catch (...)
         {
             Status = ::GetNtStatus();
+        }
+
+        if (STATUS_SUCCESS == Status)
+        {
+            if (MileCirnoQidTypeDirectory == Response.UniqueId.Type)
+            {
+                DokanFileInfo->IsDirectory = TRUE;
+                if (FILE_NON_DIRECTORY_FILE & CreateOptions)
+                {
+                    Status = STATUS_OBJECT_NAME_NOT_FOUND;
+                }
+            }
+        }
+
+        if (STATUS_SUCCESS == Status)
+        {
+            DokanFileInfo->Context = FileId;
         }
     }
 
