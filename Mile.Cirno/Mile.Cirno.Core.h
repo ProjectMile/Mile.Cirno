@@ -58,59 +58,70 @@ namespace Mile::Cirno
         void FreeFileId(
             std::uint32_t const& FileId);
 
-        void Request(
+        std::uint32_t Request(
             MILE_CIRNO_MESSAGE_TYPE const& RequestType,
             std::vector<std::uint8_t> const& RequestContent,
             MILE_CIRNO_MESSAGE_TYPE const& ResponseType,
             std::vector<std::uint8_t>& ResponseContent);
 
-        VersionResponse Version(
-            VersionRequest const& Request);
+        std::uint32_t Version(
+            VersionRequest const& Request,
+            VersionResponse& Response);
 
-        AttachResponse Attach(
-            AttachRequest const& Request);
+        std::uint32_t Attach(
+            AttachRequest const& Request,
+            AttachResponse& Response);
 
-        WalkResponse Walk(
-            WalkRequest const& Request);
+        std::uint32_t Walk(
+            WalkRequest const& Request,
+            WalkResponse& Response);
 
-        void Clunk(
+        std::uint32_t Clunk(
             ClunkRequest const& Request);
 
-        LinuxOpenResponse LinuxOpen(
-            LinuxOpenRequest const& Request);
+        std::uint32_t LinuxOpen(
+            LinuxOpenRequest const& Request,
+            LinuxOpenResponse& Response);
 
-        ReadDirectoryResponse ReadDirectory(
-            ReadDirectoryRequest const& Request);
+        std::uint32_t ReadDirectory(
+            ReadDirectoryRequest const& Request,
+            ReadDirectoryResponse& Response);
 
-        GetAttributesResponse GetAttributes(
-            GetAttributesRequest const& Request);
+        std::uint32_t GetAttributes(
+            GetAttributesRequest const& Request,
+            GetAttributesResponse& Response);
 
-        FileSystemStatusResponse FileSystemStatus(
-            FileSystemStatusRequest const& Request);
+        std::uint32_t FileSystemStatus(
+            FileSystemStatusRequest const& Request,
+            FileSystemStatusResponse& Response);
 
-        ReadResponse Read(
-            ReadRequest const& Request);
+        std::uint32_t Read(
+            ReadRequest const& Request,
+            ReadResponse& Response);
 
-        void Remove(
+        std::uint32_t Remove(
             RemoveRequest const& Request);
 
-        void SetAttributes(
+        std::uint32_t SetAttributes(
             SetAttributesRequest const& Request);
 
-        void FlushFile(
+        std::uint32_t FlushFile(
             FlushFileRequest const& Request);
 
-        void RenameAt(
+        std::uint32_t RenameAt(
             RenameAtRequest const& Request);
 
-        WriteResponse Write(
-            WriteRequest const& Request);
+        std::uint32_t Write(
+            WriteRequest const& Request,
+            WriteResponse& Response);
 
-        MakeDirectoryResponse MakeDirectory(
-            MakeDirectoryRequest const& Request);
+        std::uint32_t MakeDirectory(
+            MakeDirectoryRequest const& Request,
+            MakeDirectoryResponse& Response);
 
-        LinuxCreateResponse LinuxCreate(
-            LinuxCreateRequest const& Request);
+        std::uint32_t LinuxCreate(
+            LinuxCreateRequest const& Request,
+            LinuxCreateResponse& Response);
 
     private:
 

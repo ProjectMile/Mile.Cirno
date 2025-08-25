@@ -111,36 +111,6 @@ NTSTATUS ToNtStatus(
     return STATUS_UNSUCCESSFUL;
 }
 
-NTSTATUS GetNtStatus()
-{
-    try
-    {
-        throw;
-    }
-    catch (Mile::Cirno::LinuxErrorResponse const& ex)
-    {
-        return ::ToNtStatus(ex.Code);
-    }
-    catch (Mile::Cirno::ErrorResponse const& ex)
-    {
-        if (ex.Code > APTX_ERANGE || 11 == ex.Code)
-        {
-            // Because there is no convention implementation for non-Linux
-            // environment, returns STATUS_UNSUCCESSFUL if the error code is not
-            // contained in Version 7 Unix Error Codes which are supported by
-            // all major POSIX-compliant environments.
-            return STATUS_UNSUCCESSFUL;
-        }
-        return ::ToNtStatus(ex.Code);
-    }
-    catch (...)
-    {
-
-    }
-
-    return STATUS_UNSUCCESSFUL;
-}
-
 // Win32 time epoch is 00:00:00, January 1 1601.
 // UNIX time epoch is 00:00:00, January 1 1970.
 // There are 11644473600 seconds between these two epochs.
@@ -217,186 +187,184 @@ namespace
     std::uint32_t g_MaximumMessageSize = Mile::Cirno::DefaultMaximumMessageSize;
 }
 
-NTSTATUS MileCirnoSimpleClunk(
+std::uint32_t SimpleClunk(
     std::uint32_t const& FileId)
 {
-    try
+    Mile::Cirno::ClunkRequest Request = {};
+    Request.FileId = FileId;
+    std::uint32_t ErrorCode = g_Instance->Clunk(Request);
+    if (0 == ErrorCode)
     {
-        Mile::Cirno::ClunkRequest Request;
-        Request.FileId = FileId;
-        g_Instance->Clunk(Request);
         g_Instance->FreeFileId(FileId);
     }
-    catch (...)
-    {
-        return ::GetNtStatus();
-    }
-
-    return STATUS_SUCCESS;
+    return ErrorCode;
 }
 
-NTSTATUS MileCirnoSimpleAttach(
+std::uint32_t SimpleAttach(
     std::uint32_t& OutputFileId,
     std::uint32_t const& AuthenticationFileId,
     std::string const& UserName,
     std::string const& AccessName,
     std::uint32_t const& NumericUserName)
 {
-    try
+    OutputFileId = MILE_CIRNO_NOFID;
+    Mile::Cirno::AttachRequest Request = {};
+    Request.FileId = g_Instance->AllocateFileId();
+    Request.AuthenticationFileId = AuthenticationFileId;
+    Request.UserName = UserName;
+    Request.AccessName = AccessName;
+    Request.NumericUserName = NumericUserName;
+    Mile::Cirno::AttachResponse Response = {};
+    std::uint32_t ErrorCode = g_Instance->Attach(Request, Response);
+    if (0 == ErrorCode)
     {
-        OutputFileId = g_Instance->AllocateFileId();
-        Mile::Cirno::AttachRequest Request;
-        Request.FileId = OutputFileId;
-        Request.AuthenticationFileId = AuthenticationFileId;
-        Request.UserName = UserName;
-        Request.AccessName = AccessName;
-        Request.NumericUserName = NumericUserName;
-        g_Instance->Attach(Request);
+        OutputFileId = Request.FileId;
     }
-    catch (...)
+    else
     {
-        NTSTATUS Status = ::GetNtStatus();
         // Only unregister the file ID because the file ID is not used by the
         // server if failed to attach.
-        g_Instance->FreeFileId(OutputFileId);
-        OutputFileId = MILE_CIRNO_NOFID;
-        return Status;
+        g_Instance->FreeFileId(Request.FileId);
     }
 
-    return STATUS_SUCCESS;
+    return ErrorCode;
 }
 
-NTSTATUS MileCirnoSimpleWalk(
+std::uint32_t SimpleWalk(
     std::uint32_t& OutputFileId,
     std::uint32_t const& RootDirectoryFileId,
     std::filesystem::path const& RelativeFilePath)
 {
+    OutputFileId = MILE_CIRNO_NOFID;
+    std::uint32_t ErrorCode = 0;
+    Mile::Cirno::WalkRequest WalkRequest = {};
+    WalkRequest.FileId = RootDirectoryFileId;
+    WalkRequest.NewFileId = g_Instance->AllocateFileId();
     try
     {
-        OutputFileId = g_Instance->AllocateFileId();
-        Mile::Cirno::WalkRequest WalkRequest;
-        WalkRequest.FileId = RootDirectoryFileId;
-        WalkRequest.NewFileId = OutputFileId;
         for (std::filesystem::path const& Element : RelativeFilePath)
         {
             WalkRequest.Names.push_back(Mile::ToString(
                 CP_UTF8,
                 Element.wstring()));
         }
-        g_Instance->Walk(WalkRequest);
     }
     catch (...)
     {
-        NTSTATUS Status = ::GetNtStatus();
-        // Only unregister the file ID because the file ID is not used by the
-        // server if failed to walk.
-        g_Instance->FreeFileId(OutputFileId);
-        OutputFileId = MILE_CIRNO_NOFID;
-        return Status;
+        ErrorCode = APTX_EINVAL;
+    }
+    if (0 == ErrorCode)
+    {
+        Mile::Cirno::WalkResponse WalkResponse = {};
+        ErrorCode = g_Instance->Walk(WalkRequest, WalkResponse);
     }
 
-    return STATUS_SUCCESS;
+    if (0 == ErrorCode)
+    {
+        OutputFileId = WalkRequest.NewFileId;
+    }
+    else
+    {
+        // Only unregister the file ID because the file ID is not used by the
+        // server if failed to walk.
+        g_Instance->FreeFileId(WalkRequest.NewFileId);
+    }
+    return ErrorCode;
 }
 
-NTSTATUS MileCirnoSimpleMakeDirectory(
+std::uint32_t SimpleMakeDirectory(
     std::uint32_t const& RootDirectoryFileId,
     std::filesystem::path const& RelativeFilePath)
 {
-    NTSTATUS Status = STATUS_SUCCESS;
+    std::uint32_t ErrorCode = 0;
 
     std::uint32_t RelativeRootDirectoryFileId = MILE_CIRNO_NOFID;
-    Status = ::MileCirnoSimpleWalk(
+    ErrorCode = ::SimpleWalk(
         RelativeRootDirectoryFileId,
         RootDirectoryFileId,
         RelativeFilePath.parent_path());
-    if (STATUS_SUCCESS == Status)
+    if (0 == ErrorCode)
     {
-        try
+        std::uint32_t RootDirectoryGroupId = 0;
         {
-            std::uint32_t RootDirectoryGroupId = 0;
+            Mile::Cirno::GetAttributesRequest Request = {};
+            Request.FileId = RelativeRootDirectoryFileId;
+            Request.RequestMask =
+                MileCirnoLinuxGetAttributesFlagGroupId;
+            Mile::Cirno::GetAttributesResponse Response = {};
+            ErrorCode = g_Instance->GetAttributes(Request, Response);
+            if (0 == ErrorCode)
             {
-                Mile::Cirno::GetAttributesRequest Request;
-                Request.FileId = RelativeRootDirectoryFileId;
-                Request.RequestMask =
-                    MileCirnoLinuxGetAttributesFlagGroupId;
-                Mile::Cirno::GetAttributesResponse Response =
-                    g_Instance->GetAttributes(Request);
                 RootDirectoryGroupId = Response.GroupId;
             }
-
-            {
-                Mile::Cirno::MakeDirectoryRequest Request;
-                Request.DirectoryFileId = RelativeRootDirectoryFileId;
-                Request.Name = Mile::ToString(
-                    CP_UTF8,
-                    RelativeFilePath.filename().wstring());
-                Request.Mode = APTX_IRWXU;
-                Request.Mode |= APTX_IRGRP | APTX_IXGRP;
-                Request.Mode |= APTX_IROTH | APTX_IXOTH;
-                Request.GroupId = RootDirectoryGroupId;
-                g_Instance->MakeDirectory(Request);
-            }
         }
-        catch (...)
+        if (0 == ErrorCode)
         {
-            Status = ::GetNtStatus();
+            Mile::Cirno::MakeDirectoryRequest Request = {};
+            Request.DirectoryFileId = RelativeRootDirectoryFileId;
+            Request.Name = Mile::ToString(
+                CP_UTF8,
+                RelativeFilePath.filename().wstring());
+            Request.Mode = APTX_IRWXU;
+            Request.Mode |= APTX_IRGRP | APTX_IXGRP;
+            Request.Mode |= APTX_IROTH | APTX_IXOTH;
+            Request.GroupId = RootDirectoryGroupId;
+            Mile::Cirno::MakeDirectoryResponse Response = {};
+            ErrorCode = g_Instance->MakeDirectory(Request, Response);
         }
 
-        ::MileCirnoSimpleClunk(RelativeRootDirectoryFileId);
+        ::SimpleClunk(RelativeRootDirectoryFileId);
     }
 
-    return Status;
+    return ErrorCode;
 }
 
-NTSTATUS MileCirnoSimpleLinuxCreate(
+std::uint32_t SimpleLinuxCreate(
     std::uint32_t const& RootDirectoryFileId,
     std::filesystem::path const& RelativeFilePath,
     std::uint32_t Flags,
     std::uint32_t Mode)
 {
-    NTSTATUS Status = STATUS_SUCCESS;
+    std::uint32_t ErrorCode = 0;
 
     std::uint32_t RelativeRootDirectoryFileId = MILE_CIRNO_NOFID;
-    Status = ::MileCirnoSimpleWalk(
+    ErrorCode = ::SimpleWalk(
         RelativeRootDirectoryFileId,
         RootDirectoryFileId,
         RelativeFilePath.parent_path());
-    if (STATUS_SUCCESS == Status)
+    if (0 == ErrorCode)
     {
-        try
+        std::uint32_t RootDirectoryGroupId = 0;
         {
-            std::uint32_t RootDirectoryGroupId = 0;
+            Mile::Cirno::GetAttributesRequest Request = {};
+            Request.FileId = RelativeRootDirectoryFileId;
+            Request.RequestMask =
+                MileCirnoLinuxGetAttributesFlagGroupId;
+            Mile::Cirno::GetAttributesResponse Response = {};
+            ErrorCode = g_Instance->GetAttributes(Request, Response);
+            if (0 == ErrorCode)
             {
-                Mile::Cirno::GetAttributesRequest Request;
-                Request.FileId = RelativeRootDirectoryFileId;
-                Request.RequestMask =
-                    MileCirnoLinuxGetAttributesFlagGroupId;
-                Mile::Cirno::GetAttributesResponse Response =
-                    g_Instance->GetAttributes(Request);
                 RootDirectoryGroupId = Response.GroupId;
             }
-
-            {
-                Mile::Cirno::LinuxCreateRequest Request;
-                Request.FileId = RelativeRootDirectoryFileId;
-                Request.Name = Mile::ToString(
-                    CP_UTF8,
-                    RelativeFilePath.filename().wstring());
-                Request.Flags = Flags;
-                Request.Mode = Mode;
-                Request.GroupId = RootDirectoryGroupId;
-                g_Instance->LinuxCreate(Request);
-            }
         }
-        catch (...)
+        if (0 == ErrorCode)
         {
-            Status = ::GetNtStatus();
+            Mile::Cirno::LinuxCreateRequest Request = {};
+            Request.FileId = RelativeRootDirectoryFileId;
+            Request.Name = Mile::ToString(
+                CP_UTF8,
+                RelativeFilePath.filename().wstring());
+            Request.Flags = Flags;
+            Request.Mode = Mode;
+            Request.GroupId = RootDirectoryGroupId;
+            Mile::Cirno::LinuxCreateResponse Response = {};
+            ErrorCode = g_Instance->LinuxCreate(Request, Response);
         }
 
-        ::MileCirnoSimpleClunk(RelativeRootDirectoryFileId);
+        ::SimpleClunk(RelativeRootDirectoryFileId);
     }
 
-    return Status;
+    return ErrorCode;
 }
 
 #define MILE_CIRNO_ACCESS_READ ( \
@@ -434,7 +402,8 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
         return STATUS_NO_SUCH_FILE;
     }
 
-    NTSTATUS Status = STATUS_SUCCESS;
+    std::uint32_t ErrorCode = 0;
+
     std::filesystem::path RelativeFilePath(&FileName[1]);
 
     if (FILE_DIRECTORY_FILE == (FILE_DIRECTORY_FILE & CreateOptions))
@@ -442,12 +411,12 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
         if (FILE_CREATE == CreateDisposition ||
             FILE_OPEN_IF == CreateDisposition)
         {
-            Status = ::MileCirnoSimpleMakeDirectory(
+            ErrorCode = ::SimpleMakeDirectory(
                 g_RootDirectoryFileId,
                 RelativeFilePath);
-            if (STATUS_SUCCESS != Status)
+            if (0 != ErrorCode)
             {
-                return Status;
+                return ::ToNtStatus(ErrorCode);
             }
             CreateDisposition = FILE_OPEN;
         }
@@ -500,13 +469,21 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
         ConvertedFlags |= MileCirnoLinuxOpenCreateFlagDirect;
     }
 
+    NTSTATUS Status = STATUS_SUCCESS;
+
     std::uint32_t FileId = MILE_CIRNO_NOFID;
-    Status = ::MileCirnoSimpleWalk(
+    ErrorCode = ::SimpleWalk(
         FileId,
         g_RootDirectoryFileId,
         RelativeFilePath);
+    if (0 != ErrorCode)
+    {
+        Status = ::ToNtStatus(ErrorCode);
+    }
     if (STATUS_SUCCESS != Status)
     {
+        Status = STATUS_SUCCESS;
+
         if (DokanFileInfo->IsDirectory)
         {
             return STATUS_INVALID_PARAMETER;
@@ -526,24 +503,24 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
         // According to the documentation, these dispositions will create the
         // file if the file does not exist.
 
-        Status = ::MileCirnoSimpleLinuxCreate(
+        ErrorCode = ::SimpleLinuxCreate(
             g_RootDirectoryFileId,
             RelativeFilePath,
             ConvertedFlags | MileCirnoLinuxOpenCreateFlagCreate,
             ConvertedFileMode);
-        if (STATUS_SUCCESS != Status)
+        if (0 != ErrorCode)
         {
-            return Status;
+            return ::ToNtStatus(ErrorCode);
         }
         CreateDisposition = FILE_OPEN;
 
-        Status = ::MileCirnoSimpleWalk(
+        ErrorCode = ::SimpleWalk(
             FileId,
             g_RootDirectoryFileId,
             RelativeFilePath);
-        if (STATUS_SUCCESS != Status)
+        if (0 != ErrorCode)
         {
-            return Status;
+            return ::ToNtStatus(ErrorCode);
         }
     }
 
@@ -571,33 +548,21 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
             ConvertedFlags |= MileCirnoLinuxOpenCreateFlagTruncate;
         }
 
+        Mile::Cirno::LinuxOpenRequest Request = {};
+        Request.FileId = FileId;
+        Request.Flags = ConvertedFlags;
         Mile::Cirno::LinuxOpenResponse Response = {};
-        try
+        ErrorCode = g_Instance->LinuxOpen(Request, Response);
+        if (APTX_EROFS == ErrorCode || APTX_EACCES == ErrorCode)
         {
-            Mile::Cirno::LinuxOpenRequest Request;
-            Request.FileId = FileId;
-            Request.Flags = ConvertedFlags;
-            try
-            {
-                Response = g_Instance->LinuxOpen(Request);
-            }
-            catch (...)
-            {
-                Status = ::GetNtStatus();
-                if (STATUS_MEDIA_WRITE_PROTECTED == Status ||
-                    STATUS_ACCESS_DENIED == Status)
-                {
-                    Status = STATUS_SUCCESS;
-                    Request.Flags &= ~MileCirnoLinuxOpenCreateFlagWriteOnly;
-                    Request.Flags &= ~MileCirnoLinuxOpenCreateFlagReadWrite;
-                    Request.Flags |= MileCirnoLinuxOpenCreateFlagReadOnly;
-                    Response = g_Instance->LinuxOpen(Request);
-                }
-            }
+            Request.Flags &= ~MileCirnoLinuxOpenCreateFlagWriteOnly;
+            Request.Flags &= ~MileCirnoLinuxOpenCreateFlagReadWrite;
+            Request.Flags |= MileCirnoLinuxOpenCreateFlagReadOnly;
+            ErrorCode = g_Instance->LinuxOpen(Request, Response);
         }
-        catch (...)
+        if (0 != ErrorCode)
         {
-            Status = ::GetNtStatus();
+            Status = ::ToNtStatus(ErrorCode);
         }
 
         if (STATUS_SUCCESS == Status)
@@ -620,7 +585,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
 
     if (STATUS_SUCCESS != Status)
     {
-        ::MileCirnoSimpleClunk(FileId);
+        ::SimpleClunk(FileId);
     }
 
     return Status;
@@ -641,16 +606,9 @@ void DOKAN_CALLBACK MileCirnoCleanup(
 
     if (DokanFileInfo->DeletePending)
     {
-        try
-        {
-            Mile::Cirno::RemoveRequest Request;
-            Request.FileId = FileId;
-            g_Instance->Remove(Request);
-        }
-        catch (...)
-        {
-
-        }
+        Mile::Cirno::RemoveRequest Request = {};
+        Request.FileId = FileId;
+        g_Instance->Remove(Request);
     }
 }
 
@@ -667,14 +625,7 @@ void DOKAN_CALLBACK MileCirnoCloseFile(
         return;
     }
 
-    try
-    {
-        ::MileCirnoSimpleClunk(FileId);
-    }
-    catch (...)
-    {
-
-    }
+    ::SimpleClunk(FileId);
 }
 
 NTSTATUS DOKAN_CALLBACK MileCirnoReadFile(
@@ -694,43 +645,44 @@ NTSTATUS DOKAN_CALLBACK MileCirnoReadFile(
         return STATUS_INVALID_HANDLE;
     }
 
+    NTSTATUS Status = STATUS_SUCCESS;
+
     DWORD ProceededSize = 0;
     DWORD UnproceededSize = BufferLength;
 
-    try
+    while (UnproceededSize)
     {
-        while (UnproceededSize)
+        Mile::Cirno::ReadRequest Request = {};
+        Request.FileId = FileId;
+        Request.Offset = Offset + ProceededSize;
+        Request.Count = g_MaximumMessageSize;
+        Request.Count -= Mile::Cirno::ReadResponseHeaderSize;
+        if (UnproceededSize < Request.Count)
         {
-            Mile::Cirno::ReadRequest Request;
-            Request.FileId = FileId;
-            Request.Offset = Offset + ProceededSize;
-            Request.Count = g_MaximumMessageSize;
-            Request.Count -= Mile::Cirno::ReadResponseHeaderSize;
-            if (UnproceededSize < Request.Count)
-            {
-                Request.Count = UnproceededSize;
-            }
-            Mile::Cirno::ReadResponse Response = g_Instance->Read(Request);
-            DWORD CurrentProceededSize =
-                static_cast<DWORD>(Response.Data.size());
-            if (!CurrentProceededSize)
-            {
-                break;
-            }
-            if (Buffer)
-            {
-                std::memcpy(
-                    static_cast<std::uint8_t*>(Buffer) + ProceededSize,
-                    &Response.Data[0],
-                    CurrentProceededSize);
-            }
-            ProceededSize += CurrentProceededSize;
-            UnproceededSize -= CurrentProceededSize;
+            Request.Count = UnproceededSize;
         }
-    }
-    catch (...)
-    {
-        return ::GetNtStatus();
+        Mile::Cirno::ReadResponse Response = {};
+        std::uint32_t ErrorCode = g_Instance->Read(Request, Response);
+        if (0 != ErrorCode)
+        {
+            Status = ::ToNtStatus(ErrorCode);
+            break;
+        }
+        DWORD CurrentProceededSize =
+            static_cast<DWORD>(Response.Data.size());
+        if (!CurrentProceededSize)
+        {
+            break;
+        }
+        if (Buffer)
+        {
+            std::memcpy(
+                static_cast<std::uint8_t*>(Buffer) + ProceededSize,
+                &Response.Data[0],
+                CurrentProceededSize);
+        }
+        ProceededSize += CurrentProceededSize;
+        UnproceededSize -= CurrentProceededSize;
     }
 
     if (ReadLength)
@@ -738,7 +690,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoReadFile(
         *ReadLength = ProceededSize;
     }
 
-    return STATUS_SUCCESS;
+    return Status;
 }
 
 NTSTATUS DOKAN_CALLBACK MileCirnoWriteFile(
@@ -761,21 +713,30 @@ NTSTATUS DOKAN_CALLBACK MileCirnoWriteFile(
     DWORD ProceededSize = 0;
     DWORD UnproceededSize = NumberOfBytesToWrite;
 
-    try
+    NTSTATUS Status = STATUS_SUCCESS;
+
+    if (DokanFileInfo->WriteToEndOfFile || -1 == Offset)
     {
-        if (DokanFileInfo->WriteToEndOfFile || -1 == Offset)
+        Mile::Cirno::GetAttributesRequest Request = {};
+        Request.FileId = FileId;
+        Request.RequestMask = MileCirnoLinuxGetAttributesFlagSize;
+        Mile::Cirno::GetAttributesResponse Response = {};
+        std::uint32_t ErrorCode = g_Instance->GetAttributes(Request, Response);
+        if (0 != ErrorCode)
         {
-            Mile::Cirno::GetAttributesRequest Request;
-            Request.FileId = FileId;
-            Request.RequestMask = MileCirnoLinuxGetAttributesFlagSize;
-            Mile::Cirno::GetAttributesResponse Response =
-                g_Instance->GetAttributes(Request);
+            Status = ::ToNtStatus(ErrorCode);
+        }
+        else
+        {
             Offset = Response.FileSize;
         }
+    }
 
+    if (STATUS_SUCCESS == Status)
+    {
         while (UnproceededSize)
         {
-            Mile::Cirno::WriteRequest Request;
+            Mile::Cirno::WriteRequest Request = {};
             Request.FileId = FileId;
             Request.Offset = Offset + ProceededSize;
             std::uint32_t RequestCount = g_MaximumMessageSize;
@@ -789,7 +750,13 @@ NTSTATUS DOKAN_CALLBACK MileCirnoWriteFile(
                 Request.Data.data(),
                 static_cast<const std::uint8_t*>(Buffer) + ProceededSize,
                 Request.Data.size());
-            Mile::Cirno::WriteResponse Response = g_Instance->Write(Request);
+            Mile::Cirno::WriteResponse Response = {};
+            std::uint32_t ErrorCode = g_Instance->Write(Request, Response);
+            if (0 != ErrorCode)
+            {
+                Status = ::ToNtStatus(ErrorCode);
+                break;
+            }
             DWORD CurrentProceededSize = static_cast<DWORD>(Response.Count);
             if (!CurrentProceededSize)
             {
@@ -799,17 +766,13 @@ NTSTATUS DOKAN_CALLBACK MileCirnoWriteFile(
             UnproceededSize -= CurrentProceededSize;
         }
     }
-    catch (...)
-    {
-        return ::GetNtStatus();
-    }
 
     if (NumberOfBytesWritten)
     {
         *NumberOfBytesWritten = ProceededSize;
     }
 
-    return STATUS_SUCCESS;
+    return Status;
 }
 
 NTSTATUS DOKAN_CALLBACK MileCirnoFlushFileBuffers(
@@ -825,18 +788,9 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFlushFileBuffers(
         return STATUS_INVALID_HANDLE;
     }
 
-    try
-    {
-        Mile::Cirno::FlushFileRequest Request = {};
-        Request.FileId = FileId;
-        g_Instance->FlushFile(Request);
-    }
-    catch (...)
-    {
-        return ::GetNtStatus();
-    }
-
-    return STATUS_SUCCESS;
+    Mile::Cirno::FlushFileRequest Request = {};
+    Request.FileId = FileId;
+    return ::ToNtStatus(g_Instance->FlushFile(Request));
 }
 
 NTSTATUS DOKAN_CALLBACK MileCirnoGetFileInformation(
@@ -855,51 +809,48 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetFileInformation(
 
     std::memset(Buffer, 0, sizeof(BY_HANDLE_FILE_INFORMATION));
 
-    try
+    Mile::Cirno::GetAttributesRequest Request = {};
+    Request.FileId = FileId;
+    Request.RequestMask =
+        MileCirnoLinuxGetAttributesFlagMode |
+        MileCirnoLinuxGetAttributesFlagNumberOfHardLinks |
+        MileCirnoLinuxGetAttributesFlagLastAccessTime |
+        MileCirnoLinuxGetAttributesFlagLastWriteTime |
+        MileCirnoLinuxGetAttributesFlagSize;
+    Mile::Cirno::GetAttributesResponse Response = {};
+    std::uint32_t ErrorCode = g_Instance->GetAttributes(Request, Response);
+    if (0 != ErrorCode)
     {
-        Mile::Cirno::GetAttributesRequest Request;
-        Request.FileId = FileId;
-        Request.RequestMask =
-            MileCirnoLinuxGetAttributesFlagMode |
-            MileCirnoLinuxGetAttributesFlagNumberOfHardLinks |
-            MileCirnoLinuxGetAttributesFlagLastAccessTime |
-            MileCirnoLinuxGetAttributesFlagLastWriteTime |
-            MileCirnoLinuxGetAttributesFlagSize;
-        Mile::Cirno::GetAttributesResponse Response =
-            g_Instance->GetAttributes(Request);
-
-        Buffer->dwFileAttributes = ::ToFileAttributes(
-            Response.Mode);
-
-        Buffer->ftLastAccessTime = ::ToFileTime(
-            Response.LastAccessTimeSeconds,
-            Response.LastAccessTimeNanoseconds);
-        Buffer->ftLastWriteTime = ::ToFileTime(
-            Response.LastWriteTimeSeconds,
-            Response.LastWriteTimeNanoseconds);
-
-        // Assume creation time is the same as last write time.
-        Buffer->ftCreationTime = Buffer->ftLastWriteTime;
-
-        Buffer->dwVolumeSerialNumber = g_VolumeSerialNumber;
-
-        Buffer->nFileSizeHigh =
-            static_cast<DWORD>(Response.FileSize >> 32);
-        Buffer->nFileSizeLow =
-            static_cast<DWORD>(Response.FileSize);
-
-        Buffer->nNumberOfLinks =
-            static_cast<DWORD>(Response.NumberOfHardLinks);
-
-        Buffer->nFileIndexHigh =
-            static_cast<DWORD>(Response.UniqueId.Path >> 32);
-        Buffer->nFileIndexLow =
-            static_cast<DWORD>(Response.UniqueId.Path);
+        return ::ToNtStatus(ErrorCode);
     }
-    catch (...)
-    {
-        return ::GetNtStatus();
-    }
+
+    Buffer->dwFileAttributes = ::ToFileAttributes(
+        Response.Mode);
+
+    Buffer->ftLastAccessTime = ::ToFileTime(
+        Response.LastAccessTimeSeconds,
+        Response.LastAccessTimeNanoseconds);
+    Buffer->ftLastWriteTime = ::ToFileTime(
+        Response.LastWriteTimeSeconds,
+        Response.LastWriteTimeNanoseconds);
+
+    // Assume creation time is the same as last write time.
+    Buffer->ftCreationTime = Buffer->ftLastWriteTime;
+
+    Buffer->dwVolumeSerialNumber = g_VolumeSerialNumber;
+
+    Buffer->nFileSizeHigh =
+        static_cast<DWORD>(Response.FileSize >> 32);
+    Buffer->nFileSizeLow =
+        static_cast<DWORD>(Response.FileSize);
+
+    Buffer->nNumberOfLinks =
+        static_cast<DWORD>(Response.NumberOfHardLinks);
+
+    Buffer->nFileIndexHigh =
+        static_cast<DWORD>(Response.UniqueId.Path >> 32);
+    Buffer->nFileIndexLow =
+        static_cast<DWORD>(Response.UniqueId.Path);
 
     return STATUS_SUCCESS;
 }
@@ -924,101 +875,97 @@ NTSTATUS DOKAN_CALLBACK MileCirnoFindFiles(
         return STATUS_INVALID_HANDLE;
     }
 
-    try
+    NTSTATUS Status = STATUS_SUCCESS;
+
+    std::uint64_t LastOffset = 0;
+    do
     {
-        std::uint64_t LastOffset = 0;
-        do
+        Mile::Cirno::ReadDirectoryRequest Request = {};
+        Request.FileId = FileId;
+        Request.Offset = LastOffset;
+        LastOffset = 0;
+        Request.Count = g_MaximumMessageSize;
+        Request.Count -= Mile::Cirno::ReadDirectoryResponseHeaderSize;
+        Mile::Cirno::ReadDirectoryResponse Response = {};
         {
-            Mile::Cirno::ReadDirectoryRequest Request;
-            Request.FileId = FileId;
-            Request.Offset = LastOffset;
-            LastOffset = 0;
-            Request.Count = g_MaximumMessageSize;
-            Request.Count -= Mile::Cirno::ReadDirectoryResponseHeaderSize;
-            Mile::Cirno::ReadDirectoryResponse Response =
-                g_Instance->ReadDirectory(Request);
-            for (Mile::Cirno::DirectoryEntry const& Entry : Response.Data)
+            std::uint32_t ErrorCode = g_Instance->ReadDirectory(
+                Request,
+                Response);
+            if (0 != ErrorCode)
             {
-                LastOffset = Entry.Offset;
-
-                if ("." == Entry.Name || ".." == Entry.Name)
-                {
-                    continue;
-                }
-
-                WIN32_FIND_DATAW FindData = {};
-                ::wcscpy_s(
-                    FindData.cFileName,
-                    Mile::ToWideString(CP_UTF8, Entry.Name).c_str());
-
-                std::uint32_t CurrentFileId = MILE_CIRNO_NOFID;
-                auto CurrentCleanupHandler = Mile::ScopeExitTaskHandler([&]()
-                {
-                    try
-                    {
-                        if (MILE_CIRNO_NOFID != CurrentFileId)
-                        {
-                            ::MileCirnoSimpleClunk(CurrentFileId);
-                        }
-                    }
-                    catch (...)
-                    {
-
-                    }
-                });
-                if (STATUS_SUCCESS != ::MileCirnoSimpleWalk(
-                    CurrentFileId,
-                    FileId,
-                    Mile::ToWideString(CP_UTF8, Entry.Name)))
-                {
-                    continue;
-                }
-
-                try
-                {
-                    Mile::Cirno::GetAttributesRequest InformationRequest;
-                    InformationRequest.FileId = CurrentFileId;
-                    InformationRequest.RequestMask =
-                        MileCirnoLinuxGetAttributesFlagMode |
-                        MileCirnoLinuxGetAttributesFlagLastAccessTime |
-                        MileCirnoLinuxGetAttributesFlagLastWriteTime |
-                        MileCirnoLinuxGetAttributesFlagSize;
-                    Mile::Cirno::GetAttributesResponse InformationResponse =
-                        g_Instance->GetAttributes(InformationRequest);
-
-                    FindData.dwFileAttributes = ::ToFileAttributes(
-                        InformationResponse.Mode);
-
-                    FindData.ftLastAccessTime = ::ToFileTime(
-                        InformationResponse.LastAccessTimeSeconds,
-                        InformationResponse.LastAccessTimeNanoseconds);
-                    FindData.ftLastWriteTime = ::ToFileTime(
-                        InformationResponse.LastWriteTimeSeconds,
-                        InformationResponse.LastWriteTimeNanoseconds);
-
-                    // Assume creation time is the same as last write time.
-                    FindData.ftCreationTime = FindData.ftLastWriteTime;
-
-                    FindData.nFileSizeHigh =
-                        static_cast<DWORD>(InformationResponse.FileSize >> 32);
-                    FindData.nFileSizeLow =
-                        static_cast<DWORD>(InformationResponse.FileSize);
-                }
-                catch (...)
-                {
-                    continue;
-                }
-
-                FillFindData(&FindData, DokanFileInfo);
+                Status = ::ToNtStatus(ErrorCode);
+                break;
             }
-        } while (LastOffset);
-    }
-    catch (...)
-    {
-        return ::GetNtStatus();
-    }
+        }
+        for (Mile::Cirno::DirectoryEntry const& Entry : Response.Data)
+        {
+            LastOffset = Entry.Offset;
 
-    return STATUS_SUCCESS;
+            if ("." == Entry.Name || ".." == Entry.Name)
+            {
+                continue;
+            }
+
+            WIN32_FIND_DATAW FindData = {};
+            ::wcscpy_s(
+                FindData.cFileName,
+                Mile::ToWideString(CP_UTF8, Entry.Name).c_str());
+
+            std::uint32_t CurrentFileId = MILE_CIRNO_NOFID;
+            auto CurrentCleanupHandler = Mile::ScopeExitTaskHandler([&]()
+            {
+                if (MILE_CIRNO_NOFID != CurrentFileId)
+                {
+                    ::SimpleClunk(CurrentFileId);
+                }
+            });
+            if (0 != ::SimpleWalk(
+                CurrentFileId,
+                FileId,
+                Mile::ToWideString(CP_UTF8, Entry.Name)))
+            {
+                continue;
+            }
+
+            Mile::Cirno::GetAttributesRequest InformationRequest = {};
+            InformationRequest.FileId = CurrentFileId;
+            InformationRequest.RequestMask =
+                MileCirnoLinuxGetAttributesFlagMode |
+                MileCirnoLinuxGetAttributesFlagLastAccessTime |
+                MileCirnoLinuxGetAttributesFlagLastWriteTime |
+                MileCirnoLinuxGetAttributesFlagSize;
+            Mile::Cirno::GetAttributesResponse InformationResponse = {};
+            std::uint32_t ErrorCode = g_Instance->GetAttributes(
+                InformationRequest,
+                InformationResponse);
+            if (0 != ErrorCode)
+            {
+                continue;
+            }
+
+            FindData.dwFileAttributes = ::ToFileAttributes(
+                InformationResponse.Mode);
+
+            FindData.ftLastAccessTime = ::ToFileTime(
+                InformationResponse.LastAccessTimeSeconds,
+                InformationResponse.LastAccessTimeNanoseconds);
+            FindData.ftLastWriteTime = ::ToFileTime(
+                InformationResponse.LastWriteTimeSeconds,
+                InformationResponse.LastWriteTimeNanoseconds);
+
+            // Assume creation time is the same as last write time.
+            FindData.ftCreationTime = FindData.ftLastWriteTime;
+
+            FindData.nFileSizeHigh =
+                static_cast<DWORD>(InformationResponse.FileSize >> 32);
+            FindData.nFileSizeLow =
+                static_cast<DWORD>(InformationResponse.FileSize);
+
+            FillFindData(&FindData, DokanFileInfo);
+        }
+    } while (LastOffset);
+
+    return Status;
 }
 
 NTSTATUS DOKAN_CALLBACK MileCirnoSetFileAttributes(
@@ -1035,31 +982,22 @@ NTSTATUS DOKAN_CALLBACK MileCirnoSetFileAttributes(
         return STATUS_INVALID_HANDLE;
     }
 
-    try
+    Mile::Cirno::SetAttributesRequest Request = {};
+    Request.FileId = FileId;
+    Request.Valid = MileCirnoLinuxSetAttributesFlagMode;
+    Request.Mode = APTX_IRUSR | APTX_IRGRP | APTX_IROTH;
+    if (!(FILE_ATTRIBUTE_READONLY & FileAttributes))
     {
-        Mile::Cirno::SetAttributesRequest Request = {};
-        Request.FileId = FileId;
-        Request.Valid = MileCirnoLinuxSetAttributesFlagMode;
-        Request.Mode = APTX_IRUSR | APTX_IRGRP | APTX_IROTH;
-        if (!(FILE_ATTRIBUTE_READONLY & FileAttributes))
-        {
-            Request.Mode |= APTX_IWUSR | APTX_IWGRP | APTX_IWOTH;
-        }
-        Request.Mode |= (FILE_ATTRIBUTE_DIRECTORY & FileAttributes)
-            ? APTX_IFDIR
-            : APTX_IFREG;
-        if (FILE_ATTRIBUTE_REPARSE_POINT & FileAttributes)
-        {
-            Request.Mode |= APTX_IFLNK;
-        }
-        g_Instance->SetAttributes(Request);
+        Request.Mode |= APTX_IWUSR | APTX_IWGRP | APTX_IWOTH;
     }
-    catch (...)
+    Request.Mode |= (FILE_ATTRIBUTE_DIRECTORY & FileAttributes)
+        ? APTX_IFDIR
+        : APTX_IFREG;
+    if (FILE_ATTRIBUTE_REPARSE_POINT & FileAttributes)
     {
-        return ::GetNtStatus();
+        Request.Mode |= APTX_IFLNK;
     }
-
-    return STATUS_SUCCESS;
+    return ::ToNtStatus(g_Instance->SetAttributes(Request));
 }
 
 NTSTATUS DOKAN_CALLBACK MileCirnoSetFileTime(
@@ -1079,39 +1017,30 @@ NTSTATUS DOKAN_CALLBACK MileCirnoSetFileTime(
         return STATUS_INVALID_HANDLE;
     }
 
-    try
+    Mile::Cirno::SetAttributesRequest Request = {};
+    Request.FileId = FileId;
+    Request.Valid = 0;
+    if (LastAccessTime)
     {
-        Mile::Cirno::SetAttributesRequest Request = {};
-        Request.FileId = FileId;
-        Request.Valid = 0;
-        if (LastAccessTime)
-        {
-            Request.Valid =
-                MileCirnoLinuxSetAttributesFlagLastAccessTime |
-                MileCirnoLinuxSetAttributesFlagLastAccessTimeSet;
-            ::FromFileTime(
-                *LastAccessTime,
-                Request.LastAccessTimeSeconds,
-                Request.LastAccessTimeNanoseconds);
-        }
-        if (LastWriteTime)
-        {
-            Request.Valid =
-                MileCirnoLinuxSetAttributesFlagLastWriteTime |
-                MileCirnoLinuxSetAttributesFlagLastWriteTimeSet;
-            ::FromFileTime(
-                *LastWriteTime,
-                Request.LastWriteTimeSeconds,
-                Request.LastWriteTimeNanoseconds);
-        }
-        g_Instance->SetAttributes(Request);
+        Request.Valid =
+            MileCirnoLinuxSetAttributesFlagLastAccessTime |
+            MileCirnoLinuxSetAttributesFlagLastAccessTimeSet;
+        ::FromFileTime(
+            *LastAccessTime,
+            Request.LastAccessTimeSeconds,
+            Request.LastAccessTimeNanoseconds);
     }
-    catch (...)
+    if (LastWriteTime)
     {
-        return ::GetNtStatus();
+        Request.Valid =
+            MileCirnoLinuxSetAttributesFlagLastWriteTime |
+            MileCirnoLinuxSetAttributesFlagLastWriteTimeSet;
+        ::FromFileTime(
+            *LastWriteTime,
+            Request.LastWriteTimeSeconds,
+            Request.LastWriteTimeNanoseconds);
     }
-
-    return STATUS_SUCCESS;
+    return ::ToNtStatus(g_Instance->SetAttributes(Request));
 }
 
 NTSTATUS DOKAN_CALLBACK MileCirnoDeleteFile(
@@ -1137,23 +1066,20 @@ NTSTATUS DOKAN_CALLBACK MileCirnoDeleteDirectory(
         return STATUS_INVALID_HANDLE;
     }
 
-    try
+    Mile::Cirno::ReadDirectoryRequest Request = {};
+    Request.FileId = FileId;
+    Request.Offset = 0;
+    Request.Count = g_MaximumMessageSize;
+    Request.Count -= Mile::Cirno::ReadDirectoryResponseHeaderSize;
+    Mile::Cirno::ReadDirectoryResponse Response = {};
+    std::uint32_t ErrorCode = g_Instance->ReadDirectory(Request, Response);
+    if (0 != ErrorCode)
     {
-        Mile::Cirno::ReadDirectoryRequest Request;
-        Request.FileId = FileId;
-        Request.Offset = 0;
-        Request.Count = g_MaximumMessageSize;
-        Request.Count -= Mile::Cirno::ReadDirectoryResponseHeaderSize;
-        Mile::Cirno::ReadDirectoryResponse Response =
-            g_Instance->ReadDirectory(Request);
-        if (Response.Data.size() > 2)
-        {
-            return STATUS_DIRECTORY_NOT_EMPTY;
-        }
+        return ::ToNtStatus(ErrorCode);
     }
-    catch (...)
+    if (Response.Data.size() > 2)
     {
-        return ::GetNtStatus();
+        return STATUS_DIRECTORY_NOT_EMPTY;
     }
 
     return STATUS_SUCCESS;
@@ -1177,63 +1103,42 @@ NTSTATUS DOKAN_CALLBACK MileCirnoMoveFile(
     std::filesystem::path OldFilePath(&FileName[1]);
     std::filesystem::path NewFilePath(&NewFileName[1]);
 
-    NTSTATUS Status = STATUS_SUCCESS;
+    std::uint32_t ErrorCode = 0;
 
     std::uint32_t OldDirectoryFileId = MILE_CIRNO_NOFID;
-    std::uint32_t NewDirectoryFileId = MILE_CIRNO_NOFID;
-    auto CleanupHandler = Mile::ScopeExitTaskHandler([&]()
-    {
-        try
-        {
-            if (MILE_CIRNO_NOFID != NewDirectoryFileId)
-            {
-                ::MileCirnoSimpleClunk(NewDirectoryFileId);
-            }
-
-            if (MILE_CIRNO_NOFID != OldDirectoryFileId)
-            {
-                ::MileCirnoSimpleClunk(OldDirectoryFileId);
-            }
-        }
-        catch (...)
-        {
-
-        }
-    });
-
-    Status = ::MileCirnoSimpleWalk(
+    ErrorCode = ::SimpleWalk(
         OldDirectoryFileId,
         g_RootDirectoryFileId,
         OldFilePath.parent_path());
-    if (STATUS_SUCCESS != Status)
+    if (0 == ErrorCode)
     {
-        return Status;
-    }
-    Status = ::MileCirnoSimpleWalk(
-        NewDirectoryFileId,
-        g_RootDirectoryFileId,
-        NewFilePath.parent_path());
-    if (STATUS_SUCCESS != Status)
-    {
-        return Status;
+        std::uint32_t NewDirectoryFileId = MILE_CIRNO_NOFID;
+        ErrorCode = ::SimpleWalk(
+            NewDirectoryFileId,
+            g_RootDirectoryFileId,
+            NewFilePath.parent_path());
+        if (0 != ErrorCode)
+        {
+            Mile::Cirno::RenameAtRequest Request;
+            Request.OldDirectoryFileId = OldDirectoryFileId;
+            Request.OldName = Mile::ToString(
+                CP_UTF8,
+                OldFilePath.filename().wstring());
+            Request.NewDirectoryFileId = NewDirectoryFileId;
+            Request.NewName = Mile::ToString(
+                CP_UTF8,
+                NewFilePath.filename().wstring());
+            ErrorCode = g_Instance->RenameAt(Request);
+
+            ::SimpleClunk(NewDirectoryFileId);
+        }
+
+        ::SimpleClunk(OldDirectoryFileId);
     }
 
-    try
+    if (0 != ErrorCode)
     {
-        Mile::Cirno::RenameAtRequest Request;
-        Request.OldDirectoryFileId = OldDirectoryFileId;
-        Request.OldName = Mile::ToString(
-            CP_UTF8,
-            OldFilePath.filename().wstring());
-        Request.NewDirectoryFileId = NewDirectoryFileId;
-        Request.NewName = Mile::ToString(
-            CP_UTF8,
-            NewFilePath.filename().wstring());
-        g_Instance->RenameAt(Request);
-    }
-    catch (...)
-    {
-        return ::GetNtStatus();
+        return ::ToNtStatus(ErrorCode);
     }
 
     return STATUS_SUCCESS;
@@ -1253,20 +1158,11 @@ NTSTATUS DOKAN_CALLBACK MileCirnoSetEndOfFile(
         return STATUS_INVALID_HANDLE;
     }
 
-    try
-    {
-        Mile::Cirno::SetAttributesRequest Request = {};
-        Request.FileId = FileId;
-        Request.Valid = MileCirnoLinuxSetAttributesFlagSize;
-        Request.FileSize = ByteOffset;
-        g_Instance->SetAttributes(Request);
-    }
-    catch (...)
-    {
-        return ::GetNtStatus();
-    }
-
-    return STATUS_SUCCESS;
+    Mile::Cirno::SetAttributesRequest Request = {};
+    Request.FileId = FileId;
+    Request.Valid = MileCirnoLinuxSetAttributesFlagSize;
+    Request.FileSize = ByteOffset;
+    return ::ToNtStatus(g_Instance->SetAttributes(Request));
 }
 
 NTSTATUS DOKAN_CALLBACK MileCirnoSetAllocationSize(
@@ -1283,20 +1179,11 @@ NTSTATUS DOKAN_CALLBACK MileCirnoSetAllocationSize(
         return STATUS_INVALID_HANDLE;
     }
 
-    try
-    {
-        Mile::Cirno::SetAttributesRequest Request = {};
-        Request.FileId = FileId;
-        Request.Valid = MileCirnoLinuxSetAttributesFlagSize;
-        Request.FileSize = AllocSize;
-        g_Instance->SetAttributes(Request);
-    }
-    catch (...)
-    {
-        return ::GetNtStatus();
-    }
-
-    return STATUS_SUCCESS;
+    Mile::Cirno::SetAttributesRequest Request = {};
+    Request.FileId = FileId;
+    Request.Valid = MileCirnoLinuxSetAttributesFlagSize;
+    Request.FileSize = AllocSize;
+    return ::ToNtStatus(g_Instance->SetAttributes(Request));
 }
 
 NTSTATUS DOKAN_CALLBACK MileCirnoGetDiskFreeSpace(
@@ -1307,28 +1194,25 @@ NTSTATUS DOKAN_CALLBACK MileCirnoGetDiskFreeSpace(
 {
     UNREFERENCED_PARAMETER(DokanFileInfo);
 
-    try
+    Mile::Cirno::FileSystemStatusRequest Request = {};
+    Request.FileId = g_RootDirectoryFileId;
+    Mile::Cirno::FileSystemStatusResponse Response = {};
+    std::uint32_t ErrorCode = g_Instance->FileSystemStatus(Request, Response);
+    if (0 != ErrorCode)
     {
-        Mile::Cirno::FileSystemStatusRequest Request;
-        Request.FileId = g_RootDirectoryFileId;
-        Mile::Cirno::FileSystemStatusResponse Response =
-            g_Instance->FileSystemStatus(Request);
-        if (FreeBytesAvailable)
-        {
-            *FreeBytesAvailable = Response.BlockSize * Response.AvailableBlocks;
-        }
-        if (TotalNumberOfBytes)
-        {
-            *TotalNumberOfBytes = Response.BlockSize * Response.TotalBlocks;
-        }
-        if (TotalNumberOfFreeBytes)
-        {
-            *TotalNumberOfFreeBytes = Response.BlockSize * Response.FreeBlocks;
-        }
+        return ::ToNtStatus(ErrorCode);
     }
-    catch (...)
+    if (FreeBytesAvailable)
     {
-        return ::GetNtStatus();
+        *FreeBytesAvailable = Response.BlockSize * Response.AvailableBlocks;
+    }
+    if (TotalNumberOfBytes)
+    {
+        *TotalNumberOfBytes = Response.BlockSize * Response.TotalBlocks;
+    }
+    if (TotalNumberOfFreeBytes)
+    {
+        *TotalNumberOfFreeBytes = Response.BlockSize * Response.FreeBlocks;
     }
 
     return STATUS_SUCCESS;
@@ -1499,7 +1383,7 @@ int main()
         {
             if (MILE_CIRNO_NOFID == g_RootDirectoryFileId)
             {
-                ::MileCirnoSimpleClunk(g_RootDirectoryFileId);
+                ::SimpleClunk(g_RootDirectoryFileId);
             }
             delete g_Instance;
             g_Instance = nullptr;
@@ -1540,8 +1424,12 @@ int main()
             Mile::Cirno::VersionRequest Request;
             Request.MaximumMessageSize = g_MaximumMessageSize;
             Request.ProtocolVersion = Mile::Cirno::DefaultProtocolVersion;
-            Mile::Cirno::VersionResponse Response =
-                g_Instance->Version(Request);
+            Mile::Cirno::VersionResponse Response = {};
+            if (0 != g_Instance->Version(Request, Response))
+            {
+                std::printf("[ERROR] Version negotiation failed.\n");
+                return -1;
+            }
             std::printf(
                 "[INFO] VersionResponse.ProtocolVersion = %s\n"
                 "[INFO] VersionResponse.MaximumMessageSize = %u\n",
@@ -1555,13 +1443,12 @@ int main()
             g_MaximumMessageSize = Response.MaximumMessageSize;
         }
 
-        ::MileCirnoSimpleAttach(
+        if (0 != ::SimpleAttach(
             g_RootDirectoryFileId,
             MILE_CIRNO_NOFID,
             "",
             AccessName,
-            MILE_CIRNO_NONUNAME);
-        if (MILE_CIRNO_NOFID == g_RootDirectoryFileId)
+            MILE_CIRNO_NONUNAME))
         {
             std::printf("[ERROR] Attach to %s failed.\n", AccessName.c_str());
             return -1;
