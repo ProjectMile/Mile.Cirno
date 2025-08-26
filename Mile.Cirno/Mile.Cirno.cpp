@@ -1507,10 +1507,12 @@ int main()
         ::OutputDebugStringW(Mile::FormatWideString(
             L"[Mile.Cirno] "
             L"ZwCreateFile(\"%s\") = 0x%08X, "
-            L"FileId = %llu\n",
+            L"FileId = %llu, "
+            L"ProcessId = %lu\n",
             FileName,
             Status,
-            DokanFileInfo->Context).c_str());
+            DokanFileInfo->Context,
+            DokanFileInfo->ProcessId).c_str());
         return Status;
     };
     Operations.Cleanup = [](
@@ -1520,8 +1522,9 @@ int main()
         ::MileCirnoCleanup(FileName, DokanFileInfo);
         ::OutputDebugStringW(Mile::FormatWideString(
             L"[Mile.Cirno] "
-            L"Cleanup(\"%s\", DeletePending=%d)\n",
-            FileName,
+            L"Cleanup(%llu), "
+            L"DeletePending=%d\n",
+            DokanFileInfo->Context,
             DokanFileInfo->DeletePending).c_str());
     };
     Operations.CloseFile = [](
@@ -1531,8 +1534,8 @@ int main()
         ::MileCirnoCloseFile(FileName, DokanFileInfo);
         ::OutputDebugStringW(Mile::FormatWideString(
             L"[Mile.Cirno] "
-            L"CloseFile(\"%s\")\n",
-            FileName).c_str());
+            L"CloseFile(%llu)\n",
+            DokanFileInfo->Context).c_str());
     };
     Operations.ReadFile = [](
         _In_ LPCWSTR FileName,
@@ -1549,15 +1552,17 @@ int main()
             ReadLength,
             Offset,
             DokanFileInfo);
+#ifndef NDEBUG
         ::OutputDebugStringW(Mile::FormatWideString(
             L"[Mile.Cirno] "
-            L"ReadFile(\"%s\", Length=%u, Offset=%llu) = 0x%08X, "
-            L"ReadLength=%u\n",
-            FileName,
+            L"ReadFile(%llu, %u, %llu) = 0x%08X, "
+            L"Read=%u\n",
+            DokanFileInfo->Context,
             BufferLength,
             Offset,
             Status,
             ReadLength ? *ReadLength : 0).c_str());
+#endif // !NDEBUG
         return Status;
     };
     Operations.WriteFile = [](
@@ -1575,15 +1580,17 @@ int main()
             NumberOfBytesWritten,
             Offset,
             DokanFileInfo);
+#ifndef NDEBUG
         ::OutputDebugStringW(Mile::FormatWideString(
             L"[Mile.Cirno] "
-            L"WriteFile(\"%s\", Length=%u, Offset=%llu) = 0x%08X, "
-            L"NumberOfBytesWritten=%u\n",
-            FileName,
+            L"WriteFile(%llu, %u, %llu) = 0x%08X, "
+            L"Written=%u\n",
+            DokanFileInfo->Context,
             NumberOfBytesToWrite,
             Offset,
             Status,
             NumberOfBytesWritten ? *NumberOfBytesWritten : 0).c_str());
+#endif // !NDEBUG      
         return Status;
     };
     Operations.FlushFileBuffers = [](
@@ -1595,8 +1602,8 @@ int main()
             DokanFileInfo);
         ::OutputDebugStringW(Mile::FormatWideString(
             L"[Mile.Cirno] "
-            L"FlushFileBuffers(\"%s\") = 0x%08X\n",
-            FileName,
+            L"FlushFileBuffers(%llu) = 0x%08X\n",
+            DokanFileInfo->Context,
             Status).c_str());
         return Status;
     };
@@ -1611,8 +1618,8 @@ int main()
             DokanFileInfo);
         ::OutputDebugStringW(Mile::FormatWideString(
             L"[Mile.Cirno] "
-            L"GetFileInformation(\"%s\") = 0x%08X\n",
-            FileName,
+            L"GetFileInformation(%llu) = 0x%08X\n",
+            DokanFileInfo->Context,
             Status).c_str());
         return Status;
     };
@@ -1627,8 +1634,8 @@ int main()
             DokanFileInfo);
         ::OutputDebugStringW(Mile::FormatWideString(
             L"[Mile.Cirno] "
-            L"FindFiles(\"%s\") = 0x%08X\n",
-            FileName,
+            L"FindFiles(%llu) = 0x%08X\n",
+            DokanFileInfo->Context,
             Status).c_str());
         return Status;
     };
@@ -1644,8 +1651,8 @@ int main()
             DokanFileInfo);
         ::OutputDebugStringW(Mile::FormatWideString(
             L"[Mile.Cirno] "
-            L"SetFileAttributes(\"%s\", Attributes=0x%08X) = 0x%08X\n",
-            FileName,
+            L"SetFileAttributes(%llu, 0x%08X) = 0x%08X\n",
+            DokanFileInfo->Context,
             FileAttributes,
             Status).c_str());
         return Status;
@@ -1665,8 +1672,8 @@ int main()
             DokanFileInfo);
         ::OutputDebugStringW(Mile::FormatWideString(
             L"[Mile.Cirno] "
-            L"SetFileTime(\"%s\") = 0x%08X\n",
-            FileName,
+            L"SetFileTime(%llu) = 0x%08X\n",
+            DokanFileInfo->Context,
             Status).c_str());
         return Status;
     };
@@ -1679,8 +1686,8 @@ int main()
             DokanFileInfo);
         ::OutputDebugStringW(Mile::FormatWideString(
             L"[Mile.Cirno] "
-            L"DeleteFile(\"%s\") = 0x%08X\n",
-            FileName,
+            L"DeleteFile(%llu) = 0x%08X\n",
+            DokanFileInfo->Context,
             Status).c_str());
         return Status;
     };
@@ -1693,8 +1700,8 @@ int main()
             DokanFileInfo);
         ::OutputDebugStringW(Mile::FormatWideString(
             L"[Mile.Cirno] "
-            L"DeleteDirectory(\"%s\") = 0x%08X\n",
-            FileName,
+            L"DeleteDirectory(%llu) = 0x%08X\n",
+            DokanFileInfo->Context,
             Status).c_str());
         return Status;
     };
@@ -1729,8 +1736,8 @@ int main()
             DokanFileInfo);
         ::OutputDebugStringW(Mile::FormatWideString(
             L"[Mile.Cirno] "
-            L"SetEndOfFile(\"%s\", Offset=%llu) = 0x%08X\n",
-            FileName,
+            L"SetEndOfFile(%llu, %llu) = 0x%08X\n",
+            DokanFileInfo->Context,
             ByteOffset,
             Status).c_str());
         return Status;
@@ -1746,8 +1753,8 @@ int main()
             DokanFileInfo);
         ::OutputDebugStringW(Mile::FormatWideString(
             L"[Mile.Cirno] "
-            L"SetAllocationSize(\"%s\", Size=%llu) = 0x%08X\n",
-            FileName,
+            L"SetAllocationSize(%llu, %llu) = 0x%08X\n",
+            DokanFileInfo->Context,
             AllocSize,
             Status).c_str());
         return Status;
@@ -1767,14 +1774,8 @@ int main()
             DokanFileInfo);
         ::OutputDebugStringW(Mile::FormatWideString(
             L"[Mile.Cirno] "
-            L"GetDiskFreeSpace() = 0x%08X, "
-            L"FreeBytesAvailable=%llu, "
-            L"TotalNumberOfBytes=%llu, "
-            L"TotalNumberOfFreeBytes=%llu\n",
-            Status,
-            FreeBytesAvailable ? *FreeBytesAvailable : 0,
-            TotalNumberOfBytes ? *TotalNumberOfBytes : 0,
-            TotalNumberOfFreeBytes ? *TotalNumberOfFreeBytes : 0).c_str());
+            L"GetDiskFreeSpace() = 0x%08X\n",
+            Status).c_str());
         return Status;
     };
     Operations.GetVolumeInformationW = [](
