@@ -267,11 +267,10 @@ std::uint32_t Mile::Cirno::Client::Request(
     {
         {
             std::lock_guard<std::mutex> Guard(this->m_ReceiveWorkerMutex);
-            auto Iterator = this->m_Responses.find(Tag);
-            if (this->m_Responses.end() != Iterator)
+            if (this->m_Responses.contains(Tag))
             {
-                Content = Iterator->second;
-                this->m_Responses.erase(Iterator);
+                Content = std::move(this->m_Responses.at(Tag));
+                this->m_Responses.erase(Tag);
                 break;
             }
         }
