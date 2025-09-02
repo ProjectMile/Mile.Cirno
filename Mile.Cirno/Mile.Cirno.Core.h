@@ -27,27 +27,26 @@ namespace Mile::Cirno
     {
     private:
 
-        std::mutex m_TagAllocationMutex;
-        std::uint16_t m_TagUnallocatedStart = 0;
-        std::set<std::uint16_t> m_ReusableTags;
         std::mutex m_FileIdAllocationMutex;
         std::uint32_t m_FileIdUnallocatedStart = 0;
         std::set<std::uint32_t> m_ReusableFileIds;
         SOCKET m_Socket = INVALID_SOCKET;
-        std::mutex m_SendOperationMutex;
-        std::mutex m_ReceiveWorkerMutex;
-        HANDLE m_ReceiveWorkerThread = nullptr;
-        bool m_ReceiveWorkerStarted = false;
+        std::mutex m_RequestMutex;
         std::map<std::uint16_t, std::vector<std::uint8_t>> m_Responses;
-
+        
         Client() = default;
 
-        std::uint16_t AllocateTag();
+        bool SocketRecv(
+            _Out_opt_ LPVOID Buffer,
+            _In_ DWORD NumberOfBytesToRecv,
+            _Out_opt_ LPDWORD NumberOfBytesRecvd,
+            _Inout_ LPDWORD Flags);
 
-        void FreeTag(
-            std::uint16_t const& Tag);
-
-        void ReceiveWorkerEntryPoint();
+        bool SocketSend(
+            _In_opt_ LPCVOID Buffer,
+            _In_ DWORD NumberOfBytesToSend,
+            _Out_opt_ LPDWORD NumberOfBytesSent,
+            _In_ DWORD Flags);
 
     public:
 
@@ -122,10 +121,6 @@ namespace Mile::Cirno
         std::uint32_t LinuxCreate(
             LinuxCreateRequest const& Request,
             LinuxCreateResponse& Response);
-
-    private:
-
-        void Initialize();
 
     public:
 

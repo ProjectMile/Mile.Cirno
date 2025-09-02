@@ -36,131 +36,50 @@
         Code));
 }
 
-std::uint16_t Mile::Cirno::Client::AllocateTag()
+bool Mile::Cirno::Client::SocketRecv(
+    _Out_opt_ LPVOID Buffer,
+    _In_ DWORD NumberOfBytesToRecv,
+    _Out_opt_ LPDWORD NumberOfBytesRecvd,
+    _Inout_ LPDWORD Flags)
 {
-    std::lock_guard<std::mutex> Guard(this->m_TagAllocationMutex);
-
-    if (this->m_ReusableTags.empty())
-    {
-        if (MILE_CIRNO_NOTAG == this->m_TagUnallocatedStart)
-        {
-            return MILE_CIRNO_NOTAG;
-        }
-        else
-        {
-            return this->m_TagUnallocatedStart++;
-        }
-    }
-
-    std::uint16_t Result = *this->m_ReusableTags.begin();
-    this->m_ReusableTags.erase(Result);
-    return Result;
+    WSABUF WSABuffer = {};
+    WSABuffer.len = static_cast<ULONG>(NumberOfBytesToRecv);
+    WSABuffer.buf = const_cast<char*>(reinterpret_cast<const char*>(Buffer));
+    return SOCKET_ERROR != ::WSARecv(
+        this->m_Socket,
+        &WSABuffer,
+        1,
+        NumberOfBytesRecvd,
+        Flags,
+        nullptr,
+        nullptr);
 }
 
-void Mile::Cirno::Client::FreeTag(
-    std::uint16_t const& Tag)
+bool Mile::Cirno::Client::SocketSend(
+    _In_opt_ LPCVOID Buffer,
+    _In_ DWORD NumberOfBytesToSend,
+    _Out_opt_ LPDWORD NumberOfBytesSent,
+    _In_ DWORD Flags)
 {
-    if (MILE_CIRNO_NOTAG == Tag)
-    {
-        return;
-    }
-
-    std::lock_guard<std::mutex> Guard(this->m_TagAllocationMutex);
-
-    this->m_ReusableTags.insert(Tag);
-
-    while (!this->m_ReusableTags.empty() &&
-        *this->m_ReusableTags.rbegin() == this->m_TagUnallocatedStart - 1)
-    {
-        this->m_ReusableTags.erase(--this->m_TagUnallocatedStart);
-    }
-}
-
-void Mile::Cirno::Client::ReceiveWorkerEntryPoint()
-{
-    this->m_ReceiveWorkerStarted = true;
-
-    while (this->m_ReceiveWorkerStarted)
-    {
-        std::vector<std::uint8_t> Content;
-
-        {
-            Content.resize(Mile::Cirno::HeaderSize);
-            DWORD NumberOfBytesRecvd = 0;
-            DWORD Flags = MSG_WAITALL;
-            if (!::MileSocketRecv(
-                this->m_Socket,
-                &Content[0],
-                Mile::Cirno::HeaderSize,
-                &NumberOfBytesRecvd,
-                &Flags))
-            {
-                Mile::Cirno::ThrowException(
-                    "MileSocketRecv",
-                    ::WSAGetLastError());
-                break;
-            }
-            if (Mile::Cirno::HeaderSize != NumberOfBytesRecvd)
-            {
-                Mile::Cirno::ThrowException(
-                    "Mile::Cirno::HeaderSize != NumberOfBytesRecvd",
-                    ERROR_INVALID_DATA);
-                break;
-            }
-        }
-
-        std::span<std::uint8_t> HeaderSpan = std::span<std::uint8_t>(Content);
-        Mile::Cirno::Header Header = Mile::Cirno::PopHeader(HeaderSpan);
-
-        if (Header.Size)
-        {
-            Content.resize(Mile::Cirno::HeaderSize + Header.Size);
-            DWORD NumberOfBytesRecvd = 0;
-            DWORD Flags = MSG_WAITALL;
-            if (!::MileSocketRecv(
-                this->m_Socket,
-                &Content[Mile::Cirno::HeaderSize],
-                Header.Size,
-                &NumberOfBytesRecvd,
-                &Flags))
-            {
-                Mile::Cirno::ThrowException(
-                    "MileSocketRecv",
-                    ::WSAGetLastError());
-                break;
-            }
-            if (Header.Size != NumberOfBytesRecvd)
-            {
-                Mile::Cirno::ThrowException(
-                    "Header.Size != NumberOfBytesRecvd",
-                    ERROR_INVALID_DATA);
-                break;
-            }
-        }
-
-        {
-            std::lock_guard<std::mutex> Guard(this->m_ReceiveWorkerMutex);
-            this->m_Responses.emplace(Header.Tag, Content);
-        }
-    }
+    WSABUF WSABuffer = {};
+    WSABuffer.len = static_cast<ULONG>(NumberOfBytesToSend);
+    WSABuffer.buf = const_cast<char*>(reinterpret_cast<const char*>(Buffer));
+    return SOCKET_ERROR != ::WSASend(
+        this->m_Socket,
+        &WSABuffer,
+        1,
+        NumberOfBytesSent,
+        Flags,
+        nullptr,
+        nullptr);
 }
 
 Mile::Cirno::Client::~Client()
 {
-    if (this->m_ReceiveWorkerStarted)
+    if (INVALID_SOCKET != this->m_Socket)
     {
-        this->m_ReceiveWorkerStarted = false;
-        if (this->m_ReceiveWorkerThread)
-        {
-            ::WaitForSingleObject(this->m_ReceiveWorkerThread, INFINITE);
-            ::CloseHandle(this->m_ReceiveWorkerThread);
-            this->m_ReceiveWorkerThread = nullptr;
-        }
-        if (INVALID_SOCKET != this->m_Socket)
-        {
-            ::closesocket(this->m_Socket);
-            this->m_Socket = INVALID_SOCKET;
-        }
+        ::closesocket(this->m_Socket);
+        this->m_Socket = INVALID_SOCKET;
     }
 }
 
@@ -210,39 +129,21 @@ std::uint32_t Mile::Cirno::Client::Request(
     MILE_CIRNO_MESSAGE_TYPE const& ResponseType,
     std::vector<std::uint8_t>& ResponseContent)
 {
-    if (!this->m_ReceiveWorkerStarted)
-    {
-        return APTX_EIO;
-    }
+    std::lock_guard<std::mutex> Guard(this->m_RequestMutex);
 
-    std::uint16_t Tag = MILE_CIRNO_NOTAG;
-    if (MileCirnoVersionRequestMessage != RequestType)
-    {
-        Tag = this->AllocateTag();
-        if (MILE_CIRNO_NOTAG == Tag)
-        {
-            return APTX_EIO;
-        }
-    }
-    auto TagCleanupHandler = Mile::ScopeExitTaskHandler([&]()
-    {
-        if (MILE_CIRNO_NOTAG != Tag)
-        {
-            this->FreeTag(Tag);
-        }
-    });
+    std::uint16_t Tag = MileCirnoVersionRequestMessage != RequestType
+        ? 1
+        : MILE_CIRNO_NOTAG;
 
-    Mile::Cirno::Header RequestHeader;
+    Mile::Cirno::Header RequestHeader = {};
     RequestHeader.Size = static_cast<std::uint32_t>(RequestContent.size());
     RequestHeader.Type = static_cast<std::uint8_t>(RequestType);
     RequestHeader.Tag = Tag;
     std::vector<std::uint8_t> RequestHeaderBuffer;
     Mile::Cirno::PushHeader(RequestHeaderBuffer, RequestHeader);
     {
-        std::lock_guard<std::mutex> Guard(this->m_SendOperationMutex);
         DWORD NumberOfBytesSent = 0;
-        if (!::MileSocketSend(
-            this->m_Socket,
+        if (!this->SocketSend(
             &RequestHeaderBuffer[0],
             static_cast<DWORD>(RequestHeaderBuffer.size()),
             &NumberOfBytesSent,
@@ -250,8 +151,7 @@ std::uint32_t Mile::Cirno::Client::Request(
         {
             return APTX_EIO;
         }
-        if (!::MileSocketSend(
-            this->m_Socket,
+        if (!this->SocketSend(
             &RequestContent[0],
             static_cast<DWORD>(RequestContent.size()),
             &NumberOfBytesSent,
@@ -261,42 +161,64 @@ std::uint32_t Mile::Cirno::Client::Request(
         }
     }
 
-    std::vector<std::uint8_t> Content;
+    std::vector<std::uint8_t> ResponseBuffer;
 
-    for (;;)
+    Mile::Cirno::Header ResponseHeader = {};
     {
+        ResponseBuffer.resize(Mile::Cirno::HeaderSize);
+        DWORD NumberOfBytesRecvd = 0;
+        DWORD Flags = MSG_WAITALL;
+        if (!this->SocketRecv(
+            &ResponseBuffer[0],
+            Mile::Cirno::HeaderSize,
+            &NumberOfBytesRecvd,
+            &Flags))
         {
-            std::lock_guard<std::mutex> Guard(this->m_ReceiveWorkerMutex);
-            if (this->m_Responses.contains(Tag))
-            {
-                Content = std::move(this->m_Responses.at(Tag));
-                this->m_Responses.erase(Tag);
-                break;
-            }
+            return APTX_EIO;
         }
-        if (Content.empty())
+        if (Mile::Cirno::HeaderSize != NumberOfBytesRecvd)
         {
-            ::SwitchToThread();
+            return APTX_EIO;
+        }
+        std::span<std::uint8_t> Span = std::span<std::uint8_t>(ResponseBuffer);
+        ResponseHeader = Mile::Cirno::PopHeader(Span);
+        if (Tag != ResponseHeader.Tag)
+        {
+            return APTX_EIO;
         }
     }
 
-    if (Content.size() < Mile::Cirno::HeaderSize)
+    if (ResponseHeader.Size)
     {
-        return APTX_EIO;
+        ResponseBuffer.resize(ResponseHeader.Size);
+        DWORD NumberOfBytesRecvd = 0;
+        DWORD Flags = MSG_WAITALL;
+        if (!this->SocketRecv(
+            &ResponseBuffer[0],
+            ResponseHeader.Size,
+            &NumberOfBytesRecvd,
+            &Flags))
+        {
+            return APTX_EIO;
+        }
+        if (ResponseHeader.Size != NumberOfBytesRecvd)
+        {
+            return APTX_EIO;
+        }
     }
 
-    std::span<std::uint8_t> ResponseSpan =
-        std::span<std::uint8_t>(Content);
-    Mile::Cirno::Header ResponseContentHeader =
-        Mile::Cirno::PopHeader(ResponseSpan);
-    if (ResponseType == ResponseContentHeader.Type)
+    std::span<std::uint8_t> ResponseContentSpan =
+        std::span<std::uint8_t>(ResponseBuffer);
+    if (ResponseType == ResponseHeader.Type)
     {
-        ResponseContent.assign(ResponseSpan.begin(), ResponseSpan.end());
+        ResponseContent.assign(
+            ResponseContentSpan.begin(),
+            ResponseContentSpan.end());
     }
-    else if (MileCirnoErrorResponseMessage == ResponseContentHeader.Type)
+    else if (MileCirnoErrorResponseMessage == ResponseHeader.Type)
     {
         std::uint32_t ErrorCode =
-            Mile::Cirno::PopErrorResponse(ResponseSpan).Code;
+            Mile::Cirno::PopErrorResponse(ResponseContentSpan).Code;
         if (ErrorCode > APTX_ERANGE || 11 == ErrorCode)
         {
             // Because there is no convention implementation for non-Linux
@@ -307,9 +229,9 @@ std::uint32_t Mile::Cirno::Client::Request(
         }
         return ErrorCode;
     }
-    else if (MileCirnoLinuxErrorResponseMessage == ResponseContentHeader.Type)
+    else if (MileCirnoLinuxErrorResponseMessage == ResponseHeader.Type)
     {
-        return Mile::Cirno::PopLinuxErrorResponse(ResponseSpan).Code;
+        return Mile::Cirno::PopLinuxErrorResponse(ResponseContentSpan).Code;
     }
     else
     {
@@ -647,24 +569,6 @@ std::uint32_t Mile::Cirno::Client::LinuxCreate(
     return ErrorCode;
 }
 
-void Mile::Cirno::Client::Initialize()
-{
-    this->m_ReceiveWorkerThread = Mile::CreateThread([this]()
-    {
-        this->ReceiveWorkerEntryPoint();
-    });
-    if (this->m_ReceiveWorkerThread)
-    {
-        ::Sleep(100);
-    }
-    else
-    {
-        Mile::Cirno::ThrowException(
-            "Mile::CreateThread",
-            ::GetLastError());
-    }
-}
-
 Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithTcpSocket(
     std::string const& Host,
     std::string const& Port)
@@ -702,7 +606,7 @@ Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithTcpSocket(
                 Current->ai_protocol,
                 nullptr,
                 0,
-                WSA_FLAG_OVERLAPPED);
+                0);
             if (INVALID_SOCKET == Socket)
             {
                 Checkpoint = "WSASocketW";
@@ -738,8 +642,6 @@ Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithTcpSocket(
             Error);
     }
 
-    Object->Initialize();
-
     return Object;
 }
 
@@ -760,7 +662,7 @@ Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithHyperVSocket(
         HV_PROTOCOL_RAW,
         nullptr,
         0,
-        WSA_FLAG_OVERLAPPED);
+        0);
     if (INVALID_SOCKET == Socket)
     {
         Mile::Cirno::ThrowException(
@@ -795,8 +697,6 @@ Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithHyperVSocket(
     }
 
     Object->m_Socket = Socket;
-
-    Object->Initialize();
 
     return Object;
 }
