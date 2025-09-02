@@ -1106,7 +1106,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoMoveFile(
             NewDirectoryFileId,
             g_RootDirectoryFileId,
             NewFilePath.parent_path());
-        if (0 != ErrorCode)
+        if (0 == ErrorCode)
         {
             Mile::Cirno::RenameAtRequest Request;
             Request.OldDirectoryFileId = OldDirectoryFileId;

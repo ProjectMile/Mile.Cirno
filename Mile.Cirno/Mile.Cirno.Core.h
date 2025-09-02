@@ -32,7 +32,6 @@ namespace Mile::Cirno
         std::set<std::uint32_t> m_ReusableFileIds;
         SOCKET m_Socket = INVALID_SOCKET;
         std::mutex m_RequestMutex;
-        std::map<std::uint16_t, std::vector<std::uint8_t>> m_Responses;
         
         Client() = default;
 
