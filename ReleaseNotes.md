@@ -1,5 +1,17 @@
 ﻿# Mile.Cirno Release Notes
 
+**Mile.Cirno 1.2 (1.2.761.0)**
+
+- Rewrite the request and response implementation from asynchronous to
+  synchronous to reduce complexity and cpu usage.
+- Remove most of C++ exceptions to improve performance.
+- Improve the error report implementation and only output log for debug builds
+  for performance.
+- Implement more direct read and write operations to reduce memory copy, which
+  improves the performance.
+- Print mount information at startup which improves the usability.
+- Fix several implementation issues.
+
 **Mile.Cirno 1.1 (1.1.750.0)**
 
 - Provide read-write client support for 9P2000.L protocol.

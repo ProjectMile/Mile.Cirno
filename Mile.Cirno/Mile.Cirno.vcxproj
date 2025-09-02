@@ -12,7 +12,7 @@
     <MileProjectLegalCopyright>© Project Mile. All rights reserved.</MileProjectLegalCopyright>
     <MileProjectOriginalFilename>Mile.Cirno.exe</MileProjectOriginalFilename>
     <MileProjectProductName>Mile.Cirno</MileProjectProductName>
-    <MileProjectVersion>1.1.$([System.DateTime]::Today.Subtract($([System.DateTime]::Parse('2023-08-03'))).TotalDays).0</MileProjectVersion>
+    <MileProjectVersion>1.2.$([System.DateTime]::Today.Subtract($([System.DateTime]::Parse('2023-08-03'))).TotalDays).0</MileProjectVersion>
     <!-- <MileProjectVersionTag>Preview</MileProjectVersionTag> -->
     <MileUniCrtDisableRuntimeDebuggingFeature>true</MileUniCrtDisableRuntimeDebuggingFeature>
     <MileWindowsHelpersNoCppWinRTHelpers>true</MileWindowsHelpersNoCppWinRTHelpers>
