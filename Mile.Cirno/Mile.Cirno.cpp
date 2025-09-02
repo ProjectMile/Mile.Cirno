@@ -1377,6 +1377,17 @@ int main()
         return 0;
     }
 
+    std::printf(
+        "[INFO] Host = %s\n"
+        "[INFO] Port = %s\n"
+        "[INFO] AccessName = %s\n"
+        "[INFO] MountPoint = %s\n"
+        "\n",
+        Host.c_str(),
+        Port.c_str(),
+        AccessName.c_str(),
+        MountPoint.c_str());
+
     auto CleanupHandler = Mile::ScopeExitTaskHandler([&]()
     {
         if (g_Instance)
