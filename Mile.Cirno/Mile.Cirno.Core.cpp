@@ -569,6 +569,279 @@ std::uint32_t Mile::Cirno::Client::LinuxCreate(
     return ErrorCode;
 }
 
+std::uint32_t Mile::Cirno::Client::Read(
+    std::uint32_t const& FileId,
+    std::uint64_t const& Offset,
+    void* Buffer,
+    std::uint32_t const& NumberOfBytesToRead,
+    std::uint32_t& NumberOfBytesRead)
+{
+    std::lock_guard<std::mutex> Guard(this->m_RequestMutex);
+
+    Mile::Cirno::ReadRequest Request = {};
+    Request.FileId = FileId;
+    Request.Offset = Offset;
+    Request.Count = NumberOfBytesToRead;
+    std::vector<std::uint8_t> RequestContent;
+    Mile::Cirno::PushReadRequest(RequestContent, Request);
+
+    std::uint16_t Tag = 1;
+
+    Mile::Cirno::Header RequestHeader = {};
+    RequestHeader.Size = static_cast<std::uint32_t>(RequestContent.size());
+    RequestHeader.Type = MileCirnoReadRequestMessage;
+    RequestHeader.Tag = Tag;
+    std::vector<std::uint8_t> RequestHeaderBuffer;
+    Mile::Cirno::PushHeader(RequestHeaderBuffer, RequestHeader);
+    {
+        DWORD NumberOfBytesSent = 0;
+        if (!this->SocketSend(
+            &RequestHeaderBuffer[0],
+            static_cast<DWORD>(RequestHeaderBuffer.size()),
+            &NumberOfBytesSent,
+            0))
+        {
+            return APTX_EIO;
+        }
+        if (!this->SocketSend(
+            &RequestContent[0],
+            static_cast<DWORD>(RequestContent.size()),
+            &NumberOfBytesSent,
+            0))
+        {
+            return APTX_EIO;
+        }
+    }
+
+    std::vector<std::uint8_t> ResponseBuffer;
+
+    Mile::Cirno::Header ResponseHeader = {};
+    {
+        ResponseBuffer.resize(Mile::Cirno::HeaderSize);
+        DWORD NumberOfBytesRecvd = 0;
+        DWORD Flags = MSG_WAITALL;
+        if (!this->SocketRecv(
+            &ResponseBuffer[0],
+            Mile::Cirno::HeaderSize,
+            &NumberOfBytesRecvd,
+            &Flags))
+        {
+            return APTX_EIO;
+        }
+        if (Mile::Cirno::HeaderSize != NumberOfBytesRecvd)
+        {
+            return APTX_EIO;
+        }
+        std::span<std::uint8_t> Span = std::span<std::uint8_t>(ResponseBuffer);
+        ResponseHeader = Mile::Cirno::PopHeader(Span);
+        if (Tag != ResponseHeader.Tag)
+        {
+            return APTX_EIO;
+        }
+    }
+
+    if (MileCirnoReadResponseMessage == ResponseHeader.Type)
+    {
+        {
+            DWORD NumberOfBytesRecvd = 0;
+            DWORD Flags = MSG_WAITALL;
+            if (!this->SocketRecv(
+                &NumberOfBytesRead,
+                sizeof(std::uint32_t),
+                &NumberOfBytesRecvd,
+                &Flags))
+            {
+                return APTX_EIO;
+            }
+            if (sizeof(std::uint32_t) != NumberOfBytesRecvd)
+            {
+                return APTX_EIO;
+            }
+        }
+        if (NumberOfBytesRead)
+        {
+            DWORD NumberOfBytesRecvd = 0;
+            DWORD Flags = MSG_WAITALL;
+            if (!this->SocketRecv(
+                Buffer,
+                NumberOfBytesRead,
+                &NumberOfBytesRecvd,
+                &Flags))
+            {
+                return APTX_EIO;
+            }
+            if (NumberOfBytesRead != NumberOfBytesRecvd)
+            {
+                return APTX_EIO;
+            }
+        }
+        return 0;
+    }
+
+    if (ResponseHeader.Size)
+    {
+        ResponseBuffer.resize(ResponseHeader.Size);
+        DWORD NumberOfBytesRecvd = 0;
+        DWORD Flags = MSG_WAITALL;
+        if (!this->SocketRecv(
+            &ResponseBuffer[0],
+            ResponseHeader.Size,
+            &NumberOfBytesRecvd,
+            &Flags))
+        {
+            return APTX_EIO;
+        }
+        if (ResponseHeader.Size != NumberOfBytesRecvd)
+        {
+            return APTX_EIO;
+        }
+    }
+
+    std::span<std::uint8_t> ResponseContentSpan =
+        std::span<std::uint8_t>(ResponseBuffer);
+    if (MileCirnoErrorResponseMessage == ResponseHeader.Type)
+    {
+        std::uint32_t ErrorCode =
+            Mile::Cirno::PopErrorResponse(ResponseContentSpan).Code;
+        if (ErrorCode > APTX_ERANGE || 11 == ErrorCode)
+        {
+            // Because there is no convention implementation for non-Linux
+            // environment, returns APTX_EIO if the error code is not contained
+            // in Version 7 Unix Error Codes which are supported by all major
+            // POSIX-compliant environments.
+            return APTX_EIO;
+        }
+        return ErrorCode;
+    }
+    else if (MileCirnoLinuxErrorResponseMessage == ResponseHeader.Type)
+    {
+        return Mile::Cirno::PopLinuxErrorResponse(ResponseContentSpan).Code;
+    }
+
+    return APTX_EIO;
+}
+
+std::uint32_t Mile::Cirno::Client::Write(
+    std::uint32_t const& FileId,
+    std::uint64_t const& Offset,
+    const void* Buffer,
+    std::uint32_t const& NumberOfBytesToWrite,
+    std::uint32_t& NumberOfBytesWritten)
+{
+    std::lock_guard<std::mutex> Guard(this->m_RequestMutex);
+
+    std::uint16_t Tag = 1;
+
+    Mile::Cirno::Header RequestHeader = {};
+    RequestHeader.Size = Mile::Cirno::WriteRequestHeaderSize;
+    RequestHeader.Size -= Mile::Cirno::HeaderSize;
+    RequestHeader.Size += NumberOfBytesToWrite;
+    RequestHeader.Type = MileCirnoWriteRequestMessage;
+    RequestHeader.Tag = Tag;
+    std::vector<std::uint8_t> RequestHeaderBuffer;
+    Mile::Cirno::PushHeader(RequestHeaderBuffer, RequestHeader);
+    Mile::Cirno::PushUInt32(RequestHeaderBuffer, FileId);
+    Mile::Cirno::PushUInt64(RequestHeaderBuffer, Offset);
+    Mile::Cirno::PushUInt32(RequestHeaderBuffer, NumberOfBytesToWrite);
+    {
+        DWORD NumberOfBytesSent = 0;
+        if (!this->SocketSend(
+            &RequestHeaderBuffer[0],
+            static_cast<DWORD>(RequestHeaderBuffer.size()),
+            &NumberOfBytesSent,
+            0))
+        {
+            return APTX_EIO;
+        }
+        if (!this->SocketSend(
+            Buffer,
+            NumberOfBytesToWrite,
+            &NumberOfBytesSent,
+            0))
+        {
+            return APTX_EIO;
+        }
+    }
+
+    std::vector<std::uint8_t> ResponseBuffer;
+
+    Mile::Cirno::Header ResponseHeader = {};
+    {
+        ResponseBuffer.resize(Mile::Cirno::HeaderSize);
+        DWORD NumberOfBytesRecvd = 0;
+        DWORD Flags = MSG_WAITALL;
+        if (!this->SocketRecv(
+            &ResponseBuffer[0],
+            Mile::Cirno::HeaderSize,
+            &NumberOfBytesRecvd,
+            &Flags))
+        {
+            return APTX_EIO;
+        }
+        if (Mile::Cirno::HeaderSize != NumberOfBytesRecvd)
+        {
+            return APTX_EIO;
+        }
+        std::span<std::uint8_t> Span = std::span<std::uint8_t>(ResponseBuffer);
+        ResponseHeader = Mile::Cirno::PopHeader(Span);
+        if (Tag != ResponseHeader.Tag)
+        {
+            return APTX_EIO;
+        }
+    }
+
+    if (ResponseHeader.Size)
+    {
+        ResponseBuffer.resize(ResponseHeader.Size);
+        DWORD NumberOfBytesRecvd = 0;
+        DWORD Flags = MSG_WAITALL;
+        if (!this->SocketRecv(
+            &ResponseBuffer[0],
+            ResponseHeader.Size,
+            &NumberOfBytesRecvd,
+            &Flags))
+        {
+            return APTX_EIO;
+        }
+        if (ResponseHeader.Size != NumberOfBytesRecvd)
+        {
+            return APTX_EIO;
+        }
+    }
+
+    std::span<std::uint8_t> ResponseContentSpan =
+        std::span<std::uint8_t>(ResponseBuffer);
+    if (MileCirnoWriteResponseMessage == ResponseHeader.Type)
+    {
+        NumberOfBytesWritten = 
+            Mile::Cirno::PopWriteResponse(ResponseContentSpan).Count;
+    }
+    else if (MileCirnoErrorResponseMessage == ResponseHeader.Type)
+    {
+        std::uint32_t ErrorCode =
+            Mile::Cirno::PopErrorResponse(ResponseContentSpan).Code;
+        if (ErrorCode > APTX_ERANGE || 11 == ErrorCode)
+        {
+            // Because there is no convention implementation for non-Linux
+            // environment, returns APTX_EIO if the error code is not contained
+            // in Version 7 Unix Error Codes which are supported by all major
+            // POSIX-compliant environments.
+            return APTX_EIO;
+        }
+        return ErrorCode;
+    }
+    else if (MileCirnoLinuxErrorResponseMessage == ResponseHeader.Type)
+    {
+        return Mile::Cirno::PopLinuxErrorResponse(ResponseContentSpan).Code;
+    }
+    else
+    {
+        return APTX_EIO;
+    }
+
+    return 0;
+}
+
 Mile::Cirno::Client* Mile::Cirno::Client::ConnectWithTcpSocket(
     std::string const& Host,
     std::string const& Port)

@@ -122,6 +122,20 @@ namespace Mile::Cirno
             LinuxCreateRequest const& Request,
             LinuxCreateResponse& Response);
 
+        std::uint32_t Read(
+            std::uint32_t const& FileId,
+            std::uint64_t const& Offset,
+            void* Buffer,
+            std::uint32_t const& NumberOfBytesToRead,
+            std::uint32_t& NumberOfBytesRead);
+
+        std::uint32_t Write(
+            std::uint32_t const& FileId,
+            std::uint64_t const& Offset,
+            const void* Buffer,
+            std::uint32_t const& NumberOfBytesToWrite,
+            std::uint32_t& NumberOfBytesWritten);
+
     public:
 
         static Client* ConnectWithTcpSocket(

@@ -652,34 +652,27 @@ NTSTATUS DOKAN_CALLBACK MileCirnoReadFile(
 
     while (UnproceededSize)
     {
-        Mile::Cirno::ReadRequest Request = {};
-        Request.FileId = FileId;
-        Request.Offset = Offset + ProceededSize;
-        Request.Count = g_MaximumMessageSize;
-        Request.Count -= Mile::Cirno::ReadResponseHeaderSize;
-        if (UnproceededSize < Request.Count)
+        std::uint32_t NumberOfBytesToRead = g_MaximumMessageSize;
+        NumberOfBytesToRead -= Mile::Cirno::ReadResponseHeaderSize;
+        if (UnproceededSize < NumberOfBytesToRead)
         {
-            Request.Count = UnproceededSize;
+            NumberOfBytesToRead = UnproceededSize;
         }
-        Mile::Cirno::ReadResponse Response = {};
-        std::uint32_t ErrorCode = g_Instance->Read(Request, Response);
+        std::uint32_t CurrentProceededSize = 0;
+        std::uint32_t ErrorCode = g_Instance->Read(
+            FileId,
+            Offset + ProceededSize,
+            static_cast<std::uint8_t*>(Buffer) + ProceededSize,
+            NumberOfBytesToRead,
+            CurrentProceededSize);
         if (0 != ErrorCode)
         {
             Status = ::ToNtStatus(ErrorCode);
             break;
         }
-        DWORD CurrentProceededSize =
-            static_cast<DWORD>(Response.Data.size());
         if (!CurrentProceededSize)
         {
             break;
-        }
-        if (Buffer)
-        {
-            std::memcpy(
-                static_cast<std::uint8_t*>(Buffer) + ProceededSize,
-                &Response.Data[0],
-                CurrentProceededSize);
         }
         ProceededSize += CurrentProceededSize;
         UnproceededSize -= CurrentProceededSize;
@@ -736,28 +729,24 @@ NTSTATUS DOKAN_CALLBACK MileCirnoWriteFile(
     {
         while (UnproceededSize)
         {
-            Mile::Cirno::WriteRequest Request = {};
-            Request.FileId = FileId;
-            Request.Offset = Offset + ProceededSize;
             std::uint32_t RequestCount = g_MaximumMessageSize;
             RequestCount -= Mile::Cirno::WriteRequestHeaderSize;
             if (UnproceededSize < RequestCount)
             {
                 RequestCount = UnproceededSize;
             }
-            Request.Data.resize(RequestCount);
-            std::memcpy(
-                Request.Data.data(),
+            std::uint32_t CurrentProceededSize = 0;
+            std::uint32_t ErrorCode = g_Instance->Write(
+                FileId,
+                Offset + ProceededSize,
                 static_cast<const std::uint8_t*>(Buffer) + ProceededSize,
-                Request.Data.size());
-            Mile::Cirno::WriteResponse Response = {};
-            std::uint32_t ErrorCode = g_Instance->Write(Request, Response);
+                RequestCount,
+                CurrentProceededSize);
             if (0 != ErrorCode)
             {
                 Status = ::ToNtStatus(ErrorCode);
                 break;
             }
-            DWORD CurrentProceededSize = static_cast<DWORD>(Response.Count);
             if (!CurrentProceededSize)
             {
                 break;
