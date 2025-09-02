@@ -123,13 +123,13 @@ void Mile::Cirno::Client::FreeFileId(
     }
 }
 
-std::uint32_t Mile::Cirno::Client::Request(
+std::uint32_t Mile::Cirno::Client::RequestResponse(
     MILE_CIRNO_MESSAGE_TYPE const& RequestType,
     std::vector<std::uint8_t> const& RequestContent,
     MILE_CIRNO_MESSAGE_TYPE const& ResponseType,
     std::vector<std::uint8_t>& ResponseContent)
 {
-    std::lock_guard<std::mutex> Guard(this->m_RequestMutex);
+    std::lock_guard<std::mutex> Guard(this->m_RequestResponseMutex);
 
     std::uint16_t Tag = MileCirnoVersionRequestMessage != RequestType
         ? 1
@@ -250,7 +250,7 @@ std::uint32_t Mile::Cirno::Client::Version(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
-    std::uint32_t ErrorCode = this->Request(
+    std::uint32_t ErrorCode = this->RequestResponse(
         MileCirnoVersionRequestMessage,
         RequestBuffer,
         MileCirnoVersionResponseMessage,
@@ -273,7 +273,7 @@ std::uint32_t Mile::Cirno::Client::Attach(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
-    std::uint32_t ErrorCode = this->Request(
+    std::uint32_t ErrorCode = this->RequestResponse(
         MileCirnoAttachRequestMessage,
         RequestBuffer,
         MileCirnoAttachResponseMessage,
@@ -296,7 +296,7 @@ std::uint32_t Mile::Cirno::Client::Walk(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
-    std::uint32_t ErrorCode = this->Request(
+    std::uint32_t ErrorCode = this->RequestResponse(
         MileCirnoWalkRequestMessage,
         RequestBuffer,
         MileCirnoWalkResponseMessage,
@@ -318,7 +318,7 @@ std::uint32_t Mile::Cirno::Client::Clunk(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
-    return this->Request(
+    return this->RequestResponse(
         MileCirnoClunkRequestMessage,
         RequestBuffer,
         MileCirnoClunkResponseMessage,
@@ -334,7 +334,7 @@ std::uint32_t Mile::Cirno::Client::LinuxOpen(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
-    std::uint32_t ErrorCode = this->Request(
+    std::uint32_t ErrorCode = this->RequestResponse(
         MileCirnoLinuxOpenRequestMessage,
         RequestBuffer,
         MileCirnoLinuxOpenResponseMessage,
@@ -357,7 +357,7 @@ std::uint32_t Mile::Cirno::Client::ReadDirectory(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
-    std::uint32_t ErrorCode = this->Request(
+    std::uint32_t ErrorCode = this->RequestResponse(
         MileCirnoReadDirectoryRequestMessage,
         RequestBuffer,
         MileCirnoReadDirectoryResponseMessage,
@@ -380,7 +380,7 @@ std::uint32_t Mile::Cirno::Client::GetAttributes(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
-    std::uint32_t ErrorCode = this->Request(
+    std::uint32_t ErrorCode = this->RequestResponse(
         MileCirnoGetAttributesRequestMessage,
         RequestBuffer,
         MileCirnoGetAttributesResponseMessage,
@@ -403,7 +403,7 @@ std::uint32_t Mile::Cirno::Client::FileSystemStatus(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
-    std::uint32_t ErrorCode = this->Request(
+    std::uint32_t ErrorCode = this->RequestResponse(
         MileCirnoFileSystemStatusRequestMessage,
         RequestBuffer,
         MileCirnoFileSystemStatusResponseMessage,
@@ -426,7 +426,7 @@ std::uint32_t Mile::Cirno::Client::Read(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
-    std::uint32_t ErrorCode = this->Request(
+    std::uint32_t ErrorCode = this->RequestResponse(
         MileCirnoReadRequestMessage,
         RequestBuffer,
         MileCirnoReadResponseMessage,
@@ -448,7 +448,7 @@ std::uint32_t Mile::Cirno::Client::Remove(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
-    return this->Request(
+    return this->RequestResponse(
         MileCirnoRemoveRequestMessage,
         RequestBuffer,
         MileCirnoRemoveResponseMessage,
@@ -463,7 +463,7 @@ std::uint32_t Mile::Cirno::Client::SetAttributes(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
-    return this->Request(
+    return this->RequestResponse(
         MileCirnoSetAttributesRequestMessage,
         RequestBuffer,
         MileCirnoSetAttributesResponseMessage,
@@ -478,7 +478,7 @@ std::uint32_t Mile::Cirno::Client::FlushFile(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
-    return this->Request(
+    return this->RequestResponse(
         MileCirnoFlushFileRequestMessage,
         RequestBuffer,
         MileCirnoFlushFileResponseMessage,
@@ -493,7 +493,7 @@ std::uint32_t Mile::Cirno::Client::RenameAt(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
-    return this->Request(
+    return this->RequestResponse(
         MileCirnoRenameAtRequestMessage,
         RequestBuffer,
         MileCirnoRenameAtResponseMessage,
@@ -509,7 +509,7 @@ std::uint32_t Mile::Cirno::Client::Write(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
-    std::uint32_t ErrorCode = this->Request(
+    std::uint32_t ErrorCode = this->RequestResponse(
         MileCirnoWriteRequestMessage,
         RequestBuffer,
         MileCirnoWriteResponseMessage,
@@ -532,7 +532,7 @@ std::uint32_t Mile::Cirno::Client::MakeDirectory(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
-    std::uint32_t ErrorCode = this->Request(
+    std::uint32_t ErrorCode = this->RequestResponse(
         MileCirnoMakeDirectoryRequestMessage,
         RequestBuffer,
         MileCirnoMakeDirectoryResponseMessage,
@@ -555,7 +555,7 @@ std::uint32_t Mile::Cirno::Client::LinuxCreate(
         RequestBuffer,
         Request);
     std::vector<std::uint8_t> ResponseBuffer;
-    std::uint32_t ErrorCode = this->Request(
+    std::uint32_t ErrorCode = this->RequestResponse(
         MileCirnoLinuxCreateRequestMessage,
         RequestBuffer,
         MileCirnoLinuxCreateResponseMessage,
@@ -576,7 +576,7 @@ std::uint32_t Mile::Cirno::Client::Read(
     std::uint32_t const& NumberOfBytesToRead,
     std::uint32_t& NumberOfBytesRead)
 {
-    std::lock_guard<std::mutex> Guard(this->m_RequestMutex);
+    std::lock_guard<std::mutex> Guard(this->m_RequestResponseMutex);
 
     Mile::Cirno::ReadRequest Request = {};
     Request.FileId = FileId;
@@ -728,7 +728,7 @@ std::uint32_t Mile::Cirno::Client::Write(
     std::uint32_t const& NumberOfBytesToWrite,
     std::uint32_t& NumberOfBytesWritten)
 {
-    std::lock_guard<std::mutex> Guard(this->m_RequestMutex);
+    std::lock_guard<std::mutex> Guard(this->m_RequestResponseMutex);
 
     std::uint16_t Tag = 1;
 

@@ -31,7 +31,7 @@ namespace Mile::Cirno
         std::uint32_t m_FileIdUnallocatedStart = 0;
         std::set<std::uint32_t> m_ReusableFileIds;
         SOCKET m_Socket = INVALID_SOCKET;
-        std::mutex m_RequestMutex;
+        std::mutex m_RequestResponseMutex;
         
         Client() = default;
 
@@ -56,7 +56,7 @@ namespace Mile::Cirno
         void FreeFileId(
             std::uint32_t const& FileId);
 
-        std::uint32_t Request(
+        std::uint32_t RequestResponse(
             MILE_CIRNO_MESSAGE_TYPE const& RequestType,
             std::vector<std::uint8_t> const& RequestContent,
             MILE_CIRNO_MESSAGE_TYPE const& ResponseType,
