@@ -1,0 +1,8 @@
+<Solution>
+  <Configurations>
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Mile.Cirno/Mile.Cirno.vcxproj" Id="cab475b1-f268-453f-a181-c6fd8ac9ca35" />
+</Solution>
