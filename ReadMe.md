@@ -1,6 +1,6 @@
 ﻿# ![Mile.Cirno](Assets/Mile.Cirno.png) Mile.Cirno
 
-9p for Windows
+9p for Windows, with TCP and Hyper-V Socket transport support
 
 ![Screenshot](Screenshot.png)
 
