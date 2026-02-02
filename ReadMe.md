@@ -54,8 +54,8 @@ Examples:
 There are some requirements if you are the NanaBox user who want to use GPU-PV
 in your Windows guest.
 
-- The minimum guest Windows version is Windows 10 Version 1809 (Build 17763)
-  because GPU-PV is formally introduced in WDDM 2.5 which is the new feature
+- The minimum guest Windows version is Windows 10, version 1803 (Build 17134)
+  because [GPU-PV] is formally introduced in WDDM 2.4 which is the new feature
   in this baseline Windows version. But the recommend guest Windows version is
   Windows 10 Version 2004 (Build 19041) or later.
 - Your graphics driver need to support WDDM 2.5 or later.
@@ -69,6 +69,8 @@ in your Windows guest.
   Services.
 - You should disable the GPU-PV device(s) you are using before you exit the
   Mile.Cirno.
+
+[GPU-PV]: https://learn.microsoft.com/en-us/windows-hardware/drivers/display/gpu-paravirtualization
 
 ## System Requirements
 
