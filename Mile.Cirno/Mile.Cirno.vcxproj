@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CAB475B1-F268-453F-A181-C6FD8AC9CA35}</ProjectGuid>
@@ -38,7 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Mile.Windows.Helpers">
-      <Version>1.0.952</Version>
+      <Version>1.0.1427</Version>
     </PackageReference>
     <PackageReference Include="Mile.Dokany">
       <Version>1.2.844</Version>
