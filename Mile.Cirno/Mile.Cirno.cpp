@@ -1168,6 +1168,22 @@ NTSTATUS DOKAN_CALLBACK MileCirnoSetAllocationSize(
         return STATUS_INVALID_HANDLE;
     }
 
+    {
+        Mile::Cirno::GetAttributesRequest Request = {};
+        Request.FileId = FileId;
+        Request.RequestMask = MileCirnoLinuxGetAttributesFlagSize;
+        Mile::Cirno::GetAttributesResponse Response = {};
+        std::uint32_t ErrorCode = g_Instance->GetAttributes(Request, Response);
+        if (0 != ErrorCode)
+        {
+            return ::ToNtStatus(ErrorCode);
+        }
+        if (static_cast<std::uint64_t>(AllocSize) >= Response.FileSize)
+        {
+            return STATUS_SUCCESS;
+        }
+    }
+
     Mile::Cirno::SetAttributesRequest Request = {};
     Request.FileId = FileId;
     Request.Valid = MileCirnoLinuxSetAttributesFlagSize;
