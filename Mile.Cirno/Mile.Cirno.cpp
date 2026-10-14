@@ -625,6 +625,15 @@ void DOKAN_CALLBACK MileCirnoCloseFile(
         return;
     }
 
+    // According to https://9fans.github.io/plan9port/man/man9/remove.html, we
+    // will know that the remove request asks the file server both to remove the
+    // file represented by fid and to clunk the fid, even if the remove fails.
+    if (DokanFileInfo->DeletePending)
+    {
+        g_Instance->FreeFileId(FileId);
+        return;
+    }
+
     ::SimpleClunk(FileId);
 }
 
