@@ -486,7 +486,7 @@ NTSTATUS DOKAN_CALLBACK MileCirnoZwCreateFile(
 
         if (DokanFileInfo->IsDirectory)
         {
-            return STATUS_INVALID_PARAMETER;
+            return ::ToNtStatus(ErrorCode);
         }
 
         if (FILE_OPEN == CreateDisposition ||
