@@ -1,5 +1,17 @@
 ﻿# Mile.Cirno Release Notes
 
+**Mile.Cirno 1.3 (1.3.1180.0)**
+
+- Fix the behavior of SetAllocationSize handler.
+- Fix the 9p fid leak when deleting files.
+- Fix the error reporting for directory requests in the ZwCreateFile handler.
+- Update optimized icon.
+- Migrate solution from sln to slnx.
+- Use global.json to simplify the MSBuild Project SDK version resolving.
+- Update Mile.Project.Configurations to 1.1.2116.
+- Update Mile.Windows.Helpers to 1.0.1427.
+- Update Mile.Dokany to 1.2.844.
+
 **Mile.Cirno 1.2 (1.2.761.0)**
 
 - Rewrite the request and response implementation from asynchronous to
